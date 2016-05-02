@@ -145,15 +145,15 @@ DocumentPath=devices.h
 DItemRevisionGUID=
 
 [GeneratedDocument2]
-DocumentPath=Output\ImmortalsFirmware.lsl
+DocumentPath=Output\ImmortalsEmbedded.lsl
 DItemRevisionGUID=
 
 [GeneratedDocument3]
-DocumentPath=Output\ImmortalsFirmware.map
+DocumentPath=Output\ImmortalsEmbedded.map
 DItemRevisionGUID=
 
 [GeneratedDocument4]
-DocumentPath=Output\ImmortalsFirmware_mem.lsl
+DocumentPath=Output\ImmortalsEmbedded_mem.lsl
 DItemRevisionGUID=
 
 [GeneratedDocument5]
