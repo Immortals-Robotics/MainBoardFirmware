@@ -10,3 +10,7 @@ Output/
 *.html
 *.orig
 *.*_viewstate
+devices.h
+hardware.h
+swplatform.c
+swplatform.h
