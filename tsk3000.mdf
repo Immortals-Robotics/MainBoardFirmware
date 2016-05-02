@@ -1,8 +1,0 @@
-# space <name> <id> <mau size>
-space	system:sw:main	1	8
-# chip <name> <id> <mau size> <size> <type>
-chip	system:irom	0	8	16384	rom
-chip	system:iram	1	8	16384	ram
-# map <space id> <start in space> <size in space> <chip id> <start on chip>
-map	1	0	16384	0	0
-map	1	16384	16384	1	0

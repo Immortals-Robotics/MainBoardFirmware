@@ -1,7 +1,0 @@
-TASKING program builder v99.9r9 Build 081 SN 00000000
-Compiling source2.c
-c51 W560: ["source2.c" 51/12] possible truncation at implicit conversion to type "unsigned char"
-c51 W560: ["source2.c" 264/28] possible truncation at implicit conversion to type "unsigned char"
-0 errors, 2 warnings
-Assembling source2.src
-Linking and Locating
