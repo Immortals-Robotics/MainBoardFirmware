@@ -1,0 +1,1949 @@
+	; TASKING TSK51x/TSK52x C compiler v1.17r1 Build 383 SN ????????
+	; Options: -f cc1784a -c99 -Ms -Ctsk51a -Ic:\users\lordhippo\desktop\tsk51 - new - 208 -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf\llpi\include -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf\pal\include -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\c51\include -t4 --debug-info=all --language=+strings -O2 --romstrings --source --inline-max-incr=25 --inline-max-size=10 --vector-offset=0x0000 -o source1.src
+	; Module start
+	.SYMB	FILE, "source1.c"
+	.SYMB	NAME, "source1"
+	.SYMB	TOOL, "TSK51x/TSK52x C compiler", 0
+	.SYMB	TYPE, 256, "__wchar_t", 'T', #4
+	.SYMB	TYPE, 257, "__size_t", 'T', #17
+	.SYMB	TYPE, 258, "__ssize_t", 'T', #16
+	.SYMB	TYPE, 259, "__ptrdiff_t", 'T', #16
+	.SYMB	TYPE, 262, 'g', 1, 1
+	.SYMB	TYPE, 261, 'S', 1,\
+		"__b0", #262, 0,\
+		"__b1", #262, 1,\
+		"__b2", #262, 2,\
+		"__b3", #262, 3,\
+		"__b4", #262, 4,\
+		"__b5", #262, 5,\
+		"__b6", #262, 6,\
+		"__b7", #262, 7
+	.SYMB	TYPE, 260, "__bitstruct_t", 't', #261
+	.SYMB	TYPE, 265, 'n', #1, 129
+	.SYMB	TYPE, 264, 'P', #265
+	.SYMB	TYPE, 263, "__prof_adm", 't', #264
+	.SYMB	TYPE, 266, "__prof_codeptr", 't', #264
+	.SYMB	TYPE, 269, 'X', 0x0000, #1, 0, 0
+	.SYMB	TYPE, 270, 'n', #269, 135
+	.SYMB	TYPE, 268, 'P', #270
+	.SYMB	TYPE, 267, "__codeptr", 't', #268
+	.SYMB	FILE, "serial.h"
+	.SYMB	TYPE, 271, 'X', 0x0000, #1, 0, 1, #2
+	.SYMB	ALAB, _serial_init, #271
+	.SYMB	TYPE, 272, 'X', 0x0000, #2, 0, 0
+	.SYMB	ALAB, _serial_getch, #272
+	.SYMB	ALAB, _serial_putch, #271
+	.SYMB	ENDF
+	.SYMB	IDEN, "robotNum", _robotNum, #2, 0x0081, 0x4000
+	.SYMB	ALAB, _robotNum, #2
+	.SYMB	TYPE, 273, 'Z', #3, 3
+	.SYMB	IDEN, "des", _des, #273, 0x0081, 0x4000
+	.SYMB	ALAB, _des, #273
+	.SYMB	IDEN, "dir_des", _dir_des, #273, 0x0081, 0x4000
+	.SYMB	ALAB, _dir_des, #273
+	.SYMB	IDEN, "push", _push, #273, 0x0081, 0x4000
+	.SYMB	ALAB, _push, #273
+	.SYMB	TYPE, 274, 'Z', #3, 7
+	.SYMB	IDEN, "dip", _dip, #274, 0x0081, 0x4000
+	.SYMB	ALAB, _dip, #274
+	.SYMB	IDEN, "BatteryLevel", _BatteryLevel, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _BatteryLevel, #3
+	.SYMB	IDEN, "Direct_Power", _Direct_Power, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Direct_Power, #3
+	.SYMB	IDEN, "Chip_Power", _Chip_Power, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Chip_Power, #3
+	.SYMB	IDEN, "Servo_State", _Servo_State, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Servo_State, #3
+	.SYMB	IDEN, "Force", _Force, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Force, #3
+	.SYMB	IDEN, "Ready", _Ready, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Ready, #3
+	.SYMB	IDEN, "Dribbler_Power", _Dribbler_Power, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Dribbler_Power, #3
+	.SYMB	IDEN, "SOS", _SOS, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _SOS, #3
+	.SYMB	IDEN, "Debug_Mode", _Debug_Mode, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _Debug_Mode, #3
+	.SYMB	IDEN, "beep_Command", _beep_Command, #3, 0x0081, 0x4000
+	.SYMB	ALAB, _beep_Command, #3
+	.section	_delay, data, overlay('stack_data')
+
+; source1.c	     1  #include "serial.h"
+; source1.c	     2  
+; source1.c	     3  char robotNum=0;
+; source1.c	     4  
+; source1.c	     5  unsigned char des[4];
+; source1.c	     6  unsigned char dir_des[4];
+; source1.c	     7  
+; source1.c	     8  unsigned char push[4];
+; source1.c	     9  unsigned char dip[8];
+; source1.c	    10  
+; source1.c	    11  unsigned char BatteryLevel;
+; source1.c	    12  
+; source1.c	    13  unsigned char Direct_Power;
+; source1.c	    14  unsigned char Chip_Power;
+; source1.c	    15  
+; source1.c	    16  unsigned char Servo_State;
+; source1.c	    17  unsigned char Force;
+; source1.c	    18  unsigned char Ready;
+; source1.c	    19  unsigned char Dribbler_Power ;
+; source1.c	    20  unsigned char SOS;
+; source1.c	    21  unsigned char Debug_Mode;
+; source1.c	    22  unsigned char beep_Command ;
+; source1.c	    23  
+; source1.c	    24  
+; source1.c	    25  #define Motor1    1
+; source1.c	    26  #define Motor2    2
+; source1.c	    27  #define Motor3    3
+; source1.c	    28  #define Motor4    4
+; source1.c	    29  #define Dribbler  5
+; source1.c	    30  #define Servo     6
+; source1.c	    31  #define DKick     7
+; source1.c	    32  #define CKick     8
+; source1.c	    33  
+; source1.c	    34  #define Led1    P1_0
+; source1.c	    35  #define Led2    P1_1
+; source1.c	    36  #define Led3    P1_2
+; source1.c	    37  #define Buzzer  P1_3
+; source1.c	    38  
+; source1.c	    39  #define MUX1  P1_4
+; source1.c	    40  #define MUX2  P1_5
+; source1.c	    41  #define WE0   P1_6
+; source1.c	    42  #define WE1   P1_7
+; source1.c	    43  
+; source1.c	    44  #define Input1    P2_0
+; source1.c	    45  #define Input2    P2_1
+; source1.c	    46  #define Input3    P2_2
+; source1.c	    47  #define Input4    P2_3
+; source1.c	    48  
+; source1.c	    49  #define Push1    P2_4
+; source1.c	    50  #define Push2    P2_5
+; source1.c	    51  #define Push3    P2_6
+; source1.c	    52  #define Push4    P2_7
+; source1.c	    53  
+; source1.c	    54  #define InputSel0    P1_4
+; source1.c	    55  #define InputSel1    P1_5
+; source1.c	    56  
+; source1.c	    57  #define Force_Kick  P3_0
+; source1.c	    58  #define Kick_Ready  P3_1
+; source1.c	    59  #define ChargePulse P3_2
+; source1.c	    60  
+; source1.c	    61  #define dir1 P3_4
+; source1.c	    62  #define dir2 P3_5
+; source1.c	    63  #define dir3 P3_6
+; source1.c	    64  #define dir4 P3_7
+; source1.c	    65  
+; source1.c	    66  
+; source1.c	    67  
+; source1.c	    68  void delay(unsigned int ms)
+__999001__1:
+	.define	__REG	'__999001__1'
+__999002__2:
+	.global	__overlay__delay
+__overlay__delay:
+	; End of section
+
+	.section	code, code
+	.global	_delay
+; Function _delay
+_delay:
+	.registerbank	0
+	.SYMB	TYPE, 275, 'X', 0x0000, #1, 0, 1, #17
+	.SYMB	GFUN, "delay", _delay, #275, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _delay, #275
+	.SYMB	IDEN, "ms", 22, #17, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "t", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "t", -1, 0x0000, 0x2041
+	.SYMB	LINE, 68, 6
+	.SYMB	LTIM, "ms", 6, 0x0000, 0x28c1, 0, 7
+	.SYMB	LTIM, "ms", 22, 0x0000, 0x28c1
+	.SYMB	LTIM, "ms", 7, 0x0000, 0x28c1, 8, 15
+	mov	AR1,R7
+	.SYMB	LTIM, "ms", 1, 0x0000, 0x28c1, 8, 15
+	mov	AR0,R6
+	.SYMB	LINE, 70, 11
+	.SYMB	LTIM, "ms", 0, 0x0000, 0x28c1, 0, 7
+
+; source1.c	    69  {
+; source1.c	    70      int t = ms /100;
+	gcall	__cocofun_4
+	.SYMB	LINE, 71, 11
+
+; source1.c	    71      t*=100;
+	mov	AR5,R7
+	.SYMB	LTIM, "t", 5, 0x0000, 0x20c1, 8, 15
+	mov	AR4,R6
+	.SYMB	LTIM, "t", 4, 0x0000, 0x20c1, 0, 7
+	mov	R6,#0
+	.SYMB	LTIM, "ms", 22, 0x0000, 0x2841
+	.SYMB	LTIM, "ms", 6, 0x0000, 0x2841, 0, 7
+	mov	R7,#100
+	.SYMB	LTIM, "ms", 7, 0x0000, 0x2841, 8, 15
+	gcall	__MULI
+	.SYMB	LTIM, "t", 4, 0x0000, 0x2041, 0, 7
+	mov	AR3,R7
+	.SYMB	LTIM, "t", 3, 0x0000, 0x20c1, 8, 15
+	mov	AR2,R6
+	.SYMB	LINE, 72, 14
+	.SYMB	LTIM, "t", 2, 0x0000, 0x20c1, 0, 7
+
+; source1.c	    72      ms=ms%100;
+	gcall	__cocofun_4
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "i", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "i", -1, 0x0000, 0x2041
+	.SYMB	LINE, 73, 27
+
+; source1.c	    73      for (int i = 0; i < t ; i++ )
+	mov	R1,AR3
+	.SYMB	LTIM, "ms", 1, 0x0000, 0x2841, 8, 15
+	.SYMB	LTIM, "i", 1, 0x0000, 0x20c1, 8, 15
+	mov	A,R2
+	.SYMB	LTIM, "t", 8, 0x0000, 0x20c1, 0, 7
+	mov	R0,A
+	.SYMB	LTIM, "ms", 0, 0x0000, 0x2841, 0, 7
+	.SYMB	LTIM, "i", 0, 0x0000, 0x20c1, 0, 7
+	gjb	ACC.7,_10
+	orl	A,R1
+	.SYMB	LTIM, "t", 8, 0x0000, 0x2041, 0, 7
+	gjz	_10
+	mov	A,R1
+	.SYMB	LTIM, "i", 8, 0x0000, 0x20c1, 8, 15
+	gjz	_9
+	inc	R0
+_9:
+_11:
+_3:
+	.SYMB	LTIM, "i", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "t", 2, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "t", 3, 0x0000, 0x2041, 8, 15
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "i", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "i", -1, 0x0000, 0x2041
+	.SYMB	LINE, 75, 34
+
+; source1.c	    74      {
+; source1.c	    75          for (int i = 0; i < 1135 ; i++ )  //1135
+	mov	R2,#111
+	.SYMB	LTIM, "i", 2, 0x0000, 0x20c1, 0, 7
+	mov	R3,#5
+_6:
+_4:
+	.SYMB	LINE, 77, 13
+	.SYMB	LTIM, "i", 3, 0x0000, 0x20c1, 8, 15
+
+; source1.c	    76          {
+; source1.c	    77              __asm( "nop" );
+	nop
+	.SYMB	LINE, 75, 34
+	gdjnz	R2,_4
+	gdjnz	R3,_6
+	.SYMB	LTIM, "i", 3, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "i", 2, 0x0000, 0x2041, 0, 7
+	.SYMB	ENDB
+	.SYMB	LINE, 73, 27
+	gdjnz	R1,_3
+	gdjnz	R0,_11
+_10:
+	.SYMB	LTIM, "i", 0, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "i", 1, 0x0000, 0x2041, 8, 15
+	.SYMB	ENDB
+	.SYMB	LINE, 80, 13
+
+; source1.c	    78          }
+; source1.c	    79      }
+; source1.c	    80      ms*=1135;  // recalculate    1135
+	mov	R6,#4
+	mov	R7,#111
+	gcall	__MULI
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "i", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "i", -1, 0x0000, 0x2041
+	.SYMB	LINE, 81, 28
+
+; source1.c	    81      for (int i = 0; i < ms ; i++ )
+	mov	A,R7
+	.SYMB	LTIM, "ms", 8, 0x0000, 0x28c1, 8, 15
+	orl	A,R6
+	.SYMB	LTIM, "ms", 8, 0x0000, 0x2841, 8, 15
+	gjz	_16
+	mov	R1,AR7
+	.SYMB	LTIM, "i", 1, 0x0000, 0x20c1, 8, 15
+	mov	R0,AR6
+	.SYMB	LTIM, "i", 0, 0x0000, 0x20c1, 0, 7
+	mov	A,R1
+	.SYMB	LTIM, "i", 8, 0x0000, 0x20c1, 8, 15
+	gjz	_15
+	inc	R0
+_15:
+_17:
+_13:
+	.SYMB	LTIM, "i", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LINE, 83, 9
+
+; source1.c	    82      {
+; source1.c	    83          __asm( "nop" );
+	nop
+	.SYMB	LINE, 81, 28
+	gdjnz	R1,_13
+	gdjnz	R0,_17
+_16:
+	.SYMB	LTIM, "i", 0, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "i", 1, 0x0000, 0x2041, 8, 15
+	.SYMB	ENDB
+	.SYMB	LINE, 85, 1
+
+; source1.c	    84      }
+; source1.c	    85  }
+	ret
+	.SYMB	LTIM, "t", 5, 0x0000, 0x2041, 8, 15
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	code, code
+
+; source1.c	    86  
+; source1.c	    87  void beep(int count,int d)
+; Function __cocofun_4
+	.define	__REG	'__999001__1'
+__cocofun_4:
+	mov	AR7,R1
+	mov	AR6,R0
+	mov	R4,#0
+	mov	R5,#100
+	gjmp	__UDIVI
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	_beep, data, overlay('stack_data')
+__999003__1:
+	.ds	4
+	.define	__REG	'__999003__1'
+__999004__2:
+	.global	__overlay__beep
+__overlay__beep:
+	; End of section
+
+	.section	code, code
+	.global	_beep
+; Function _beep
+_beep:
+	.registerbank	0
+	.SYMB	TYPE, 276, 'X', 0x0000, #1, 0, 2, #16, #16
+	.SYMB	GFUN, "beep", _beep, #276, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _beep, #276
+	.SYMB	IDEN, "count", 22, #16, 0x0000, 0x2801
+	.SYMB	IDEN, "d", 20, #16, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 87, 6
+	.SYMB	LTIM, "d", 20, 0x0000, 0x28c1
+	.SYMB	LTIM, "count", 7, 0x0000, 0x28c1, 8, 15
+	.SYMB	LTIM, "count", 6, 0x0000, 0x28c1, 0, 7
+	.SYMB	LTIM, "count", 22, 0x0000, 0x28c1
+	.SYMB	LTIM, "d", 5, 0x0000, 0x28c1, 8, 15
+	.SYMB	LTIM, "d", 4, 0x0000, 0x28c1, 0, 7
+	mov	__REG+1,R5
+	.SYMB	LTIM, "d", __REG+1, 0x0081, 0x48c1, 8, 15
+	mov	__REG+0,R4
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "i", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "i", -1, 0x0000, 0x2041
+	.SYMB	LINE, 89, 23
+	.SYMB	LTIM, "d", __REG+0, 0x0081, 0x48c1, 0, 7
+
+; source1.c	    88  {
+; source1.c	    89     for(int i=0;i<count;i++)
+	mov	__REG+3,R7
+	.SYMB	LTIM, "i", __REG+3, 0x0081, 0x40c1, 8, 15
+	mov	A,R6
+	.SYMB	LTIM, "count", 8, 0x0000, 0x28c1, 0, 7
+	mov	__REG+2,A
+	.SYMB	LTIM, "i", __REG+2, 0x0081, 0x40c1, 0, 7
+	gjb	ACC.7,_22
+	orl	A,__REG+3
+	.SYMB	LTIM, "count", 8, 0x0000, 0x2841, 0, 7
+	gjz	_22
+	mov	A,__REG+3
+	.SYMB	LTIM, "i", 8, 0x0000, 0x20c1, 8, 15
+	gjz	_21
+	inc	__REG+2
+_21:
+_23:
+_19:
+	.SYMB	LTIM, "i", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "d", 4, 0x0000, 0x2841, 0, 7
+	.SYMB	LTIM, "d", 5, 0x0000, 0x2841, 8, 15
+	.SYMB	LTIM, "count", 22, 0x0000, 0x2841
+	.SYMB	LTIM, "count", 6, 0x0000, 0x2841, 0, 7
+	.SYMB	LTIM, "count", 7, 0x0000, 0x2841, 8, 15
+	.SYMB	LTIM, "d", 20, 0x0000, 0x2841
+	.SYMB	LINE, 91, 15
+
+; source1.c	    90     {
+; source1.c	    91        Buzzer=1;
+	setb	144.3
+	.SYMB	LINE, 92, 15
+
+; source1.c	    92        delay(d);
+	mov	R7,__REG+1
+	mov	R6,__REG+0
+	gcall	_delay
+	.SYMB	LINE, 93, 15
+
+; source1.c	    93        Buzzer=0;
+	clr	144.3
+	.SYMB	LINE, 94, 15
+
+; source1.c	    94        delay(d);
+	mov	R7,__REG+1
+	mov	R6,__REG+0
+	gcall	_delay
+	.SYMB	LINE, 89, 23
+	dec	__REG+3
+	mov	A,__REG+3
+	.SYMB	LTIM, "i", 8, 0x0000, 0x20c1, 8, 15
+	gjnz	_19
+	dec	__REG+2
+	mov	A,__REG+2
+	.SYMB	LTIM, "i", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "i", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_23
+_22:
+	.SYMB	LTIM, "i", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "i", __REG+2, 0x0081, 0x4041, 0, 7
+	.SYMB	LTIM, "i", __REG+3, 0x0081, 0x4041, 8, 15
+	.SYMB	ENDB
+	.SYMB	LINE, 96, 1
+
+; source1.c	    95     }
+; source1.c	    96  }
+	ret
+	.SYMB	LTIM, "d", __REG+0, 0x0081, 0x4841, 0, 7
+	.SYMB	LTIM, "d", __REG+1, 0x0081, 0x4841, 8, 15
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_getDipState, data, overlay('stack_data')
+
+; source1.c	    97  
+; source1.c	    98  void getDipState()
+__999005__1:
+	.define	__REG	'__999005__1'
+__999006__2:
+	.global	__overlay__getDipState
+__overlay__getDipState:
+	; End of section
+
+	.section	code, code
+	.global	_getDipState
+; Function _getDipState
+_getDipState:
+	.registerbank	0
+	.SYMB	TYPE, 277, 'X', 0x0000, #1, 0, 0
+	.SYMB	GFUN, "getDipState", _getDipState, #277, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _getDipState, #277
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 100, 20
+
+; source1.c	    99  {
+; source1.c	   100        dip[0]=Input1;
+	mov	C,160.0
+	clr	A
+	rlc	A
+	mov	_dip,A
+	.SYMB	LINE, 101, 20
+
+; source1.c	   101        dip[1]=Input2;
+	mov	C,160.1
+	clr	A
+	rlc	A
+	mov	_dip+1,A
+	.SYMB	LINE, 102, 20
+
+; source1.c	   102        dip[2]=Input3;
+	mov	C,160.2
+	clr	A
+	rlc	A
+	mov	_dip+2,A
+	.SYMB	LINE, 103, 20
+
+; source1.c	   103        dip[3]=Input4;
+	mov	C,160.3
+	clr	A
+	rlc	A
+	mov	_dip+3,A
+	.SYMB	LINE, 104, 1
+
+; source1.c	   104  }
+	ret
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_SetData, data, overlay('stack_data')
+
+; source1.c	   105  
+; source1.c	   106  void SetData ( unsigned char add , char data )
+__999007__1:
+	.define	__REG	'__999007__1'
+__999008__2:
+	.global	__overlay__SetData
+__overlay__SetData:
+	; End of section
+
+	.section	code, code
+	.global	_SetData
+; Function _SetData
+_SetData:
+	.registerbank	0
+	.SYMB	TYPE, 278, 'X', 0x0000, #1, 0, 2, #3, #2
+	.SYMB	GFUN, "SetData", _SetData, #278, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _SetData, #278
+	.SYMB	IDEN, "add", 7, #3, 0x0000, 0x2801
+	.SYMB	IDEN, "data", 5, #2, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 108, 5
+	.SYMB	LTIM, "add", 7, 0x0000, 0x28c1
+	.SYMB	LTIM, "data", 5, 0x0000, 0x28c1
+
+; source1.c	   107  {
+; source1.c	   108      switch ( add )
+	mov	A,R7
+	.SYMB	LTIM, "add", 8, 0x0000, 0x28c1
+	dec	A
+	.SYMB	LTIM, "add", 8, 0x0000, 0x2841
+	gjz	_24
+	dec	A
+	gjz	_25
+	dec	A
+	gjz	_26
+	dec	A
+	gjz	_27
+	dec	A
+	gjz	_28
+	dec	A
+	gjz	_29
+	dec	A
+	gjz	_30
+	dec	A
+	gjz	_31
+	.SYMB	LINE, 187, 1
+
+; source1.c	   109      {
+; source1.c	   110          case 1:
+; source1.c	   111               MUX1 = 0;
+; source1.c	   112               MUX2 = 0;
+; source1.c	   113               P0 = data;
+; source1.c	   114               WE1 = 1;
+; source1.c	   115               __asm( "nop" );
+; source1.c	   116               __asm( "nop" );
+; source1.c	   117               WE1 = 0;
+; source1.c	   118               break;
+; source1.c	   119          case 2:
+; source1.c	   120               MUX1 = 1;
+; source1.c	   121               MUX2 = 0;
+; source1.c	   122               P0 = data;
+; source1.c	   123               WE1 = 1;
+; source1.c	   124               __asm( "nop" );
+; source1.c	   125               __asm( "nop" );
+; source1.c	   126               WE1 = 0;
+; source1.c	   127               break;
+; source1.c	   128          case 3:
+; source1.c	   129               MUX1 = 0;
+; source1.c	   130               MUX2 = 1;
+; source1.c	   131               P0 = data;
+; source1.c	   132               WE1 = 1;
+; source1.c	   133               __asm( "nop" );
+; source1.c	   134               __asm( "nop" );
+; source1.c	   135               WE1 = 0;
+; source1.c	   136               break;
+; source1.c	   137          case 4:
+; source1.c	   138               MUX1 = 1;
+; source1.c	   139               MUX2 = 1;
+; source1.c	   140               P0 = data;
+; source1.c	   141               WE1 = 1;
+; source1.c	   142               __asm( "nop" );
+; source1.c	   143               __asm( "nop" );
+; source1.c	   144               WE1 = 0;
+; source1.c	   145               break;
+; source1.c	   146  
+; source1.c	   147          case 5:
+; source1.c	   148               MUX1 = 0;
+; source1.c	   149               MUX2 = 0;
+; source1.c	   150               P0 = data;
+; source1.c	   151               WE0 = 1;
+; source1.c	   152               __asm( "nop" );
+; source1.c	   153               __asm( "nop" );
+; source1.c	   154               WE0 = 0;
+; source1.c	   155               break;
+; source1.c	   156  
+; source1.c	   157          case 6:
+; source1.c	   158               MUX1 = 1;
+; source1.c	   159               MUX2 = 0;
+; source1.c	   160               P0 = data;
+; source1.c	   161               WE0 = 1;
+; source1.c	   162               __asm( "nop" );
+; source1.c	   163               __asm( "nop" );
+; source1.c	   164               WE0 = 0;
+; source1.c	   165               break;
+; source1.c	   166  
+; source1.c	   167          case 7:
+; source1.c	   168               MUX1 = 0;
+; source1.c	   169               MUX2 = 1;
+; source1.c	   170               P0 = data;
+; source1.c	   171               WE0 = 1;
+; source1.c	   172               __asm( "nop" );
+; source1.c	   173               __asm( "nop" );
+; source1.c	   174               WE0 = 0;
+; source1.c	   175               break;
+; source1.c	   176  
+; source1.c	   177          case 8:
+; source1.c	   178               MUX1 = 1;
+; source1.c	   179               MUX2 = 1;
+; source1.c	   180               P0 = data;
+; source1.c	   181               WE0 = 1;
+; source1.c	   182               __asm( "nop" );
+; source1.c	   183               __asm( "nop" );
+; source1.c	   184               WE0 = 0;
+; source1.c	   185               break;
+; source1.c	   186      }
+; source1.c	   187  }
+	ret
+_24:
+	.SYMB	LINE, 111, 22
+	clr	144.4
+	.SYMB	LINE, 112, 22
+	clr	144.5
+	.SYMB	LINE, 113, 23
+	mov	128,R5
+	.SYMB	LINE, 114, 21
+	setb	144.7
+	.SYMB	LINE, 115, 14
+	nop
+	.SYMB	LINE, 116, 14
+	nop
+	.SYMB	LINE, 117, 21
+	clr	144.7
+	.SYMB	LINE, 187, 1
+	ret
+_25:
+	.SYMB	LINE, 120, 22
+	setb	144.4
+	.SYMB	LINE, 121, 22
+	clr	144.5
+	.SYMB	LINE, 122, 23
+	mov	128,R5
+	.SYMB	LINE, 123, 21
+	setb	144.7
+	.SYMB	LINE, 124, 14
+	nop
+	.SYMB	LINE, 125, 14
+	nop
+	.SYMB	LINE, 126, 21
+	clr	144.7
+	.SYMB	LINE, 187, 1
+	ret
+_26:
+	.SYMB	LINE, 129, 22
+	clr	144.4
+	.SYMB	LINE, 130, 22
+	setb	144.5
+	.SYMB	LINE, 131, 23
+	mov	128,R5
+	.SYMB	LINE, 132, 21
+	setb	144.7
+	.SYMB	LINE, 133, 14
+	nop
+	.SYMB	LINE, 134, 14
+	nop
+	.SYMB	LINE, 135, 21
+	clr	144.7
+	.SYMB	LINE, 187, 1
+	ret
+_27:
+	.SYMB	LINE, 138, 22
+	setb	144.4
+	.SYMB	LINE, 139, 22
+	setb	144.5
+	.SYMB	LINE, 140, 23
+	mov	128,R5
+	.SYMB	LINE, 141, 21
+	setb	144.7
+	.SYMB	LINE, 142, 14
+	nop
+	.SYMB	LINE, 143, 14
+	nop
+	.SYMB	LINE, 144, 21
+	clr	144.7
+	.SYMB	LINE, 187, 1
+	ret
+_28:
+	.SYMB	LINE, 148, 22
+	clr	144.4
+	.SYMB	LINE, 149, 22
+	clr	144.5
+	.SYMB	LINE, 155, 14
+	gjmp	_37
+_29:
+	.SYMB	LINE, 158, 22
+	setb	144.4
+	.SYMB	LINE, 159, 22
+	clr	144.5
+	.SYMB	LINE, 165, 14
+	gjmp	_38
+_30:
+	.SYMB	LINE, 168, 22
+	clr	144.4
+	.SYMB	LINE, 175, 14
+	gjmp	_39
+_31:
+	.SYMB	LINE, 178, 22
+	setb	144.4
+_39:
+	.SYMB	LINE, 179, 22
+	setb	144.5
+_37:
+_38:
+	.SYMB	LINE, 180, 23
+	mov	128,R5
+	.SYMB	LINE, 181, 21
+	setb	144.6
+	.SYMB	LINE, 182, 14
+	nop
+	.SYMB	LINE, 183, 14
+	nop
+	.SYMB	LINE, 184, 21
+	clr	144.6
+	.SYMB	LINE, 187, 1
+	ret
+	.SYMB	LTIM, "data", 5, 0x0000, 0x2841
+	.SYMB	LTIM, "add", 7, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_setServo, data, overlay('stack_data')
+
+; source1.c	   188  
+; source1.c	   189  void setServo(unsigned char teta)
+__999009__1:
+	.define	__REG	'__999009__1'
+__999010__2:
+	.global	__overlay__setServo
+__overlay__setServo:
+	; End of section
+
+	.section	code, code
+	.global	_setServo
+; Function _setServo
+_setServo:
+	.registerbank	0
+	.SYMB	TYPE, 279, 'X', 0x0000, #1, 0, 1, #3
+	.SYMB	GFUN, "setServo", _setServo, #279, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _setServo, #279
+	.SYMB	IDEN, "teta", 7, #3, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 189, 6
+	.SYMB	LTIM, "teta", 7, 0x0000, 0x28c1
+	mov	AR5,R7
+	.SYMB	LINE, 192, 25
+	.SYMB	LTIM, "teta", 5, 0x0000, 0x28c1
+
+; source1.c	   190  {
+; source1.c	   191       // conver the teta to data
+; source1.c	   192       SetData(Servo,teta);
+	mov	R7,#6
+	.SYMB	LTIM, "teta", 7, 0x0000, 0x2841
+	gjmp	_SetData
+	.SYMB	LTIM, "teta", 5, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_init, data, overlay('stack_data')
+
+; source1.c	   193  }
+; source1.c	   194  
+; source1.c	   195  void init()
+__999011__1:
+	.define	__REG	'__999011__1'
+__999012__2:
+	.global	__overlay__init
+__overlay__init:
+	; End of section
+
+	.section	code, code
+	.global	_init
+; Function _init
+_init:
+	.registerbank	0
+	.SYMB	GFUN, "init", _init, #277, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _init, #277
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 197, 17
+
+; source1.c	   196  {
+; source1.c	   197     Kick_Ready =0;
+	clr	176.1
+	.SYMB	LINE, 198, 17
+
+; source1.c	   198     Force_Kick =0;
+	clr	176.0
+	.SYMB	LINE, 199, 12
+
+; source1.c	   199     Buzzer=0;
+	clr	144.3
+	.SYMB	LINE, 200, 10
+
+; source1.c	   200     Led1=0;
+	clr	144.0
+	.SYMB	LINE, 201, 10
+
+; source1.c	   201     Led2=0;
+	clr	144.1
+	.SYMB	LINE, 202, 10
+
+; source1.c	   202     Led3=0;
+	clr	144.2
+	.SYMB	LINE, 203, 19
+
+; source1.c	   203     ChargePulse = 0;
+	clr	176.2
+	.SYMB	LINE, 204, 18
+
+; source1.c	   204     serial_init(5);  // Baud Rate : 38400 ;
+	mov	R7,#5
+	gcall	_serial_init
+	.SYMB	LINE, 205, 17
+
+; source1.c	   205     getDipState();
+	gcall	_getDipState
+	.SYMB	LINE, 206, 53
+
+; source1.c	   206     robotNum= dip[3] + dip[2]*2 + dip[1]*4 + dip[0]*8;
+	mov	A,_dip
+	swap	A
+	rr	A
+	anl	A,#248
+	mov	R0,A
+	mov	A,_dip+1
+	rl	A
+	rl	A
+	anl	A,#252
+	mov	R1,A
+	mov	A,_dip+2
+	add	A,ACC
+	mov	R2,A
+	add	A,_dip+3
+	add	A,R1
+	add	A,R0
+	mov	_robotNum,A
+	.SYMB	LINE, 207, 21
+
+; source1.c	   207     SetData ( 1 , 0 );
+	mov	R5,#0
+	mov	R7,#1
+	gcall	__cocofun_5
+	.SYMB	LINE, 208, 21
+
+; source1.c	   208     SetData ( 2 , 0 );
+	mov	R7,#2
+	gcall	__cocofun_5
+	.SYMB	LINE, 209, 21
+
+; source1.c	   209     SetData ( 3 , 0 );
+	mov	R7,#3
+	gcall	__cocofun_5
+	.SYMB	LINE, 210, 21
+
+; source1.c	   210     SetData ( 4 , 0 );
+	mov	R7,#4
+	gcall	__cocofun_5
+	.SYMB	LINE, 211, 21
+
+; source1.c	   211     SetData ( 5 , 0 );
+	mov	R7,#5
+	gcall	_SetData
+	.SYMB	LINE, 212, 20
+
+; source1.c	   212     Direct_Power = 0;
+	mov	_Direct_Power,#0
+	.SYMB	LINE, 213, 18
+
+; source1.c	   213     Chip_Power = 0;
+	mov	_Chip_Power,#0
+	.SYMB	LINE, 214, 11
+
+; source1.c	   214     Force=0;
+	mov	_Force,#0
+	.SYMB	LINE, 215, 12
+
+; source1.c	   215     Ready =0;
+	mov	_Ready,#0
+	.SYMB	LINE, 216, 31
+
+; source1.c	   216     SetData(DKick,Direct_Power);
+	mov	R5,#0
+	gcall	__cocofun_2
+	.SYMB	LINE, 218, 19
+
+; source1.c	   217     SetData(CKick,Chip_Power);
+; source1.c	   218     Servo_State = 1;
+	mov	_Servo_State,#1
+	.SYMB	LINE, 220, 19
+
+; source1.c	   219     //setServo(Servo_State);
+; source1.c	   220     beep_Command =0;
+	mov	_beep_Command,#0
+	.SYMB	LINE, 222, 1
+
+; source1.c	   221     //beep(3,50);
+; source1.c	   222  }
+	ret
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	code, code
+
+; source1.c	   223  
+; source1.c	   224  void recivePacket()
+; Function __cocofun_5
+	.define	__REG	'__999011__1'
+__cocofun_5:
+	gcall	_SetData
+	mov	R5,#0
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_2
+	.define	__REG	'__999011__1'
+__cocofun_2:
+	mov	R7,#7
+	gcall	_SetData
+	mov	R5,_Chip_Power
+	mov	R7,#8
+	gjmp	_SetData
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	_recivePacket, data, overlay('stack_data')
+__999013__7:
+	.ds	2
+	.define	__REG	'__999013__7'
+__999014__8:
+	.global	__overlay__recivePacket
+__overlay__recivePacket:
+	; End of section
+
+	.section	code, code
+	.global	_recivePacket
+; Function _recivePacket
+_recivePacket:
+	.registerbank	0
+	.SYMB	GFUN, "recivePacket", _recivePacket, #277, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _recivePacket, #277
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "counter", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "counter", -1, 0x0000, 0x2041
+	.SYMB	IDEN, "c", -1, #3, 0x0000, 0x2001
+	.SYMB	LTIM, "c", -1, 0x0000, 0x2041
+	.SYMB	LINE, 228, 21
+
+; source1.c	   225  {
+; source1.c	   226       int counter=0;
+; source1.c	   227       unsigned char c;
+; source1.c	   228       while(counter<8)
+	gjmp	_40
+_41:
+	.SYMB	LINE, 230, 27
+	.SYMB	LTIM, "counter", __REG+1, 0x0081, 0x40c1, 8, 15
+	.SYMB	LTIM, "counter", __REG+0, 0x0081, 0x40c1, 0, 7
+
+; source1.c	   229       {
+; source1.c	   230            c=serial_getch();
+	gcall	_serial_getch
+	mov	R0,A
+	.SYMB	LINE, 231, 11
+	.SYMB	LTIM, "c", 0, 0x0000, 0x20c1
+
+; source1.c	   231            if(c==0)
+	gjnz	_42
+	.SYMB	LINE, 233, 23
+
+; source1.c	   232            {
+; source1.c	   233               counter=1;
+	mov	__REG+1,#1
+	mov	__REG+0,#0
+	gjmp	_43
+_42:
+	.SYMB	LINE, 235, 16
+
+; source1.c	   234            }
+; source1.c	   235            else if(counter==1)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	dec	A
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	orl	A,__REG+0
+	gjnz	_44
+	.SYMB	LINE, 237, 13
+
+; source1.c	   236            {
+; source1.c	   237              if((c%16)==robotNum)
+	mov	AR3,R0
+	mov	R2,#0
+	mov	A,R3
+	anl	A,#15
+	mov	R3,A
+	clr	A
+	mov	R2,A
+	mov	A,_robotNum
+	mov	R5,A
+	rlc	A
+	subb	A,ACC
+	mov	R4,A
+	mov	A,R3
+	gcjne	A,AR5,_45
+	mov	A,R2
+	gcjne	A,AR4,_45
+	.SYMB	LINE, 239, 22
+
+; source1.c	   238              {
+; source1.c	   239               Led1 = 1;
+	setb	144.0
+	.SYMB	LINE, 240, 20
+
+; source1.c	   240               c=c>>4;
+	mov	A,R0
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	swap	A
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	anl	A,#15
+	.SYMB	LINE, 241, 33
+
+; source1.c	   241               Direct_Power = c%16;
+	anl	A,#15
+	mov	_Direct_Power,A
+	.SYMB	LINE, 239, 22
+	gjmp	_46
+_45:
+_40:
+	.SYMB	LTIM, "c", 0, 0x0000, 0x2041
+	.SYMB	LTIM, "counter", __REG+0, 0x0081, 0x4041, 0, 7
+	.SYMB	LTIM, "counter", __REG+1, 0x0081, 0x4041, 8, 15
+	.SYMB	LINE, 246, 28
+
+; source1.c	   242               counter++;
+; source1.c	   243              }
+; source1.c	   244              else
+; source1.c	   245              {
+; source1.c	   246                  counter = 0;
+	clr	A
+	mov	__REG+1,A
+	.SYMB	LTIM, "counter", __REG+1, 0x0081, 0x40c1, 8, 15
+	mov	__REG+0,A
+	.SYMB	LINE, 244, 13
+	.SYMB	LTIM, "counter", __REG+0, 0x0081, 0x40c1, 0, 7
+	gjmp	_47
+_44:
+	.SYMB	LINE, 249, 16
+	.SYMB	LTIM, "c", 0, 0x0000, 0x20c1
+
+; source1.c	   247              }
+; source1.c	   248            }
+; source1.c	   249            else if(counter==2)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gcjne	A,#2,_48
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_48
+	.SYMB	LINE, 251, 13
+
+; source1.c	   250            {
+; source1.c	   251              if(c>127)
+	mov	A,R0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	gjnb	ACC.7,_49
+	.SYMB	LINE, 253, 24
+
+; source1.c	   252              {
+; source1.c	   253                  c=c-127;
+	gcall	__cocofun_3
+	.SYMB	LINE, 255, 27
+
+; source1.c	   254                  c=c*2;
+; source1.c	   255                  des[0] = c;
+	mov	_des,R0
+	.SYMB	LINE, 256, 29
+
+; source1.c	   256                  dir_des[0]=0;
+	mov	_dir_des,#0
+	.SYMB	LINE, 253, 24
+	gjmp	_50
+_49:
+	.SYMB	LINE, 259, 24
+
+; source1.c	   257              }else
+; source1.c	   258              {
+; source1.c	   259                  c=127-c;
+	gcall	__cocofun_1
+	.SYMB	LINE, 261, 27
+
+; source1.c	   260                  c=c*2;
+; source1.c	   261                  des[0] = c;
+	mov	_des,R0
+	.SYMB	LINE, 262, 29
+
+; source1.c	   262                  dir_des[0]=1;
+	mov	_dir_des,#1
+	.SYMB	LINE, 265, 23
+
+; source1.c	   263  
+; source1.c	   264              }
+; source1.c	   265               counter++;
+	gjmp	_51
+_48:
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LINE, 267, 16
+
+; source1.c	   266            }
+; source1.c	   267            else if(counter==3)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gcjne	A,#3,_52
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_52
+	.SYMB	LINE, 269, 14
+
+; source1.c	   268            {
+; source1.c	   269               if(c>127)
+	mov	A,R0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	gjnb	ACC.7,_53
+	.SYMB	LINE, 271, 24
+
+; source1.c	   270              {
+; source1.c	   271                  c=c-127;
+	gcall	__cocofun_3
+	.SYMB	LINE, 273, 27
+
+; source1.c	   272                  c=c*2;
+; source1.c	   273                  des[1] = c;
+	mov	_des+1,R0
+	.SYMB	LINE, 274, 29
+
+; source1.c	   274                  dir_des[1]=0;
+	mov	_dir_des+1,#0
+	.SYMB	LINE, 271, 24
+	gjmp	_54
+_53:
+	.SYMB	LINE, 277, 24
+
+; source1.c	   275              }else
+; source1.c	   276              {
+; source1.c	   277                  c=127-c;
+	gcall	__cocofun_1
+	.SYMB	LINE, 279, 27
+
+; source1.c	   278                  c=c*2;
+; source1.c	   279                  des[1] = c;
+	mov	_des+1,R0
+	.SYMB	LINE, 280, 29
+
+; source1.c	   280                  dir_des[1]=1;
+	mov	_dir_des+1,#1
+	.SYMB	LINE, 283, 23
+
+; source1.c	   281  
+; source1.c	   282              }
+; source1.c	   283               counter++;
+	gjmp	_55
+_52:
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LINE, 285, 16
+
+; source1.c	   284            }
+; source1.c	   285            else if(counter==4)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gcjne	A,#4,_56
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_56
+	.SYMB	LINE, 287, 14
+
+; source1.c	   286            {
+; source1.c	   287               if(c>127)
+	mov	A,R0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	gjnb	ACC.7,_57
+	.SYMB	LINE, 289, 24
+
+; source1.c	   288              {
+; source1.c	   289                  c=c-127;
+	gcall	__cocofun_3
+	.SYMB	LINE, 291, 27
+
+; source1.c	   290                  c=c*2;
+; source1.c	   291                  des[2] = c;
+	mov	_des+2,R0
+	.SYMB	LINE, 292, 29
+
+; source1.c	   292                  dir_des[2]=0;
+	mov	_dir_des+2,#0
+	.SYMB	LINE, 289, 24
+	gjmp	_58
+_57:
+	.SYMB	LINE, 295, 24
+
+; source1.c	   293              }else
+; source1.c	   294              {
+; source1.c	   295                  c=127-c;
+	gcall	__cocofun_1
+	.SYMB	LINE, 297, 27
+
+; source1.c	   296                  c=c*2;
+; source1.c	   297                  des[2] = c;
+	mov	_des+2,R0
+	.SYMB	LINE, 298, 29
+
+; source1.c	   298                  dir_des[2]=1;
+	mov	_dir_des+2,#1
+	.SYMB	LINE, 301, 23
+
+; source1.c	   299  
+; source1.c	   300              }
+; source1.c	   301               counter++;
+	gjmp	_59
+_56:
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LINE, 303, 16
+
+; source1.c	   302            }
+; source1.c	   303            else if(counter==5)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gcjne	A,#5,_60
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_60
+	.SYMB	LINE, 305, 14
+
+; source1.c	   304            {
+; source1.c	   305               if(c>127)
+	mov	A,R0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	gjnb	ACC.7,_61
+	.SYMB	LINE, 307, 24
+
+; source1.c	   306              {
+; source1.c	   307                  c=c-127;
+	gcall	__cocofun_3
+	.SYMB	LINE, 309, 27
+
+; source1.c	   308                  c=c*2;
+; source1.c	   309                  des[3] = c;
+	mov	_des+3,R0
+	.SYMB	LINE, 310, 29
+
+; source1.c	   310                  dir_des[3]=0;
+	mov	_dir_des+3,#0
+	.SYMB	LINE, 307, 24
+	gjmp	_62
+_61:
+	.SYMB	LINE, 313, 24
+
+; source1.c	   311              }else
+; source1.c	   312              {
+; source1.c	   313                  c=127-c;
+	gcall	__cocofun_1
+	.SYMB	LINE, 315, 27
+
+; source1.c	   314                  c=c*2;
+; source1.c	   315                  des[3] = c;
+	mov	_des+3,R0
+	.SYMB	LINE, 316, 29
+
+; source1.c	   316                  dir_des[3]=1;
+	mov	_dir_des+3,#1
+	.SYMB	LINE, 319, 23
+
+; source1.c	   317  
+; source1.c	   318              }
+; source1.c	   319               counter++;
+	gjmp	_63
+_60:
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LINE, 321, 16
+
+; source1.c	   320            }
+; source1.c	   321            else if(counter==6)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gcjne	A,#6,_64
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_64
+	.SYMB	LINE, 323, 30
+
+; source1.c	   322            {
+; source1.c	   323              Servo_State = c%4;
+	mov	A,R0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	anl	A,#3
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	mov	_Servo_State,A
+	.SYMB	LINE, 324, 19
+
+; source1.c	   324              c=c>>2;
+	gcall	__cocofun_6
+	.SYMB	LINE, 325, 24
+
+; source1.c	   325              Ready = c%2;
+	mov	_Ready,A
+	.SYMB	LINE, 326, 19
+
+; source1.c	   326              c=c>>1;
+	mov	A,R0
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	clr	C
+	rrc	A
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	mov	R0,A
+	.SYMB	LTIM, "c", 0, 0x0000, 0x2041
+	.SYMB	LINE, 327, 24
+	.SYMB	LTIM, "c", 0, 0x0000, 0x20c1
+
+; source1.c	   327              Force = c%2;
+	anl	A,#1
+	mov	_Force,A
+	.SYMB	LINE, 328, 19
+
+; source1.c	   328              c=c>>1;
+	mov	A,R0
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	clr	C
+	rrc	A
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LINE, 329, 30
+
+; source1.c	   329              Chip_Power = c%16;
+	anl	A,#15
+	mov	_Chip_Power,A
+	.SYMB	LINE, 323, 30
+	gjmp	_65
+_64:
+	.SYMB	LTIM, "c", 0, 0x0000, 0x2041
+	.SYMB	LINE, 333, 16
+	.SYMB	LTIM, "c", 0, 0x0000, 0x20c1
+
+; source1.c	   330              counter++;
+; source1.c	   331            }
+; source1.c	   332  
+; source1.c	   333            else if(counter==7)
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gcjne	A,#7,_66
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	gjnz	_66
+	.SYMB	LINE, 335, 31
+
+; source1.c	   334            {
+; source1.c	   335              beep_Command = c%2;
+	mov	A,R0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	anl	A,#1
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	mov	_beep_Command,A
+	.SYMB	LINE, 336, 19
+
+; source1.c	   336              c=c>>2;
+	gcall	__cocofun_6
+	.SYMB	LINE, 337, 29
+
+; source1.c	   337              Debug_Mode = c%2;
+	mov	_Debug_Mode,A
+	.SYMB	LINE, 338, 19
+
+; source1.c	   338              c=c>>1;
+	mov	A,R0
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	clr	C
+	rrc	A
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	mov	R0,A
+	.SYMB	LTIM, "c", 0, 0x0000, 0x2041
+	.SYMB	LINE, 339, 22
+	.SYMB	LTIM, "c", 0, 0x0000, 0x20c1
+
+; source1.c	   339              SOS = c%2;
+	anl	A,#1
+	mov	_SOS,A
+	.SYMB	LINE, 340, 19
+
+; source1.c	   340              c=c>>1;
+	mov	A,R0
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+	clr	C
+	rrc	A
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LINE, 341, 34
+
+; source1.c	   341              Dribbler_Power = c%16;
+	anl	A,#15
+	mov	_Dribbler_Power,A
+_65:
+_62:
+_63:
+_58:
+_59:
+_54:
+_55:
+_50:
+_51:
+_46:
+	.SYMB	LTIM, "c", 0, 0x0000, 0x2041
+	.SYMB	LINE, 342, 22
+
+; source1.c	   342              counter++;
+	inc	__REG+1
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	gjnz	_67
+	inc	__REG+0
+_67:
+_66:
+_47:
+_43:
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	.SYMB	LINE, 228, 21
+	mov	A,__REG+1
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 8, 15
+	add	A,#248
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 8, 15
+	mov	A,__REG+0
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x20c1, 0, 7
+	xrl	A,#128
+	.SYMB	LTIM, "counter", 8, 0x0000, 0x2041, 0, 7
+	addc	A,#127
+	gjnc	_41
+	.SYMB	LINE, 366, 34
+
+; source1.c	   343            }
+; source1.c	   344  
+; source1.c	   345       }
+; source1.c	   346  
+; source1.c	   347       /*if(SOS==1)
+; source1.c	   348       {
+; source1.c	   349  
+; source1.c	   350            SetData( Motor1,0);
+; source1.c	   351            SetData( Motor2,0);
+; source1.c	   352            SetData( Motor3,0);
+; source1.c	   353            SetData( Motor4,0);
+; source1.c	   354            SetData(Dribbler,0);
+; source1.c	   355            setServo(0);
+; source1.c	   356            Force = 0;
+; source1.c	   357            Ready = 0;
+; source1.c	   358            ChargePulse = 0;
+; source1.c	   359            Buzzer =0;
+; source1.c	   360            beep(20,50);
+; source1.c	   361  
+; source1.c	   362       }*/
+; source1.c	   363       //else
+; source1.c	   364       {
+; source1.c	   365  
+; source1.c	   366            SetData( Motor1,des[0]);
+	mov	R5,_des
+	mov	R7,#1
+	gcall	_SetData
+	.SYMB	LINE, 367, 28
+
+; source1.c	   367            dir1 = dir_des[0];
+	mov	A,_dir_des
+	add	A,#255
+	mov	176.4,C
+	.SYMB	LINE, 369, 34
+
+; source1.c	   368  
+; source1.c	   369            SetData( Motor2,des[1]);
+	mov	R5,_des+1
+	mov	R7,#2
+	gcall	_SetData
+	.SYMB	LINE, 370, 28
+
+; source1.c	   370            dir2 = dir_des[1];
+	mov	A,_dir_des+1
+	add	A,#255
+	mov	176.5,C
+	.SYMB	LINE, 372, 34
+
+; source1.c	   371  
+; source1.c	   372            SetData( Motor3,des[2]);
+	mov	R5,_des+2
+	mov	R7,#3
+	gcall	_SetData
+	.SYMB	LINE, 373, 28
+
+; source1.c	   373            dir3 = dir_des[2];
+	mov	A,_dir_des+2
+	add	A,#255
+	mov	176.6,C
+	.SYMB	LINE, 375, 34
+
+; source1.c	   374  
+; source1.c	   375            SetData( Motor4,des[3]);
+	mov	R5,_des+3
+	mov	R7,#4
+	gcall	_SetData
+	.SYMB	LINE, 376, 28
+
+; source1.c	   376            dir4 = dir_des[3];
+	mov	A,_dir_des+3
+	add	A,#255
+	mov	176.7,C
+	.SYMB	LINE, 378, 48
+
+; source1.c	   377  
+; source1.c	   378            Dribbler_Power = Dribbler_Power << 4 ;
+	mov	A,_Dribbler_Power
+	swap	A
+	anl	A,#240
+	mov	_Dribbler_Power,A
+	.SYMB	LINE, 380, 43
+
+; source1.c	   379  
+; source1.c	   380            SetData(Dribbler,Dribbler_Power);
+	mov	R5,_Dribbler_Power
+	mov	R7,#5
+	gcall	_SetData
+	.SYMB	LINE, 382, 32
+
+; source1.c	   381  
+; source1.c	   382            setServo(Servo_State);
+	mov	R7,_Servo_State
+	gcall	_setServo
+	.SYMB	LINE, 384, 38
+
+; source1.c	   383  
+; source1.c	   384            SetData(DKick,Direct_Power);
+	mov	R5,_Direct_Power
+	gcall	__cocofun_2
+	.SYMB	LINE, 387, 25
+
+; source1.c	   385            SetData(CKick,Chip_Power);
+; source1.c	   386  
+; source1.c	   387            Force_Kick = 0;
+	clr	176.0
+	.SYMB	LINE, 388, 29
+
+; source1.c	   388            Kick_Ready = Ready;
+	mov	A,_Ready
+	add	A,#255
+	mov	176.1,C
+	.SYMB	LINE, 389, 36
+
+; source1.c	   389            Buzzer = beep_Command % 2;
+	mov	A,_beep_Command
+	mov	R0,#0
+	anl	A,#1
+	mov	R3,A
+	clr	A
+	mov	R2,A
+	orl	A,R3
+	add	A,#255
+	mov	144.3,C
+	.SYMB	LINE, 393, 14
+
+; source1.c	   390  
+; source1.c	   391       }
+; source1.c	   392  
+; source1.c	   393       Led1 = 0;
+	clr	144.0
+	.SYMB	LINE, 394, 1
+
+; source1.c	   394  }
+	ret
+	.SYMB	LTIM, "counter", __REG+0, 0x0081, 0x4041, 0, 7
+	.SYMB	LTIM, "counter", __REG+1, 0x0081, 0x4041, 8, 15
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	code, code
+
+; source1.c	   395  
+; source1.c	   396  void putch(char t)
+; Function __cocofun_6
+	.define	__REG	'__999013__7'
+__cocofun_6:
+	mov	A,R0
+	rr	A
+	rr	A
+	anl	A,#63
+	mov	R0,A
+	anl	A,#1
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_3
+	.define	__REG	'__999013__7'
+__cocofun_3:
+	mov	A,R0
+	add	A,#129
+	add	A,ACC
+	mov	R0,A
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_1
+	.define	__REG	'__999013__7'
+__cocofun_1:
+	mov	A,#127
+	clr	C
+	subb	A,R0
+	add	A,ACC
+	mov	R0,A
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	_putch, data, overlay('stack_data')
+__999015__1:
+	.define	__REG	'__999015__1'
+__999016__2:
+	.global	__overlay__putch
+__overlay__putch:
+	; End of section
+
+	.section	code, code
+	.global	_putch
+; Function _putch
+_putch:
+	.registerbank	0
+	.SYMB	GFUN, "putch", _putch, #271, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _putch, #271
+	.SYMB	IDEN, "t", 7, #2, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 398, 16
+	.SYMB	LTIM, "t", 7, 0x0000, 0x28c1
+
+; source1.c	   397  {
+; source1.c	   398         SBUF = t;
+	mov	153,R7
+
+; source1.c	   399         while (TI == 0)    // wait for TI flag to come true
+_68:
+	.SYMB	LINE, 399, 22
+	gjnb	152.1,_68
+	.SYMB	LINE, 403, 14
+
+; source1.c	   400         {
+; source1.c	   401  
+; source1.c	   402         }
+; source1.c	   403         TI = 0;
+	clr	152.1
+	.SYMB	LINE, 404, 1
+
+; source1.c	   404  }
+	ret
+	.SYMB	LTIM, "t", 7, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_sendData, data, overlay('stack_data')
+
+; source1.c	   405  
+; source1.c	   406  void sendData(unsigned char d1, unsigned char d2, unsigned char d3 , unsigned char d4)
+__999017__1:
+	.ds	4
+	.define	__REG	'__999017__1'
+__999018__2:
+	.global	__overlay__sendData
+__overlay__sendData:
+	; End of section
+
+	.section	code, code
+	.global	_sendData
+; Function _sendData
+_sendData:
+	.registerbank	0
+	.SYMB	TYPE, 280, 'X', 0x0000, #1, 0, 4, #3, #3, #3, #3
+	.SYMB	GFUN, "sendData", _sendData, #280, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _sendData, #280
+	.SYMB	IDEN, "d1", 7, #3, 0x0000, 0x2801
+	.SYMB	IDEN, "d2", 5, #3, 0x0000, 0x2801
+	.SYMB	IDEN, "d3", 3, #3, 0x0000, 0x2801
+	.SYMB	IDEN, "d4", 6, #3, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 406, 6
+	.SYMB	LTIM, "d2", 5, 0x0000, 0x28c1
+	.SYMB	LTIM, "d4", 6, 0x0000, 0x28c1
+	.SYMB	LTIM, "d1", 7, 0x0000, 0x28c1
+	.SYMB	LTIM, "d3", 3, 0x0000, 0x28c1
+	mov	__REG+0,R7
+	.SYMB	LTIM, "d1", __REG+0, 0x0081, 0x48c1
+	mov	__REG+1,R5
+	.SYMB	LTIM, "d2", __REG+1, 0x0081, 0x48c1
+	mov	__REG+2,R3
+	.SYMB	LTIM, "d3", __REG+2, 0x0081, 0x48c1
+	mov	__REG+3,R6
+	.SYMB	LINE, 408, 20
+	.SYMB	LTIM, "d4", __REG+3, 0x0081, 0x48c1
+
+; source1.c	   407  {
+; source1.c	   408      serial_putch(0);
+	mov	R7,#0
+	.SYMB	LTIM, "d1", 7, 0x0000, 0x2841
+	gcall	_serial_putch
+	.SYMB	LTIM, "d3", 3, 0x0000, 0x2841
+	.SYMB	LTIM, "d4", 6, 0x0000, 0x2841
+	.SYMB	LTIM, "d2", 5, 0x0000, 0x2841
+	.SYMB	LINE, 409, 50
+
+; source1.c	   409      serial_putch(robotNum + (Direct_Power%16)*16);
+	mov	A,_Direct_Power
+	anl	A,#15
+	swap	A
+	anl	A,#240
+	mov	R0,A
+	add	A,_robotNum
+	mov	R7,A
+	gcall	_serial_putch
+	.SYMB	LINE, 410, 21
+
+; source1.c	   410      serial_putch(d1);
+	mov	R7,__REG+0
+	gcall	_serial_putch
+	.SYMB	LINE, 411, 21
+
+; source1.c	   411      serial_putch(d2);
+	mov	R7,__REG+1
+	gcall	_serial_putch
+	.SYMB	LINE, 412, 21
+
+; source1.c	   412      serial_putch(d3);
+	mov	R7,__REG+2
+	gcall	_serial_putch
+	.SYMB	LINE, 413, 21
+
+; source1.c	   413      serial_putch(d4);
+	mov	R7,__REG+3
+	gjmp	_serial_putch
+	.SYMB	LTIM, "d4", __REG+3, 0x0081, 0x4841
+	.SYMB	LTIM, "d3", __REG+2, 0x0081, 0x4841
+	.SYMB	LTIM, "d2", __REG+1, 0x0081, 0x4841
+	.SYMB	LTIM, "d1", __REG+0, 0x0081, 0x4841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_main, data, overlay('stack_data')
+
+; source1.c	   414  }
+; source1.c	   415  
+; source1.c	   416  #define max(a,b) (a>b?a:b)
+; source1.c	   417  #define min(a,b) (a<b?a:b)
+; source1.c	   418  #define sss 30
+; source1.c	   419  
+; source1.c	   420  void main( void )
+__999019__1:
+	.define	__REG	'__999019__1'
+__999020__2:
+	.global	__overlay__main
+__overlay__main:
+	; End of section
+
+	.section	code, code
+	.global	_main
+; Function _main
+_main:
+	.registerbank	0
+	.SYMB	TYPE, 281, 'X', 0x0000, #1, 0, 0
+	.SYMB	GFUN, "main", _main, #281, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _main, #281
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 422, 11
+
+; source1.c	   421  {
+; source1.c	   422      init();
+	gcall	_init
+
+; source1.c	   423      while (1)
+_69:
+	.SYMB	LINE, 425, 23
+
+; source1.c	   424      {
+; source1.c	   425          recivePacket();
+	gcall	_recivePacket
+	.SYMB	LINE, 423, 13
+	gjmp	_69
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	data, data, init
+	.global	_robotNum
+_robotNum:
+	.db	0
+	; End of section
+
+	.section	data, data, clear
+	.global	_des
+_des:
+	.ds	4
+	; End of section
+
+	.section	data, data, clear
+	.global	_dir_des
+_dir_des:
+	.ds	4
+	; End of section
+
+	.section	data, data, clear
+	.global	_push
+_push:
+	.ds	4
+	; End of section
+
+	.section	data, data, clear
+	.global	_dip
+_dip:
+	.ds	8
+	; End of section
+
+	.section	data, data, clear
+	.global	_BatteryLevel
+_BatteryLevel:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Direct_Power
+_Direct_Power:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Chip_Power
+_Chip_Power:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Servo_State
+_Servo_State:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Force
+_Force:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Ready
+_Ready:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Dribbler_Power
+_Dribbler_Power:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_SOS
+_SOS:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_Debug_Mode
+_Debug_Mode:
+	.ds	1
+	; End of section
+
+	.section	data, data, clear
+	.global	_beep_Command
+_beep_Command:
+	.ds	1
+	; End of section
+
+	.extern	__start : code
+	.extern	_serial_init : code
+	.extern	_serial_getch : code
+	.extern	_serial_putch : code
+	.calls	'_main','_recivePacket'
+	.calls	'_main','_init'
+	.calls	'_sendData','_serial_putch'
+	.calls	'_recivePacket','_setServo'
+	.calls	'_recivePacket','_SetData'
+	.calls	'_recivePacket','_serial_getch'
+	.calls	'_init','_SetData'
+	.calls	'_init','_getDipState'
+	.calls	'_init','_serial_init'
+	.calls	'_setServo','_SetData'
+	.calls	'_beep','_delay'
+	.extern	__MULI : code
+	.extern	__UDIVI : code
+	.SYMB	ENDF
+
+; source1.c	   426      }
+; source1.c	   427  }
+
+	; Module end
+	.end

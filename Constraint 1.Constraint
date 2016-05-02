@@ -1,0 +1,89 @@
+;...............................................................................
+;Constraints File
+;   Device  :
+;   Board   :
+;   Project :
+;
+;   Created 3/20/2010
+;...............................................................................
+
+;...............................................................................
+Record=FileHeader | Id=DXP Constraints v1.0
+;...............................................................................
+
+
+Record=Constraint | TargetKind=Part | TargetId=XC3S400-4PQ208C
+Record=Constraint | TargetKind=Port | TargetId=H2_1 | FPGA_PINNUM=P198
+Record=Constraint | TargetKind=Port | TargetId=H2_2 | FPGA_PINNUM=P199
+Record=Constraint | TargetKind=Port | TargetId=H2_3 | FPGA_PINNUM=P200
+Record=Constraint | TargetKind=Port | TargetId=M2_6 | FPGA_PINNUM=P15
+Record=Constraint | TargetKind=Port | TargetId=M2_5 | FPGA_PINNUM=P16
+Record=Constraint | TargetKind=Port | TargetId=M2_4 | FPGA_PINNUM=P18
+Record=Constraint | TargetKind=Port | TargetId=M2_3 | FPGA_PINNUM=P19
+Record=Constraint | TargetKind=Port | TargetId=M2_2 | FPGA_PINNUM=P20
+Record=Constraint | TargetKind=Port | TargetId=M2_1 | FPGA_PINNUM=P21
+Record=Constraint | TargetKind=Port | TargetId=H3_1 | FPGA_PINNUM=P203
+Record=Constraint | TargetKind=Port | TargetId=H3_2 | FPGA_PINNUM=P204
+Record=Constraint | TargetKind=Port | TargetId=H3_3 | FPGA_PINNUM=P205
+Record=Constraint | TargetKind=Port | TargetId=M3_6 | FPGA_PINNUM=P37
+Record=Constraint | TargetKind=Port | TargetId=M3_5 | FPGA_PINNUM=P39
+Record=Constraint | TargetKind=Port | TargetId=M3_4 | FPGA_PINNUM=P22
+Record=Constraint | TargetKind=Port | TargetId=M3_3 | FPGA_PINNUM=P24
+Record=Constraint | TargetKind=Port | TargetId=M3_2 | FPGA_PINNUM=P35
+Record=Constraint | TargetKind=Port | TargetId=M3_1 | FPGA_PINNUM=P36
+Record=Constraint | TargetKind=Port | TargetId=RESET | FPGA_PINNUM=P57
+Record=Constraint | TargetKind=Port | TargetId=DIP_1_1 | FPGA_PINNUM=P81
+Record=Constraint | TargetKind=Port | TargetId=DIP_1_2 | FPGA_PINNUM=P85
+Record=Constraint | TargetKind=Port | TargetId=DIP_1_3 | FPGA_PINNUM=P86
+Record=Constraint | TargetKind=Port | TargetId=DIP_1_4 | FPGA_PINNUM=P87
+Record=Constraint | TargetKind=Port | TargetId=DIP_2_4 | FPGA_PINNUM=P90
+Record=Constraint | TargetKind=Port | TargetId=DIP_2_3 | FPGA_PINNUM=P93
+Record=Constraint | TargetKind=Port | TargetId=DIP_2_2 | FPGA_PINNUM=P94
+Record=Constraint | TargetKind=Port | TargetId=DIP_2_1 | FPGA_PINNUM=P95
+Record=Constraint | TargetKind=Port | TargetId=INIT_B | FPGA_PINNUM=P83
+Record=Constraint | TargetKind=Port | TargetId=BUZZER | FPGA_PINNUM=P111
+Record=Constraint | TargetKind=Port | TargetId=LED_1 | FPGA_PINNUM=P113
+Record=Constraint | TargetKind=Port | TargetId=LED_2 | FPGA_PINNUM=P114
+Record=Constraint | TargetKind=Port | TargetId=DIN | FPGA_PINNUM=P92
+Record=Constraint | TargetKind=Port | TargetId=LED_3 | FPGA_PINNUM=P115
+Record=Constraint | TargetKind=Port | TargetId=LED_4 | FPGA_PINNUM=P116
+Record=Constraint | TargetKind=Port | TargetId=SERVO | FPGA_PINNUM=P117
+Record=Constraint | TargetKind=Port | TargetId=TX | FPGA_PINNUM=P106
+Record=Constraint | TargetKind=Port | TargetId=RX | FPGA_PINNUM=P107
+Record=Constraint | TargetKind=Port | TargetId=RTS | FPGA_PINNUM=P108
+Record=Constraint | TargetKind=Port | TargetId=CTS | FPGA_PINNUM=P109
+Record=Constraint | TargetKind=Port | TargetId=M4_6 | FPGA_PINNUM=P119
+Record=Constraint | TargetKind=Port | TargetId=M4_5 | FPGA_PINNUM=P120
+Record=Constraint | TargetKind=Port | TargetId=M4_4 | FPGA_PINNUM=P122
+Record=Constraint | TargetKind=Port | TargetId=M4_3 | FPGA_PINNUM=P123
+Record=Constraint | TargetKind=Port | TargetId=M4_2 | FPGA_PINNUM=P124
+Record=Constraint | TargetKind=Port | TargetId=M4_1 | FPGA_PINNUM=P125
+Record=Constraint | TargetKind=Port | TargetId=H4_3 | FPGA_PINNUM=P131
+Record=Constraint | TargetKind=Port | TargetId=H4_2 | FPGA_PINNUM=P128
+Record=Constraint | TargetKind=Port | TargetId=H4_1 | FPGA_PINNUM=P132
+Record=Constraint | TargetKind=Port | TargetId=M1_6 | FPGA_PINNUM=P140
+Record=Constraint | TargetKind=Port | TargetId=M1_5 | FPGA_PINNUM=P141
+Record=Constraint | TargetKind=Port | TargetId=M1_4 | FPGA_PINNUM=P143
+Record=Constraint | TargetKind=Port | TargetId=M1_3 | FPGA_PINNUM=P144
+Record=Constraint | TargetKind=Port | TargetId=M1_2 | FPGA_PINNUM=P146
+Record=Constraint | TargetKind=Port | TargetId=M1_1 | FPGA_PINNUM=P147
+Record=Constraint | TargetKind=Port | TargetId=H1_1 | FPGA_PINNUM=P133
+Record=Constraint | TargetKind=Port | TargetId=H1_2 | FPGA_PINNUM=P135
+Record=Constraint | TargetKind=Port | TargetId=H1_3 | FPGA_PINNUM=P130
+Record=Constraint | TargetKind=Port | TargetId=CHARGE_PULSE | FPGA_PINNUM=P161
+Record=Constraint | TargetKind=Port | TargetId=CHIP_PULSE | FPGA_PINNUM=P162
+Record=Constraint | TargetKind=Port | TargetId=SHOOT_PULSE | FPGA_PINNUM=P165
+Record=Constraint | TargetKind=Port | TargetId=IR_T | FPGA_PINNUM=P171
+Record=Constraint | TargetKind=Port | TargetId=IR_R | FPGA_PINNUM=P172
+Record=Constraint | TargetKind=Port | TargetId=BOOSTER_READY | FPGA_PINNUM=P180
+Record=Constraint | TargetKind=Port | TargetId=PUSH_3 | FPGA_PINNUM=P181
+Record=Constraint | TargetKind=Port | TargetId=PUSH_2 | FPGA_PINNUM=P182
+Record=Constraint | TargetKind=Port | TargetId=PUSH_1 | FPGA_PINNUM=P183
+Record=Constraint | TargetKind=Port | TargetId=CLK | FPGA_PINNUM=P184
+Record=Constraint | TargetKind=Port | TargetId=CLK | FPGA_CLOCK_PIN=TRUE
+Record=Constraint | TargetKind=Net | TargetId=CLK | FPGA_CLOCK_FREQUENCY=40 Mhz
+Record=Constraint | TargetKind=Port | TargetId=NTDI | FPGA_PINNUM=P169
+Record=Constraint | TargetKind=Port | TargetId=NTDO | FPGA_PINNUM=P168
+Record=Constraint | TargetKind=Port | TargetId=NTCK | FPGA_PINNUM=P167
+Record=Constraint | TargetKind=Port | TargetId=NTMS | FPGA_PINNUM=P166
+

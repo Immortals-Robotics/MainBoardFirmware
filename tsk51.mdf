@@ -1,0 +1,20 @@
+# space <name> <id> <mau size>
+space	system:sw:code	7	8
+space	system:sw:bdata	9	8
+space	system:sw:data	1	8
+space	system:sw:idata	3	8
+space	system:sw:bit	4	1
+space	system:sw:xdata	5	8
+space	system:sw:pdata	6	8
+# chip <name> <id> <mau size> <size> <type>
+chip	system:iram	0	8	256	ram
+chip	system:xrom	2	8	65536	rom
+chip	system:xram	1	8	65536	ram
+# map <space id> <start in space> <size in space> <chip id> <start on chip>
+map	1	0	128	0	0
+map	3	0	256	0	0
+map	4	0	128	0	32
+map	5	0	65536	1	0
+map	6	0	256	1	0
+map	7	0	65536	2	0
+map	9	32	16	0	32

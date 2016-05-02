@@ -1,0 +1,350 @@
+	; TASKING TSK51x/TSK52x C compiler v1.17r1 Build 383 SN ????????
+	; Options: -f cc3936a -c99 -Ms -Ctsk51a -Ic:\users\lordhippo\desktop\tsk51 - new - 208 -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf\llpi\include -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf\pal\include -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\c51\include -t4 --debug-info=all --language=+strings -O2 --romstrings --source --inline-max-incr=25 --inline-max-size=10 --vector-offset=0x0000 -o serial.src
+	; Module start
+	.SYMB	FILE, "serial.c"
+	.SYMB	NAME, "serial"
+	.SYMB	TOOL, "TSK51x/TSK52x C compiler", 0
+	.SYMB	TYPE, 256, "__wchar_t", 'T', #4
+	.SYMB	TYPE, 257, "__size_t", 'T', #17
+	.SYMB	TYPE, 258, "__ssize_t", 'T', #16
+	.SYMB	TYPE, 259, "__ptrdiff_t", 'T', #16
+	.SYMB	TYPE, 262, 'g', 1, 1
+	.SYMB	TYPE, 261, 'S', 1,\
+		"__b0", #262, 0,\
+		"__b1", #262, 1,\
+		"__b2", #262, 2,\
+		"__b3", #262, 3,\
+		"__b4", #262, 4,\
+		"__b5", #262, 5,\
+		"__b6", #262, 6,\
+		"__b7", #262, 7
+	.SYMB	TYPE, 260, "__bitstruct_t", 't', #261
+	.SYMB	TYPE, 265, 'n', #1, 129
+	.SYMB	TYPE, 264, 'P', #265
+	.SYMB	TYPE, 263, "__prof_adm", 't', #264
+	.SYMB	TYPE, 266, "__prof_codeptr", 't', #264
+	.SYMB	TYPE, 269, 'X', 0x0000, #1, 0, 0
+	.SYMB	TYPE, 270, 'n', #269, 135
+	.SYMB	TYPE, 268, 'P', #270
+	.SYMB	TYPE, 267, "__codeptr", 't', #268
+	.section	_serial_init, data, overlay('stack_data')
+
+; serial.c	     1  #include "serial.h"
+; serial.c	     2  
+; serial.c	     3  //--------------------------------
+; serial.c	     4  // Write serial port register
+; serial.c	     5  //--------------------------------
+; serial.c	     6  
+; serial.c	     7  #define FOSC 8000000L  // Oscillator frequency
+; serial.c	     8  
+; serial.c	     9  //----------------------------------------------------
+; serial.c	    10  // Initialise serial  port
+; serial.c	    11  void serial_init(char speed)
+__999001__1:
+	.define	__REG	'__999001__1'
+__999002__2:
+	.global	__overlay__serial_init
+__overlay__serial_init:
+	; End of section
+
+	.section	code, code
+	.global	_serial_init
+; Function _serial_init
+_serial_init:
+	.registerbank	0
+	.SYMB	TYPE, 271, 'X', 0x0000, #1, 0, 1, #2
+	.SYMB	GFUN, "serial_init", _serial_init, #271, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _serial_init, #271
+	.SYMB	IDEN, "speed", 7, #2, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 13, 12
+	.SYMB	LTIM, "speed", 7, 0x0000, 0x28c1
+
+; serial.c	    12  {
+; serial.c	    13      TR1 = 0;          // stop timer 1
+	clr	136.6
+	.SYMB	LINE, 14, 16
+
+; serial.c	    14      TMOD &=0x0F;
+	anl	137,#15
+	.SYMB	LINE, 15, 17
+
+; serial.c	    15      TMOD |= 0x20;     // timer 1 is in mode 2: 8 bit auto reload
+	orl	137,#32
+	.SYMB	LINE, 16, 17
+
+; serial.c	    16      PCON |= 0x80;     // Baud rate is 1/32th FOSC
+	orl	135,#128
+	.SYMB	LINE, 18, 12
+
+; serial.c	    17  
+; serial.c	    18      SM1 = 1;          // 8 bits, variable;
+	setb	152.6
+	.SYMB	LINE, 19, 12
+
+; serial.c	    19      REN = 1;          // Enable Serial reception
+	setb	152.4
+	.SYMB	LINE, 22, 5
+
+; serial.c	    20  
+; serial.c	    21      //Initialise serial comms
+; serial.c	    22      switch (speed)
+	mov	A,R7
+	.SYMB	LTIM, "speed", 8, 0x0000, 0x28c1
+	gjz	_2
+	dec	A
+	.SYMB	LTIM, "speed", 8, 0x0000, 0x2841
+	gjz	_3
+	dec	A
+	gjz	_4
+	dec	A
+	gjz	_5
+	dec	A
+	gjz	_6
+	dec	A
+	gjz	_7
+	gjmp	_8
+
+; serial.c	    23      {
+; serial.c	    24             case 0:  TH1 = (unsigned char) (256-(((FOSC/192.0)/(float)1200)));        break;
+_2:
+	.SYMB	LINE, 24, 77
+	.SYMB	LTIM, "speed", 8, 0x0000, 0x28c1
+	mov	141,#221
+	.SYMB	LINE, 24, 86
+	gjmp	_9
+
+; serial.c	    25             case 1:  TH1 = (unsigned char) (256-(((FOSC/192.0)/(float)2400)));        break;
+_3:
+	.SYMB	LTIM, "speed", 8, 0x0000, 0x2841
+	.SYMB	LINE, 25, 77
+	mov	141,#238
+	.SYMB	LINE, 25, 86
+	gjmp	_10
+
+; serial.c	    26             case 2:  TH1 = (unsigned char) (256-(((FOSC/192.0)/(float)4800)));        break;
+_4:
+	.SYMB	LINE, 26, 77
+	mov	141,#247
+	.SYMB	LINE, 26, 86
+	gjmp	_11
+
+; serial.c	    27             case 3:  TH1 = (unsigned char) (256-(((FOSC/192.0)/(float)9600)));        break;
+; serial.c	    28             case 4:  TH1 = (unsigned char) (256-(((FOSC/192.0)/(float)19200)));       break;
+_6:
+	.SYMB	LINE, 28, 78
+	mov	141,#253
+	.SYMB	LINE, 28, 86
+	gjmp	_12
+
+; serial.c	    29             case 5:  TH1 = 251;//(unsigned char) (256-(((FOSC/192.0)/(float)38400)));       break;
+_7:
+_5:
+	.SYMB	LINE, 29, 30
+	mov	141,#251
+_8:
+
+; serial.c	    30      }
+; serial.c	    31      TR1 = 1;          // enable timer 1
+_12:
+_11:
+_10:
+_9:
+	.SYMB	LINE, 31, 12
+	setb	136.6
+	.SYMB	LINE, 32, 1
+
+; serial.c	    32  }
+	ret
+	.SYMB	LTIM, "speed", 7, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_serial_getch, data, overlay('stack_data')
+
+; serial.c	    33  
+; serial.c	    34  char serial_getch(void)
+__999003__1:
+	.define	__REG	'__999003__1'
+__999004__2:
+	.global	__overlay__serial_getch
+__overlay__serial_getch:
+	; End of section
+
+	.section	code, code
+	.global	_serial_getch
+; Function _serial_getch
+_serial_getch:
+	.registerbank	0
+	.SYMB	TYPE, 272, 'X', 0x0000, #2, 0, 0
+	.SYMB	GFUN, "serial_getch", _serial_getch, #272, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _serial_getch, #272
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "c", -1, #2, 0x0000, 0x2001
+	.SYMB	LTIM, "c", -1, 0x0000, 0x2041
+
+; serial.c	    35  {
+; serial.c	    36      char c=0;
+; serial.c	    37      while(!RI);
+_13:
+	.SYMB	LINE, 37, 14
+	gjnb	152.0,_13
+	.SYMB	LINE, 38, 13
+
+; serial.c	    38      c = SBUF;
+	mov	R0,153
+	.SYMB	LINE, 39, 11
+	.SYMB	LTIM, "c", 0, 0x0000, 0x20c1
+
+; serial.c	    39      RI = 0;
+	clr	152.0
+	.SYMB	LINE, 40, 5
+
+; serial.c	    40      return c;
+	mov	A,R0
+	.SYMB	LINE, 41, 1
+	.SYMB	LTIM, "c", 8, 0x0000, 0x20c1
+
+; serial.c	    41  }
+	ret
+	.SYMB	LTIM, "c", 8, 0x0000, 0x2041
+	.SYMB	LTIM, "c", 0, 0x0000, 0x2041
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_serial_putch, data, overlay('stack_data')
+
+; serial.c	    42  
+; serial.c	    43  void serial_putch(char c)
+__999005__1:
+	.define	__REG	'__999005__1'
+__999006__2:
+	.global	__overlay__serial_putch
+__overlay__serial_putch:
+	; End of section
+
+	.section	code, code
+	.global	_serial_putch
+; Function _serial_putch
+_serial_putch:
+	.registerbank	0
+	.SYMB	GFUN, "serial_putch", _serial_putch, #271, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _serial_putch, #271
+	.SYMB	IDEN, "c", 7, #2, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 45, 14
+	.SYMB	LTIM, "c", 7, 0x0000, 0x28c1
+
+; serial.c	    44  {
+; serial.c	    45       SBUF = c;
+	mov	153,R7
+
+; serial.c	    46       while (TI == 0)    // wait for TI flag to come true
+_15:
+	.SYMB	LINE, 46, 20
+	gjnb	152.1,_15
+	.SYMB	LINE, 50, 12
+
+; serial.c	    47       {
+; serial.c	    48  
+; serial.c	    49       }
+; serial.c	    50       TI = 0;            // clear flag again
+	clr	152.1
+	.SYMB	LINE, 51, 1
+
+; serial.c	    51  }
+	ret
+	.SYMB	LTIM, "c", 7, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_serial_puts, data, overlay('stack_data')
+
+; serial.c	    52  
+; serial.c	    53  void serial_puts(char __rom *p)
+__999007__1:
+	.define	__REG	'__999007__1'
+__999008__2:
+	.global	__overlay__serial_puts
+__overlay__serial_puts:
+	; End of section
+
+	.section	code, code
+	.global	_serial_puts
+; Function _serial_puts
+_serial_puts:
+	.registerbank	0
+	.SYMB	TYPE, 275, 'Q', 1, #2
+	.SYMB	TYPE, 276, 'n', #275, 135
+	.SYMB	TYPE, 274, 'P', #276
+	.SYMB	TYPE, 273, 'X', 0x0000, #1, 0, 1, #274
+	.SYMB	GFUN, "serial_puts", _serial_puts, #273, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _serial_puts, #273
+	.SYMB	IDEN, "p", 22, #274, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 53, 6
+	.SYMB	LTIM, "p", 6, 0x0000, 0x28c1, 0, 7
+	.SYMB	LTIM, "p", 22, 0x0000, 0x28c1
+	.SYMB	LTIM, "p", 7, 0x0000, 0x28c1, 8, 15
+	mov	AR1,R7
+	mov	AR0,R6
+	.SYMB	LINE, 55, 18
+
+; serial.c	    54  {
+; serial.c	    55     while (*p != 0)
+	gjmp	_16
+_17:
+	.SYMB	LTIM, "p", 7, 0x0000, 0x2841, 8, 15
+	.SYMB	LTIM, "p", 22, 0x0000, 0x2841
+	.SYMB	LINE, 57, 28
+
+; serial.c	    56     {
+; serial.c	    57             serial_putch(*p);
+	mov	DPL,R1
+	mov	DPH,R0
+	clr	A
+	movc	A,@A+DPTR
+	mov	R7,A
+	gcall	_serial_putch
+	.SYMB	LINE, 58, 15
+
+; serial.c	    58             p++;
+	inc	R1
+	gcjne	R1,#0,_18
+	inc	R0
+_18:
+_16:
+	.SYMB	LINE, 55, 18
+	mov	DPL,R1
+	mov	DPH,R0
+	clr	A
+	movc	A,@A+DPTR
+	gjnz	_17
+	.SYMB	LINE, 60, 1
+
+; serial.c	    59     }
+; serial.c	    60  }
+	ret
+	.SYMB	LTIM, "p", 6, 0x0000, 0x2841, 0, 7
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	
+	.calls	'_serial_puts','_serial_putch'
+	.SYMB	ENDF
+
+
+	; Module end
+	.end

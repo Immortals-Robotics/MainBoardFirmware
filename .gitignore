@@ -1,0 +1,12 @@
+History/
+ProjectOutputs/
+Output/
+*.*Preview
+*.PrjPcbStructure
+*.PrjFpgStructure
+*.LOG
+*.obj
+*.drc
+*.html
+*.orig
+*.*_viewstate

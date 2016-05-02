@@ -1,0 +1,8 @@
+TASKING program builder:
+Compiling main.c
+c3000 E219: ["main.c" 5/1] cannot open #include file "dsf_system.h"
+c3000 E208: ["main.c" 12/16] syntax error - token ";" inserted before "device_uart"
+c3000 I805: ["main.c" 12/1] start of current external declaration
+2 errors, 0 warnings
+wmk: *** action exited with value 1.
+wmk: main.src removed.

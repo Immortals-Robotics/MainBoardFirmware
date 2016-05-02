@@ -1,0 +1,1049 @@
+	; TASKING TSK51x/TSK52x C compiler v1.17r1 Build 383 SN ????????
+	; Options: -f cc5872a -c99 -Ms -Ctsk52a -Ic:\users\lordhippo\desktop\tsk51 -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf\llpi\include -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\dsf\pal\include -IC:\PROGRAM FILES\ALTIUM DESIGNER 6\System\Tasking\c51\include -t4 --debug-info=all --language=+strings -O2 --romstrings --source --inline-max-incr=25 --inline-max-size=10 --vector-offset=0x0000 -o source2.src
+	; Module start
+	.SYMB	FILE, "source2.c"
+	.SYMB	NAME, "source2"
+	.SYMB	TOOL, "TSK51x/TSK52x C compiler", 0
+	.SYMB	TYPE, 256, "__wchar_t", 'T', #4
+	.SYMB	TYPE, 257, "__size_t", 'T', #17
+	.SYMB	TYPE, 258, "__ssize_t", 'T', #16
+	.SYMB	TYPE, 259, "__ptrdiff_t", 'T', #16
+	.SYMB	TYPE, 262, 'g', 1, 1
+	.SYMB	TYPE, 261, 'S', 1,\
+		"__b0", #262, 0,\
+		"__b1", #262, 1,\
+		"__b2", #262, 2,\
+		"__b3", #262, 3,\
+		"__b4", #262, 4,\
+		"__b5", #262, 5,\
+		"__b6", #262, 6,\
+		"__b7", #262, 7
+	.SYMB	TYPE, 260, "__bitstruct_t", 't', #261
+	.SYMB	TYPE, 265, 'n', #1, 129
+	.SYMB	TYPE, 264, 'P', #265
+	.SYMB	TYPE, 263, "__prof_adm", 't', #264
+	.SYMB	TYPE, 266, "__prof_codeptr", 't', #264
+	.SYMB	TYPE, 269, 'X', 0x0000, #1, 0, 0
+	.SYMB	TYPE, 270, 'n', #269, 135
+	.SYMB	TYPE, 268, 'P', #270
+	.SYMB	TYPE, 267, "__codeptr", 't', #268
+	.SYMB	TYPE, 271, 'Z', #3, 3
+	.SYMB	IDEN, "des", _des, #271, 0x0081, 0x4000
+	.SYMB	ALAB, _des, #271
+	.SYMB	TYPE, 273, 'Z', #3, 1
+	.SYMB	TYPE, 272, 'Z', #273, 3
+	.SYMB	IDEN, "current", _current, #272, 0x0081, 0x4000
+	.SYMB	ALAB, _current, #272
+	.SYMB	TYPE, 274, 'Z', #16, 3
+	.SYMB	IDEN, "curr", _curr, #274, 0x0081, 0x4000
+	.SYMB	ALAB, _curr, #274
+	.section	_main, data, overlay('stack_data')
+
+; source2.c	     1  #define ADD1 P3_0
+; source2.c	     2  #define ADD2 P3_1
+; source2.c	     3  #define ADD3 P3_2
+; source2.c	     4  #define WR P3_2
+; source2.c	     5  
+; source2.c	     6  #define DirM1 P3_4
+; source2.c	     7  #define DirM2 P3_5
+; source2.c	     8  #define DirM3 P3_6
+; source2.c	     9  #define DirM4 P3_7
+; source2.c	    10  
+; source2.c	    11  #define max(a,b) (a>b?a:b)
+; source2.c	    12  #define min(a,b) (a<b?a:b)
+; source2.c	    13  
+; source2.c	    14  unsigned char des[4];
+; source2.c	    15  unsigned char current[4][2];
+; source2.c	    16  int curr[4];
+; source2.c	    17  
+; source2.c	    18  void setMotor(char id,char dir,unsigned char speed);
+; source2.c	    19  int getMotorSpeed(char id);
+; source2.c	    20  void getData (void);
+; source2.c	    21  
+; source2.c	    22  inline void p ( char id );
+; source2.c	    23  
+; source2.c	    24  
+; source2.c	    25  void main ( void )
+__999001__10:
+	.define	__REG	'__999001__10'
+__999002__11:
+	.global	__overlay__main
+__overlay__main:
+	; End of section
+
+	.section	code, code
+	.global	_main
+; Function _main
+_main:
+	.registerbank	0
+	.SYMB	TYPE, 275, 'X', 0x0000, #1, 0, 0
+	.SYMB	GFUN, "main", _main, #275, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _main, #275
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 27, 131
+
+; source2.c	    26  {
+; source2.c	    27      current[0][0] = current[0][1] = current[1][0] = current[1][1] = current[2][0] = current[2][1] = current[3][0] = current[3][1] = 0;
+	mov	_current+7,#0
+	.SYMB	LINE, 27, 115
+	mov	_current+6,#0
+	.SYMB	LINE, 27, 99
+	mov	_current+5,#0
+	.SYMB	LINE, 27, 83
+	mov	_current+4,#0
+	.SYMB	LINE, 27, 67
+	mov	_current+3,#0
+	.SYMB	LINE, 27, 51
+	mov	_current+2,#0
+	.SYMB	LINE, 27, 35
+	mov	_current+1,#0
+	.SYMB	LINE, 27, 134
+	mov	_current,#0
+	.SYMB	LINE, 28, 43
+
+; source2.c	    28      curr[0] = curr[1] = curr[2] = curr[3] = 0;
+	clr	A
+	mov	_curr+7,A
+	mov	_curr+6,A
+	.SYMB	LINE, 28, 33
+	clr	A
+	mov	_curr+5,A
+	mov	_curr+4,A
+	.SYMB	LINE, 28, 23
+	clr	A
+	mov	_curr+3,A
+	mov	_curr+2,A
+	.SYMB	LINE, 28, 46
+	clr	A
+	mov	_curr+1,A
+	mov	_curr,A
+	.SYMB	LINE, 29, 11
+
+; source2.c	    29      WR = 0;
+	clr	176.2
+	.SYMB	LINE, 30, 28
+
+; source2.c	    30      setMotor( 3 , 0 , 200 );
+	mov	R7,#3
+	mov	R5,#0
+	mov	R3,#200
+	gcall	_setMotor
+	.SYMB	LINE, 31, 31
+
+; source2.c	    31          setMotor( 4 , 1 , 30 );
+	mov	R7,#4
+	mov	R5,#1
+	mov	R3,#30
+	gcall	_setMotor
+
+; source2.c	    32      for ( ;; )
+_2:
+	.SYMB	LINE, 36, 20
+
+; source2.c	    33      {
+; source2.c	    34          //P2 = P1;
+; source2.c	    35          //getData();
+; source2.c	    36          des[0] = 50;
+	mov	_des,#50
+	.SYMB	LINE, 37, 20
+
+; source2.c	    37          des[1] = 50;
+	mov	_des+1,#50
+	.SYMB	LINE, 38, 20
+
+; source2.c	    38          des[2] = 50;
+	mov	_des+2,#50
+	.SYMB	LINE, 39, 20
+
+; source2.c	    39          des[3] = 50;
+	mov	_des+3,#50
+	.SYMB	LINE, 51, 21
+
+; source2.c	    40          //p(1);
+; source2.c	    41          //p(2);
+; source2.c	    42          //p(3);
+; source2.c	    43          //getMotorSpeed( 3 );
+; source2.c	    44  
+; source2.c	    45          //p(4);
+; source2.c	    46          /*getMotorSpeed( 4 );
+; source2.c	    47          getMotorSpeed( 4 );
+; source2.c	    48          getMotorSpeed( 3 );
+; source2.c	    49          getMotorSpeed( 2 );
+; source2.c	    50          getMotorSpeed( 1 );*/
+; source2.c	    51          P2 = curr[3];
+	mov	160,_curr+7
+	.SYMB	LINE, 32, 12
+	gjmp	_2
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	_setMotor, data, overlay('stack_data')
+
+; source2.c	    52  
+; source2.c	    53      }
+; source2.c	    54  }
+; source2.c	    55  
+; source2.c	    56  void setMotor(char id,char dir,unsigned char speed)
+__999003__1:
+	.define	__REG	'__999003__1'
+__999004__2:
+	.global	__overlay__setMotor
+__overlay__setMotor:
+	; End of section
+
+	.section	code, code
+	.global	_setMotor
+; Function _setMotor
+_setMotor:
+	.registerbank	0
+	.SYMB	TYPE, 276, 'X', 0x0000, #1, 0, 3, #2, #2, #3
+	.SYMB	GFUN, "setMotor", _setMotor, #276, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _setMotor, #276
+	.SYMB	IDEN, "id", 7, #2, 0x0000, 0x2801
+	.SYMB	IDEN, "dir", 5, #2, 0x0000, 0x2801
+	.SYMB	IDEN, "speed", 3, #3, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 58, 5
+	.SYMB	LTIM, "dir", 5, 0x0000, 0x28c1
+	.SYMB	LTIM, "speed", 3, 0x0000, 0x28c1
+	.SYMB	LTIM, "id", 7, 0x0000, 0x28c1
+
+; source2.c	    57  {
+; source2.c	    58      switch(id)
+	mov	A,R7
+	.SYMB	LTIM, "id", 8, 0x0000, 0x28c1
+	dec	A
+	.SYMB	LTIM, "id", 8, 0x0000, 0x2841
+	gjz	_3
+	dec	A
+	gjz	_4
+	dec	A
+	gjz	_5
+	dec	A
+	gjz	_6
+	.SYMB	LINE, 116, 1
+
+; source2.c	    59      {
+; source2.c	    60          case 1 :
+; source2.c	    61               P0=speed;
+; source2.c	    62               ADD1 = 0;
+; source2.c	    63               ADD2 = 0;
+; source2.c	    64               __asm( "nop" );
+; source2.c	    65               __asm( "nop" );
+; source2.c	    66               WR = 1;
+; source2.c	    67               DirM1=dir;
+; source2.c	    68               __asm( "nop" );
+; source2.c	    69               __asm( "nop" );
+; source2.c	    70               WR = 0;
+; source2.c	    71               break;
+; source2.c	    72  
+; source2.c	    73          case 2 :
+; source2.c	    74               P0=speed;
+; source2.c	    75               ADD1 = 1;
+; source2.c	    76               ADD2 = 0;
+; source2.c	    77               __asm( "nop" );
+; source2.c	    78               __asm( "nop" );
+; source2.c	    79               WR = 1;
+; source2.c	    80               DirM2=dir;
+; source2.c	    81               __asm( "nop" );
+; source2.c	    82               __asm( "nop" );
+; source2.c	    83               WR = 0;
+; source2.c	    84               break;
+; source2.c	    85  
+; source2.c	    86  
+; source2.c	    87          case 3 :
+; source2.c	    88               P0=speed;
+; source2.c	    89               ADD1 = 0;
+; source2.c	    90               ADD2 = 1;
+; source2.c	    91               __asm( "nop" );
+; source2.c	    92               __asm( "nop" );
+; source2.c	    93               WR = 1;
+; source2.c	    94               DirM3=dir;
+; source2.c	    95               __asm( "nop" );
+; source2.c	    96               __asm( "nop" );
+; source2.c	    97               WR = 0;
+; source2.c	    98               break;
+; source2.c	    99  
+; source2.c	   100  
+; source2.c	   101          case 4 :
+; source2.c	   102               P0=speed;
+; source2.c	   103               ADD1 = 1;
+; source2.c	   104               ADD2 = 1;
+; source2.c	   105               __asm( "nop" );
+; source2.c	   106               __asm( "nop" );
+; source2.c	   107               WR = 1;
+; source2.c	   108               DirM4=dir;
+; source2.c	   109               __asm( "nop" );
+; source2.c	   110               __asm( "nop" );
+; source2.c	   111               WR = 0;
+; source2.c	   112               break;
+; source2.c	   113  
+; source2.c	   114      }
+; source2.c	   115  
+; source2.c	   116  }
+	ret
+_3:
+	.SYMB	LINE, 61, 22
+	mov	128,R3
+	.SYMB	LINE, 62, 22
+	clr	176.0
+	.SYMB	LINE, 63, 22
+	clr	176.1
+	.SYMB	LINE, 64, 14
+	nop
+	.SYMB	LINE, 65, 14
+	nop
+	.SYMB	LINE, 66, 20
+	gcall	__cocofun_4
+	.SYMB	LINE, 67, 23
+	mov	176.4,C
+	.SYMB	LINE, 71, 14
+	gjmp	_8
+_4:
+	.SYMB	LINE, 74, 22
+	mov	128,R3
+	.SYMB	LINE, 75, 22
+	setb	176.0
+	.SYMB	LINE, 76, 22
+	clr	176.1
+	.SYMB	LINE, 77, 14
+	nop
+	.SYMB	LINE, 78, 14
+	nop
+	.SYMB	LINE, 79, 20
+	gcall	__cocofun_4
+	.SYMB	LINE, 80, 23
+	mov	176.5,C
+	.SYMB	LINE, 84, 14
+	gjmp	_9
+_5:
+	.SYMB	LINE, 88, 22
+	mov	128,R3
+	.SYMB	LINE, 89, 22
+	clr	176.0
+	.SYMB	LINE, 90, 22
+	setb	176.1
+	.SYMB	LINE, 91, 14
+	nop
+	.SYMB	LINE, 92, 14
+	nop
+	.SYMB	LINE, 93, 20
+	gcall	__cocofun_4
+	.SYMB	LINE, 94, 23
+	mov	176.6,C
+	.SYMB	LINE, 98, 14
+	gjmp	_10
+_6:
+	.SYMB	LINE, 102, 22
+	mov	128,R3
+	.SYMB	LINE, 103, 22
+	setb	176.0
+	.SYMB	LINE, 104, 22
+	setb	176.1
+	.SYMB	LINE, 105, 14
+	nop
+	.SYMB	LINE, 106, 14
+	nop
+	.SYMB	LINE, 107, 20
+	gcall	__cocofun_4
+	.SYMB	LINE, 108, 23
+	mov	176.7,C
+_8:
+_9:
+_10:
+	.SYMB	LINE, 109, 14
+	nop
+	.SYMB	LINE, 110, 14
+	nop
+	.SYMB	LINE, 111, 20
+	clr	176.2
+	.SYMB	LINE, 116, 1
+	ret
+	.SYMB	LTIM, "id", 7, 0x0000, 0x2841
+	.SYMB	LTIM, "speed", 3, 0x0000, 0x2841
+	.SYMB	LTIM, "dir", 5, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	code, code
+
+; source2.c	   117  
+; source2.c	   118  int getMotorSpeed(char id)
+; Function __cocofun_4
+	.define	__REG	'__999003__1'
+__cocofun_4:
+	setb	176.2
+	mov	A,R5
+	add	A,#255
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	_getMotorSpeed, data, overlay('stack_data')
+__999005__8:
+	.define	__REG	'__999005__8'
+__999006__9:
+	.global	__overlay__getMotorSpeed
+__overlay__getMotorSpeed:
+	; End of section
+
+	.section	code, code
+	.global	_getMotorSpeed
+; Function _getMotorSpeed
+_getMotorSpeed:
+	.registerbank	0
+	.SYMB	TYPE, 277, 'X', 0x0000, #16, 0, 1, #2
+	.SYMB	GFUN, "getMotorSpeed", _getMotorSpeed, #277, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _getMotorSpeed, #277
+	.SYMB	IDEN, "id", 7, #2, 0x0000, 0x2801
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	IDEN, "changed", -1, #2, 0x0000, 0x2001
+	.SYMB	LTIM, "changed", -1, 0x0000, 0x2041
+	.SYMB	IDEN, "ans", -1, #16, 0x0000, 0x2001
+	.SYMB	LTIM, "ans", -1, 0x0000, 0x2041
+	.SYMB	LINE, 118, 5
+	.SYMB	LTIM, "id", 7, 0x0000, 0x28c1
+	mov	AR1,R7
+	.SYMB	LINE, 120, 18
+	.SYMB	LTIM, "id", 1, 0x0000, 0x28c1
+
+; source2.c	   119  {
+; source2.c	   120      char changed = 0;
+	mov	R2,#0
+	.SYMB	LINE, 122, 5
+	.SYMB	LTIM, "changed", 2, 0x0000, 0x20c1
+
+; source2.c	   121      int ans = 0;
+; source2.c	   122      switch(id)
+	mov	A,R1
+	.SYMB	LTIM, "id", 8, 0x0000, 0x28c1
+	dec	A
+	.SYMB	LTIM, "id", 8, 0x0000, 0x2841
+	gjz	_11
+	dec	A
+	gjz	_12
+	dec	A
+	gjz	_13
+	dec	A
+	gjz	_14
+	gjmp	_15
+
+; source2.c	   123      {
+; source2.c	   124          case 1:
+_11:
+	.SYMB	LINE, 125, 22
+
+; source2.c	   125               ADD1 = 0;
+	clr	176.0
+	.SYMB	LINE, 126, 22
+
+; source2.c	   126               ADD2 = 0;
+	clr	176.1
+	.SYMB	LINE, 127, 22
+
+; source2.c	   127               ADD3 = 0;
+	clr	176.2
+	.SYMB	LINE, 128, 23
+
+; source2.c	   128               ans += P1;
+	gcall	__cocofun_2
+	.SYMB	LINE, 129, 14
+
+; source2.c	   129               if ( P1 != current[0][0] )
+	xrl	A,_current
+	gjz	_16
+	.SYMB	LINE, 131, 35
+
+; source2.c	   130               {
+; source2.c	   131                  current[0][0] = P1;
+	mov	_current,144
+	.SYMB	LINE, 132, 28
+
+; source2.c	   132                  changed = 1;
+	mov	R2,#1
+_16:
+	.SYMB	LINE, 135, 22
+
+; source2.c	   133  
+; source2.c	   134               }
+; source2.c	   135               ADD1 = 1;
+	setb	176.0
+	.SYMB	LINE, 136, 22
+
+; source2.c	   136               ADD2 = 0;
+	clr	176.1
+	.SYMB	LINE, 137, 22
+
+; source2.c	   137               ADD3 = 0;
+	clr	176.2
+	.SYMB	LINE, 138, 43
+
+; source2.c	   138               if ( ( P1 != current[0][1] ) || ( changed ) )
+	mov	A,144
+	gcjne	A,_current+1,_17
+	mov	A,R2
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x20c1
+	gjz	_18
+_17:
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x2041
+	.SYMB	LINE, 140, 30
+
+; source2.c	   139               {
+; source2.c	   140                  ans += P1*256;
+	gcall	__cocofun_6
+	.SYMB	LINE, 141, 35
+
+; source2.c	   141                  current[0][1] = P1;
+	mov	_current+1,144
+	.SYMB	LINE, 142, 28
+
+; source2.c	   142                  changed = 1;
+	mov	R2,#1
+	.SYMB	LINE, 146, 14
+
+; source2.c	   143  
+; source2.c	   144               }
+; source2.c	   145  
+; source2.c	   146               break;
+	gjmp	_19
+
+; source2.c	   147          case 2:
+_12:
+	.SYMB	LINE, 148, 22
+
+; source2.c	   148               ADD1 = 0;
+	clr	176.0
+	.SYMB	LINE, 149, 22
+
+; source2.c	   149               ADD2 = 1;
+	setb	176.1
+	.SYMB	LINE, 150, 22
+
+; source2.c	   150               ADD3 = 0;
+	clr	176.2
+	.SYMB	LINE, 151, 23
+
+; source2.c	   151               ans += P1;
+	gcall	__cocofun_2
+	.SYMB	LINE, 152, 14
+
+; source2.c	   152               if ( P1 != current[1][0] )
+	xrl	A,_current+2
+	gjz	_20
+	.SYMB	LINE, 154, 35
+
+; source2.c	   153               {
+; source2.c	   154                  current[1][0] = P1;
+	mov	_current+2,144
+	.SYMB	LINE, 155, 28
+
+; source2.c	   155                  changed = 1;
+	mov	R2,#1
+_20:
+	.SYMB	LINE, 158, 22
+
+; source2.c	   156  
+; source2.c	   157               }
+; source2.c	   158               ADD1 = 1;
+	setb	176.0
+	.SYMB	LINE, 159, 22
+
+; source2.c	   159               ADD2 = 1;
+	setb	176.1
+	.SYMB	LINE, 160, 22
+
+; source2.c	   160               ADD3 = 0;
+	clr	176.2
+	.SYMB	LINE, 161, 43
+
+; source2.c	   161               if ( ( P1 != current[1][1] ) || ( changed ) )
+	mov	R0,#_current+3
+	mov	AR3,@R0
+	mov	A,144
+	gcjne	A,AR3,_21
+	mov	A,R2
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x20c1
+	gjz	_22
+_21:
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x2041
+	.SYMB	LINE, 163, 30
+
+; source2.c	   162               {
+; source2.c	   163                  ans += P1*256;
+	gcall	__cocofun_1
+	.SYMB	LINE, 168, 14
+
+; source2.c	   164                  current[1][1] = P1;
+; source2.c	   165                  changed = 1;
+; source2.c	   166               }
+; source2.c	   167  
+; source2.c	   168               break;
+	gjmp	_23
+
+; source2.c	   169          case 3:
+_13:
+	.SYMB	LINE, 170, 22
+
+; source2.c	   170               ADD1 = 0;
+	clr	176.0
+	.SYMB	LINE, 171, 22
+
+; source2.c	   171               ADD2 = 0;
+	clr	176.1
+	.SYMB	LINE, 172, 22
+
+; source2.c	   172               ADD3 = 1;
+	setb	176.2
+	.SYMB	LINE, 173, 23
+
+; source2.c	   173               ans += P1;
+	gcall	__cocofun_2
+	.SYMB	LINE, 174, 14
+
+; source2.c	   174               if ( P1 != current[2][0] )
+	xrl	A,_current+4
+	gjz	_24
+	.SYMB	LINE, 176, 35
+
+; source2.c	   175               {
+; source2.c	   176                  current[2][0] = P1;
+	mov	_current+4,144
+	.SYMB	LINE, 177, 28
+
+; source2.c	   177                  changed = 1;
+	mov	R2,#1
+_24:
+	.SYMB	LINE, 180, 22
+
+; source2.c	   178  
+; source2.c	   179               }
+; source2.c	   180               ADD1 = 1;
+	setb	176.0
+	.SYMB	LINE, 181, 22
+
+; source2.c	   181               ADD2 = 0;
+	clr	176.1
+	.SYMB	LINE, 182, 22
+
+; source2.c	   182               ADD3 = 1;
+	setb	176.2
+	.SYMB	LINE, 183, 43
+
+; source2.c	   183               if ( ( P1 != current[2][1] ) || ( changed ) )
+	mov	R0,#_current+5
+	mov	AR3,@R0
+	mov	A,144
+	gcjne	A,AR3,_25
+	mov	A,R2
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x20c1
+	gjz	_26
+_25:
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x2041
+	.SYMB	LINE, 185, 30
+
+; source2.c	   184               {
+; source2.c	   185                  ans += P1*256;
+	gcall	__cocofun_1
+	.SYMB	LINE, 190, 14
+
+; source2.c	   186                  current[2][1] = P1;
+; source2.c	   187                  changed = 1;
+; source2.c	   188               }
+; source2.c	   189  
+; source2.c	   190               break;
+	gjmp	_27
+
+; source2.c	   191          case 4:
+_14:
+	.SYMB	LINE, 192, 22
+
+; source2.c	   192               ADD1 = 0;
+	clr	176.0
+	.SYMB	LINE, 193, 22
+
+; source2.c	   193               ADD2 = 1;
+	setb	176.1
+	.SYMB	LINE, 194, 22
+
+; source2.c	   194               ADD3 = 1;
+	setb	176.2
+	.SYMB	LINE, 195, 23
+
+; source2.c	   195               ans += P1;
+	gcall	__cocofun_2
+	.SYMB	LINE, 196, 14
+
+; source2.c	   196               if ( P1 != current[3][0] )
+	xrl	A,_current+6
+	gjz	_28
+	.SYMB	LINE, 198, 35
+
+; source2.c	   197               {
+; source2.c	   198                  current[3][0] = P1;
+	mov	_current+6,144
+	.SYMB	LINE, 199, 28
+
+; source2.c	   199                  changed = 1;
+	mov	R2,#1
+_28:
+	.SYMB	LINE, 202, 22
+
+; source2.c	   200  
+; source2.c	   201               }
+; source2.c	   202               ADD1 = 1;
+	setb	176.0
+	.SYMB	LINE, 203, 22
+
+; source2.c	   203               ADD2 = 1;
+	setb	176.1
+	.SYMB	LINE, 204, 22
+
+; source2.c	   204               ADD3 = 1;
+	setb	176.2
+	.SYMB	LINE, 205, 43
+
+; source2.c	   205               if ( ( P1 != current[3][1] ) || ( changed ) )
+	mov	R0,#_current+7
+	mov	AR3,@R0
+	mov	A,144
+	gcjne	A,AR3,_29
+	mov	A,R2
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x20c1
+	gjz	_30
+_29:
+	.SYMB	LTIM, "changed", 8, 0x0000, 0x2041
+	.SYMB	LINE, 207, 30
+
+; source2.c	   206               {
+; source2.c	   207                  ans += P1*256;
+	gcall	__cocofun_1
+	.SYMB	LINE, 212, 14
+
+; source2.c	   208                  current[3][1] = P1;
+; source2.c	   209                  changed = 1;
+; source2.c	   210               }
+; source2.c	   211  
+; source2.c	   212               break;
+	gjmp	_31
+
+; source2.c	   213          default:
+_15:
+	.SYMB	LINE, 214, 24
+
+; source2.c	   214                  ans = 1;
+	mov	R5,#1
+	.SYMB	LTIM, "ans", 5, 0x0000, 0x20c1, 8, 15
+	mov	R4,#0
+_30:
+
+; source2.c	   215      }
+; source2.c	   216      if ( changed == 1 )
+_31:
+_26:
+_27:
+_22:
+_23:
+_18:
+_19:
+	.SYMB	LTIM, "ans", 5, 0x0000, 0x2041, 8, 15
+	.SYMB	LINE, 216, 5
+	gcjne	R2,#1,_32
+	.SYMB	LINE, 218, 22
+
+; source2.c	   217      {
+; source2.c	   218      ans = 12754 / ans;
+	mov	R6,#49
+	mov	R7,#210
+	.SYMB	LTIM, "id", 7, 0x0000, 0x2841
+	gcall	__SDIVI
+	.SYMB	LINE, 219, 5
+
+; source2.c	   219      if ( ans < 0 )
+	mov	A,R6
+	.SYMB	LTIM, "ans", 8, 0x0000, 0x20c1, 0, 7
+	gjnb	ACC.7,_33
+	.SYMB	LINE, 220, 15
+
+; source2.c	   220         ans = 0;
+	clr	A
+	.SYMB	LTIM, "ans", 8, 0x0000, 0x2041, 0, 7
+	mov	R7,A
+	.SYMB	LTIM, "ans", 7, 0x0000, 0x20c1, 8, 15
+	mov	R6,A
+_33:
+	.SYMB	LTIM, "ans", 7, 0x0000, 0x2041, 8, 15
+	.SYMB	LINE, 221, 5
+
+; source2.c	   221      if ( ans > 255 )
+	mov	A,R6
+	.SYMB	LTIM, "ans", 8, 0x0000, 0x20c1, 0, 7
+	xrl	A,#128
+	.SYMB	LTIM, "ans", 8, 0x0000, 0x2041, 0, 7
+	add	A,#127
+	gjnc	_34
+	.SYMB	LINE, 222, 17
+
+; source2.c	   222         ans = 255;
+	clr	A
+	mov	R7,#255
+	.SYMB	LTIM, "ans", 7, 0x0000, 0x20c1, 8, 15
+	mov	R6,A
+_34:
+	.SYMB	LTIM, "ans", 7, 0x0000, 0x2041, 8, 15
+	.SYMB	LINE, 223, 24
+
+; source2.c	   223         curr[id-1] = ans;
+	gcall	__cocofun_5
+	mov	@R0,AR6
+	inc	R0
+	mov	@R0,AR7
+	.SYMB	LINE, 230, 1
+
+; source2.c	   224      }
+; source2.c	   225      else
+; source2.c	   226      {
+; source2.c	   227          ans = curr[id-1];
+; source2.c	   228      }
+; source2.c	   229      return ans;
+; source2.c	   230  }
+	ret
+_32:
+	.SYMB	LINE, 227, 25
+	.SYMB	LTIM, "id", 7, 0x0000, 0x28c1
+	gcall	__cocofun_5
+	mov	AR6,@R0
+	.SYMB	LTIM, "ans", 6, 0x0000, 0x20c1, 0, 7
+	inc	R0
+	mov	AR7,@R0
+	.SYMB	LTIM, "id", 7, 0x0000, 0x2841
+	.SYMB	LINE, 230, 1
+	.SYMB	LTIM, "ans", 7, 0x0000, 0x20c1, 8, 15
+	ret
+	.SYMB	LTIM, "ans", 7, 0x0000, 0x2041, 8, 15
+	.SYMB	LTIM, "ans", 6, 0x0000, 0x2041, 0, 7
+	.SYMB	LTIM, "changed", 2, 0x0000, 0x2041
+	.SYMB	LTIM, "id", 1, 0x0000, 0x2841
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	code, code
+
+; source2.c	   231  
+; source2.c	   232  void getData (void)
+; Function __cocofun_6
+	.define	__REG	'__999005__8'
+__cocofun_6:
+	mov	A,R5
+	mov	R2,144
+	mov	R3,#0
+	add	A,R3
+	mov	R5,A
+	mov	A,R4
+	addc	A,R2
+	mov	R4,A
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_5
+	.define	__REG	'__999005__8'
+__cocofun_5:
+	mov	A,R1
+	add	A,ACC
+	add	A,#254
+	add	A,#_curr
+	mov	R0,A
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_2
+	.define	__REG	'__999005__8'
+__cocofun_2:
+	mov	A,144
+	mov	R5,A
+	mov	R4,#0
+	mov	R0,144
+	mov	A,R0
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_1
+	.define	__REG	'__999005__8'
+__cocofun_1:
+	gcall	__cocofun_6
+	mov	@R0,144
+	mov	R2,#1
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	_getData, data, overlay('stack_data')
+__999007__1:
+	.define	__REG	'__999007__1'
+__999008__2:
+	.global	__overlay__getData
+__overlay__getData:
+	; End of section
+
+	.section	code, code
+	.global	_getData
+; Function _getData
+_getData:
+	.registerbank	0
+	.SYMB	GFUN, "getData", _getData, #275, 0x0000, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 0, 0
+	.SYMB	ALAB, _getData, #275
+	.SYMB	BGNB, 0, 0, 0
+	.SYMB	LINE, 234, 13
+
+; source2.c	   233  {
+; source2.c	   234      ADD1 = 0;
+	clr	176.0
+	.SYMB	LINE, 235, 13
+
+; source2.c	   235      ADD2 = 0;
+	clr	176.1
+	.SYMB	LINE, 236, 13
+
+; source2.c	   236      ADD3 = 0;
+	gcall	__cocofun_3
+	.SYMB	LINE, 237, 23
+
+; source2.c	   237      des[0] = P2 - 127 ;
+	mov	_des,A
+	.SYMB	LINE, 238, 13
+
+; source2.c	   238      ADD1 = 1;
+	setb	176.0
+	.SYMB	LINE, 239, 13
+
+; source2.c	   239      ADD2 = 0;
+	clr	176.1
+	.SYMB	LINE, 240, 13
+
+; source2.c	   240      ADD3 = 0;
+	gcall	__cocofun_3
+	.SYMB	LINE, 241, 22
+
+; source2.c	   241      des[1] = P2 - 127;
+	mov	_des+1,A
+	.SYMB	LINE, 242, 13
+
+; source2.c	   242      ADD1 = 0;
+	clr	176.0
+	.SYMB	LINE, 243, 13
+
+; source2.c	   243      ADD2 = 1;
+	setb	176.1
+	.SYMB	LINE, 244, 13
+
+; source2.c	   244      ADD3 = 0;
+	gcall	__cocofun_3
+	.SYMB	LINE, 245, 22
+
+; source2.c	   245      des[2] = P2 - 127;
+	mov	_des+2,A
+	.SYMB	LINE, 246, 13
+
+; source2.c	   246      ADD1 = 1;
+	setb	176.0
+	.SYMB	LINE, 247, 13
+
+; source2.c	   247      ADD2 = 1;
+	setb	176.1
+	.SYMB	LINE, 248, 13
+
+; source2.c	   248      ADD3 = 0;
+	gcall	__cocofun_3
+	.SYMB	LINE, 249, 22
+
+; source2.c	   249      des[3] = P2 - 127;
+	mov	_des+3,A
+	.SYMB	LINE, 250, 1
+
+; source2.c	   250  }
+	ret
+	.SYMB	ENDB
+	.undef	__REG
+	.SYMB	EFUN
+	; End of function
+	; End of section
+
+	.section	code, code
+; Function __cocofun_3
+	.define	__REG	'__999007__1'
+__cocofun_3:
+	clr	176.2
+	mov	A,160
+	add	A,#129
+	ret
+	.undef	__REG
+	; End of function
+	; End of section
+
+	.section	data, data, clear
+	.global	_des
+_des:
+	.ds	4
+	; End of section
+
+	.section	data, data, clear
+	.global	_current
+_current:
+	.ds	8
+	; End of section
+
+	.section	data, data, clear
+	.global	_curr
+_curr:
+	.ds	8
+	; End of section
+
+	.extern	__start : code
+	.calls	'_main','_setMotor'
+	.extern	__SDIVI : code
+	.SYMB	ENDF
+
+; source2.c	   251   #define hehe 127
+; source2.c	   252  inline void p ( char id )
+; source2.c	   253  {
+; source2.c	   254      int tmp = curr[id-1];
+; source2.c	   255      if ( tmp == getMotorSpeed( id ) )
+; source2.c	   256         return;
+; source2.c	   257      int khor = 20*(des[id-1] - curr[id-1]+des[id-1]);
+; source2.c	   258  
+; source2.c	   259      khor = max ( -hehe , min ( hehe , khor ) );
+; source2.c	   260      khor += des[id-1];
+; source2.c	   261  
+; source2.c	   262      if ( khor >= 0 )
+; source2.c	   263      {
+; source2.c	   264          setMotor( id , 1 , khor );
+; source2.c	   265          //P2=100;
+; source2.c	   266      }
+; source2.c	   267      else
+; source2.c	   268      {
+; source2.c	   269          setMotor( id , 0 , -khor );
+; source2.c	   270          //P2=0;
+; source2.c	   271      }
+; source2.c	   272  }
+
+	; Module end
+	.end
