@@ -57,7 +57,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=GVETDTTR
+DocumentUniqueId=PNAFQAXC
 
 [Document2]
 DocumentPath=System1.OpenBus
@@ -91,7 +91,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=LWOFPBAH
+DocumentUniqueId=KXAGXLYI
 
 [Document4]
 DocumentPath=Servo_Driver.SchDoc
@@ -108,7 +108,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=GVRMJUHW
+DocumentUniqueId=ECKQYGKA
 
 [Document5]
 DocumentPath=IR-Decoder.SchDoc
@@ -125,7 +125,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=KRRLBSPY
+DocumentUniqueId=LJNEWUAF
 
 [Document6]
 DocumentPath=Brushless_Controller.SchDoc
@@ -142,7 +142,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=YGCSALBD
+DocumentUniqueId=CVFJBDYL
 
 [Document7]
 DocumentPath=encoder.SchDoc
@@ -159,7 +159,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=EQWCIQEA
+DocumentUniqueId=GNIGYMXJ
 
 [Document8]
 DocumentPath=144.Constraint
@@ -177,82 +177,6 @@ ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
-
-[GeneratedDocument1]
-DocumentPath=ProjectOutputs\144\Brushless_Controller.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument2]
-DocumentPath=ProjectOutputs\144\Configurable_ADC.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument3]
-DocumentPath=ProjectOutputs\144\Configurable_DebugIO.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument4]
-DocumentPath=ProjectOutputs\144\Configurable_Kick.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument5]
-DocumentPath=ProjectOutputs\144\Configurable_MotorDir.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument6]
-DocumentPath=ProjectOutputs\144\Configurable_MotorVel.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument7]
-DocumentPath=ProjectOutputs\144\Configurable_Servo.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument8]
-DocumentPath=ProjectOutputs\144\Configurable_TERMINATOR_1.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument9]
-DocumentPath=ProjectOutputs\144\Configurable_TSK3000A_1.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument10]
-DocumentPath=ProjectOutputs\144\Configurable_WB_INTERCON_1.Vhd
-DItemRevisionGUID=
-
-[GeneratedDocument11]
-DocumentPath=ProjectOutputs\144\Configurable_WB_SPI_1.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument12]
-DocumentPath=ProjectOutputs\144\encoder.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument13]
-DocumentPath=ProjectOutputs\144\IR-Decoder.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument14]
-DocumentPath=ProjectOutputs\144\Kicker.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument15]
-DocumentPath=ProjectOutputs\144\Servo_Driver.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument16]
-DocumentPath=ProjectOutputs\144\Sheet1.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument17]
-DocumentPath=ProjectOutputs\144\System1.VHD
-DItemRevisionGUID=
-
-[GeneratedDocument18]
-DocumentPath=ProjectOutputs\144\TSK3000.edf
-DItemRevisionGUID=
-
-[GeneratedDocument19]
-DocumentPath=ProjectOutputs\144\TSK3000.synthlog
-DItemRevisionGUID=
 
 [Configuration1]
 Name=144
