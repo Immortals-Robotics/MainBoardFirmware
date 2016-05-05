@@ -18,7 +18,7 @@ AllowPortNetNames=0
 AllowSheetEntryNetNames=1
 AppendSheetNumberToLocalNets=0
 NetlistSinglePinNets=0
-DefaultConfiguration=Default
+DefaultConfiguration=Default Configuration
 UserID=0xFFFFFFFF
 DefaultPcbProtel=1
 DefaultPcbPcad=0
@@ -39,7 +39,7 @@ PrefsVaultGUID=
 PrefsRevisionGUID=
 
 [Document1]
-DocumentPath=TSK3000ADEVNAME.CONSTRAINT
+DocumentPath=main.c
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -56,7 +56,7 @@ GenerateClassCluster=0
 DocumentUniqueId=
 
 [Document2]
-DocumentPath=main.c
+DocumentPath=hardware.h
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -124,7 +124,75 @@ GenerateClassCluster=0
 DocumentUniqueId=
 
 [Document6]
-DocumentPath=hardware.h
+DocumentPath=nrf.c
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
+[Document7]
+DocumentPath=nrf.h
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
+[Document8]
+DocumentPath=nrf24l01.c
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
+[Document9]
+DocumentPath=nrf24l01.h
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
+[Document10]
+DocumentPath=TASKING 3000.CONSTRAINT
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -165,30 +233,25 @@ DocumentPath=swplatform.h
 DItemRevisionGUID=
 
 [Configuration1]
-Name=Default
+Name=Default Configuration
 ParameterCount=0
 ConstraintFileCount=1
-ConstraintFilePath1=TSK3000ADEVNAME.CONSTRAINT
+ConstraintFilePath1=TASKING 3000.CONSTRAINT
 ReleaseItemId=
 CurrentRevision=
 Variant=[No Variations]
-GenerateBOM=1
+GenerateBOM=0
 OutputJobsCount=0
 
-[Generic_EDE]
-OutputDir=Output
-SaveFiles=True
-KeepTmpFiles=False
-StopAfterError=True
-AbsolutePathNames=False
-UseMakeOptions=False
-UserMakefile=False
-ToolchainName=TASKING 3000
-DeviceName=TSK3000A
-TCCVersion=1.0
-AutomaticallyImportFromFPGA_NEXUS_CORE=0
-SwPlatformDefaultVersion=AD13
-Memory_Configuration=Record[CODE_EXPORT]{}ExportType[1]{n}Record[NEXUS_CORE]{}ComponentDesignator[iram]{}Memory_Depth[7k]{}Memory_UsageType[ram]{}ProgramDownloadAddress[25k]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_Interrupts[]{n}Record[NEXUS_CORE]{}ComponentDesignator[irom]{}Memory_Depth[25k]{}Memory_UsageType[rom]{}ProgramDownloadAddress[0x00000000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[0x00000008]{}Memory_MatchedComponent[]{}Memory_Description[]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[ADC]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0D0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[DebugIO]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF000000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[Kick]{}Memory_Depth[0x0002]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF070000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[MotorDir]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF090000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[MotorVel]{}Memory_Depth[0x0004]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF030000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[Servo]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF080000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_I2CM_1]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0C0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E10]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_1]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF050000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E5]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_2]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF060000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E6]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_3]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF020000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E7]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_4]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF040000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E8]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_D]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0A0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E9]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_SPI_1]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0B0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_UART8_V2_1]{}Memory_Depth[0x0010]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF010000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E2,E3]{n}Record[PHYSICAL_MEMORY]{}ComponentDesignator[U1]{}Memory_Depth[32768]{}Memory_UsageType[ram]{}ProgramDownloadAddress[0x00000000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[0x00000008]{}Memory_MatchedComponent[]{}Memory_Description[]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_Interrupts[]{n}
+[Configuration2]
+Name=Release
+ParameterCount=0
+ConstraintFileCount=0
+ReleaseItemId=
+CurrentRevision=
+Variant=
+GenerateBOM=1
+OutputJobsCount=0
 
 [Generic_CHCOptions]
 ASP_Software_Enable=False
@@ -199,6 +262,14 @@ Configuration_144_DeviceName=XC3S400-4TQ144C
 FileList=main.c,pid.h,gyro.h
 
 [Generic_DefaultOptions]
+BinDir=$(PRODDIR)\c3000\bin
+SwPlatformDefaultVersion=R10
+S09=0
+R10=1
+AD13=0
+Family=Legacy
+Processor=ProcTSK3000
+ProcTSK3000=1
 CompOptim=CompOL3
 CompOL0=0
 CompOL1=0
@@ -215,11 +286,25 @@ LkOL0=0
 LkOL1=0
 LkOL2=1
 LkOLAdv=0
-ASP_Enable=False
 Choices_HardwareUnits=MultiplyDivideUnit
 MultiplyDivideUnit=1
-Family=Legacy
-Processor=ProcTSK3000
+ASP_Enable=False
+
+[Generic_EDE]
+KeepTmpFiles=False
+StopAfterError=True
+SilentMode=True
+AbsolutePathNames=False
+UseMakeOptions=False
+UserMakefile=False
+OutputDir=Output
+SwPlatformDefaultVersion=R10
+TCCVersion=1.0
+ToolchainName=TASKING 3000
+DeviceName=TASKING 3000
+Memory_Configuration=Record[CODE_EXPORT]{}ExportType[1]{n}Record[NEXUS_CORE]{}ComponentDesignator[iram]{}Memory_Depth[7k]{}Memory_UsageType[ram]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[25k]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[NEXUS_CORE]{}ComponentDesignator[irom]{}Memory_Depth[25k]{}Memory_UsageType[rom]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0x00000000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[0x00000008]{}Memory_MatchedComponent[]{}Memory_Description[]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[DebugIO]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF000000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[Kick]{}Memory_Depth[0x0002]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF070000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[MotorDir]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF090000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[MotorVel]{}Memory_Depth[0x0004]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF030000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[Servo]{}Memory_Depth[0x0001]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF080000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_I2CM_1]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0C0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E10]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWM8_1]{}Memory_Depth[0x0004]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0E0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E12]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_1]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF050000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E5]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_2]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF060000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E6]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_3]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF020000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E7]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_4]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF040000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E8]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_PWMX_D]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF0A0000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[E9]{n}Record[PERIPHERAL]{}ComponentDesignator[WB_SPI_2]{}Memory_Depth[0x0008]{}Memory_UsageType[peripheral]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0xFF010000]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[WB_INTERCON_1]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}Record[PHYSICAL_MEMORY]{}ComponentDesignator[TSK3000A_1]{}Memory_Depth[32768]{}Memory_UsageType[nvram]{}Memory_Configuration[]{}Memory_External[False]{}Memory_Speed[1]{}ProgramDownloadAddress[0x0]{}Memory_BusType[TSK3000:addr_bus]{}Memory_Mau[8]{}Memory_MatchedComponent[]{}Memory_Description[]{}Memory_FillBitPattern[]{}Memory_IncludeDependencies[False]{}Memory_ByLoadAddress[False]{}Memory_CopyDuringInit[False]{}Memory_NoCopyDuringInit[False]{}Memory_Interrupts[]{n}
+AutomaticallyImportFromFPGA_NEXUS_CORE=-1
+AutomaticallySynchronizeFromDevices_NEXUS_CORE=0
 
 [Generic_Directories]
 BinDir1=$(PRODDIR)\c3000\bin
@@ -227,7 +312,7 @@ BinDir1=$(PRODDIR)\c3000\bin
 [OutputGroup1]
 Name=Netlist Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=EDIF
 OutputName1=EDIF for PCB
@@ -358,7 +443,7 @@ OutputDefault25=0
 [OutputGroup2]
 Name=Simulator Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=AdvSimNetlist
 OutputName1=Mixed Sim
@@ -440,57 +525,57 @@ OutputName10=Assembler Source Prints
 OutputDocumentPath10=
 OutputVariantName10=
 OutputDefault10=0
-PageOptions10=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+PageOptions10=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
 OutputType11=C Source Print
 OutputName11=C Source Prints
 OutputDocumentPath11=
 OutputVariantName11=
 OutputDefault11=0
-PageOptions11=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+PageOptions11=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
 OutputType12=C/C++ Header Print
 OutputName12=C/C++ Header Prints
 OutputDocumentPath12=
 OutputVariantName12=
 OutputDefault12=0
-PageOptions12=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
+PageOptions12=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
 OutputType13=C++ Source Print
 OutputName13=C++ Source Prints
 OutputDocumentPath13=
 OutputVariantName13=
 OutputDefault13=0
-PageOptions13=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType14=FSM Print
-OutputName14=FSM Prints
+PageOptions13=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
+OutputType14=PCB 3D Video
+OutputName14=PCB 3D Video
 OutputDocumentPath14=
-OutputVariantName14=
+OutputVariantName14=[No Variations]
 OutputDefault14=0
-PageOptions14=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType15=PCB 3D Video
-OutputName15=PCB 3D Video
+PageOptions14=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
+OutputType15=Report Print
+OutputName15=Report Prints
 OutputDocumentPath15=
-OutputVariantName15=[No Variations]
+OutputVariantName15=
 OutputDefault15=0
-PageOptions15=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType16=PCBLIB Print
-OutputName16=PCBLIB Prints
+PageOptions15=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
+OutputType16=Software Platform Print
+OutputName16=Software Platform Prints
 OutputDocumentPath16=
 OutputVariantName16=
 OutputDefault16=0
-PageOptions16=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType17=Report Print
-OutputName17=Report Prints
+PageOptions16=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
+OutputType17=VHDL Print
+OutputName17=VHDL Prints
 OutputDocumentPath17=
 OutputVariantName17=
 OutputDefault17=0
-PageOptions17=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType18=Software Platform Print
-OutputName18=Software Platform Prints
+PageOptions17=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
+OutputType18=FSM Print
+OutputName18=FSM Prints
 OutputDocumentPath18=
 OutputVariantName18=
 OutputDefault18=0
 PageOptions18=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType19=VHDL Print
-OutputName19=VHDL Prints
+OutputType19=PCBLIB Print
+OutputName19=PCBLIB Prints
 OutputDocumentPath19=
 OutputVariantName19=
 OutputDefault19=0
@@ -499,7 +584,7 @@ PageOptions19=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|Print
 [OutputGroup4]
 Name=Assembly Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=Assembly
 OutputName1=Assembly Drawings
@@ -521,7 +606,7 @@ OutputDefault3=0
 [OutputGroup5]
 Name=Fabrication Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=CompositeDrill
 OutputName1=Composite Drill Drawing
@@ -593,7 +678,7 @@ OutputDefault12=0
 [OutputGroup6]
 Name=Report Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=BOM_PartType
 OutputName1=Bill of Materials
@@ -630,7 +715,7 @@ OutputDefault6=0
 [OutputGroup7]
 Name=Other Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=Text Print
 OutputName1=Text Print
@@ -810,7 +895,7 @@ PageOptions29=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|Print
 [OutputGroup8]
 Name=Validation Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=Design Rules Check
 OutputName1=Design Rules Check
@@ -824,24 +909,24 @@ OutputDocumentPath2=
 OutputVariantName2=
 OutputDefault2=0
 PageOptions2=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
-OutputType3=Component states check
-OutputName3=Vault's components states check
+OutputType3=Differences Report
+OutputName3=Differences Report
 OutputDocumentPath3=
 OutputVariantName3=
 OutputDefault3=0
-OutputType4=Configuration compliance
-OutputName4=Environment configuration compliance check
+PageOptions3=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-4|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter
+OutputType4=Footprint Comparison Report
+OutputName4=Footprint Comparison Report
 OutputDocumentPath4=
 OutputVariantName4=
 OutputDefault4=0
-OutputType5=Differences Report
-OutputName5=Differences Report
+OutputType5=Component states check
+OutputName5=Vault's components states check
 OutputDocumentPath5=
 OutputVariantName5=
 OutputDefault5=0
-PageOptions5=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-OutputType6=Footprint Comparison Report
-OutputName6=Footprint Comparison Report
+OutputType6=Configuration compliance
+OutputName6=Environment configuration compliance check
 OutputDocumentPath6=
 OutputVariantName6=
 OutputDefault6=0
@@ -849,27 +934,27 @@ OutputDefault6=0
 [OutputGroup9]
 Name=Export Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Microsoft XPS Document Writer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
-OutputType1=AutoCAD dwg/dxf PCB
-OutputName1=AutoCAD dwg/dxf File PCB
+OutputType1=ExportSTEP
+OutputName1=Export STEP
 OutputDocumentPath1=
-OutputVariantName1=
+OutputVariantName1=[No Variations]
 OutputDefault1=0
-OutputType2=AutoCAD dwg/dxf Schematic
-OutputName2=AutoCAD dwg/dxf File Schematic
+OutputType2=AutoCAD dwg/dxf PCB
+OutputName2=AutoCAD dwg/dxf File PCB
 OutputDocumentPath2=
 OutputVariantName2=
 OutputDefault2=0
-OutputType3=ExportIDF
-OutputName3=Export IDF
+OutputType3=AutoCAD dwg/dxf Schematic
+OutputName3=AutoCAD dwg/dxf File Schematic
 OutputDocumentPath3=
 OutputVariantName3=
 OutputDefault3=0
-OutputType4=ExportSTEP
-OutputName4=Export STEP
+OutputType4=ExportIDF
+OutputName4=Export IDF
 OutputDocumentPath4=
-OutputVariantName4=[No Variations]
+OutputVariantName4=
 OutputDefault4=0
 OutputType5=NetList Sch
 OutputName5=NetList Sch

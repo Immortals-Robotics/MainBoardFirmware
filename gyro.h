@@ -1,3 +1,44 @@
+// 1
+//float GYRO_OFFSET = -1.23;
+
+// 2
+//float GYRO_OFFSET = 1.63;
+
+// 3(RIP) or 14
+//float GYRO_OFFSET = 0.895;
+
+// 4
+//float GYRO_OFFSET = 1.5;
+
+// 5
+//float GYRO_OFFSET = 4.23;
+
+// 6
+//float GYRO_OFFSET = 4.62;
+
+// 7*
+//float GYRO_OFFSET = -1.12;
+
+// 8*
+//float GYRO_OFFSET = -0.81;
+
+// 9*
+//float GYRO_OFFSET = -0.33;
+
+// 10
+//float GYRO_OFFSET = 4.96;
+
+// 11
+//float GYRO_OFFSET = 3.42;
+
+// 12
+//float GYRO_OFFSET = 4.31;
+
+// 13
+float GYRO_OFFSET = 3.95;
+
+
+
 #include <drv_i2cm.h>
 #include <timing.h>
 #include <time.h>
@@ -161,7 +202,7 @@ bool getGyroscopeData(gyroData * result)
         tmp = (result->buff[2] << 8) | result->buff[3];
         tmp = tcmplnt16 ( tmp );
         result->x =  (float)(tmp) / 14.375;
-        result->x += 10.07;
+        result->x += GYRO_OFFSET;
         #ifdef YZ_READ
         tmp = (result->buff[4] << 8) | result->buff[5];
         tmp = tcmplnt16 ( tmp );

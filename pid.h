@@ -7,7 +7,7 @@ inline float P ( float current , float desired , float k )
 
 typedef struct
 {
-    float dState[5];           //Last position input
+    float dState[5];        //Last position input
     float dt;
     float iState;           //Integrator state
     float iMax , iMin;      //Maximum and minimum allowable integrator state
@@ -30,11 +30,11 @@ void initSPid ( SPid * pid )
 
     pid->iState = 0;
 
-    pid->iMax = 996;
-    pid->iMin = -996;
+    pid->iMax = 328;
+    pid->iMin = -328;
 
-    pid->iGain = 0.358;
-    pid->pGain = 16.4;
+    pid->iGain = 0.32;
+    pid->pGain = 25.0;
     pid->dGain = 0;
 }
 
@@ -44,7 +44,7 @@ void update_PID_Vals(SPid * pid , float p , float i , float d , float imax )
     pid->iMin = -imax;
     pid->iGain = i;
     pid->pGain = p;
-    pid->dGain = d;
+    //pid->dGain = d;
 
 }
 
