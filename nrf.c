@@ -1,7 +1,7 @@
 #include "nrf.h"
 
 spi_t* nrf_spi;
-ioport_t * servo;
+ioport_t * servo; 
 
 void init_spi()
 {

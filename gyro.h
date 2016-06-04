@@ -35,7 +35,7 @@
 //float GYRO_OFFSET = 4.31;
 
 // 13
-float GYRO_OFFSET = 3.95;
+float GYRO_OFFSET = 0;
 
 
 

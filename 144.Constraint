@@ -109,5 +109,6 @@ Record=Constraint | TargetKind=Port | TargetId=GYROINT | FPGA_PINNUM=P112
 Record=Constraint | TargetKind=Port | TargetId=CHARGE_PULSE | FPGA_PINNUM=P113
 Record=Constraint | TargetKind=Port | TargetId=SCL | FPGA_PINNUM=P107
 Record=Constraint | TargetKind=Port | TargetId=SDA | FPGA_PINNUM=P108
+Record=Constraint | TargetKind=Port | TargetId=Debug_tx | FPGA_PINNUM=P137
 Record=Constraint | TargetKind=Port | TargetId=MD_6 | FPGA_PINNUM=P140
 Record=Constraint | TargetKind=Port | TargetId=MD_5 | FPGA_PINNUM=P141

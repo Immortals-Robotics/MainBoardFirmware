@@ -1,39 +1,4 @@
-#include "devices.h"
-#include <drv_ioport.h>
-#include <drv_pwmx.h>
-#include <drv_pwm8.h>
-#include <math.h>
-#include <stdlib.h>
-
-#include "nrf.h"
-#include "gyro.h"
-
-//#define FLASH_PROM
-
-#include <interrupts.h>
-
-#include "pid.h"
-
-#ifndef max
-#define max(a,b) (a>b?a:b)
-#endif
-#ifndef min
-#define min(a,b) (a<b?a:b)
-#endif
-
-/*inline float max ( float a , float b )
-{
-    if ( a > b )
-       return a;
-    return b;
-}
-
-inline float min ( float a , float b )
-{
-    if ( a < b )
-       return a;
-    return b;
-}*/
+#include "GlobalVars.h"
 
 inline short sgn ( float a )
 {
@@ -42,88 +7,50 @@ inline short sgn ( float a )
     return 1;
 }
 
-ioport_t * motorvel;
-ioport_t * motordir;
-ioport_t * kick;
-extern ioport_t * servo;
-ioport_t * debug;
-
-pwmx_t* m0;
-pwmx_t* m1;
-pwmx_t* m2;
-pwmx_t* m3;
-pwmx_t* md;
-
-pwm8_t* buzzer;
-
-unsigned char robotNum=1;
-
-uint8_t batteryV;
-
-float des[4];
-float desW;
-
-typedef struct
+void setTheBit(unsigned char * var , unsigned char bitPosition , bool Value)
 {
-    float targetAngle;
-    float angle;
-    float tW;
-    float vx;
-    float vy;
-    unsigned char direct;
-    unsigned char chip;
-    unsigned char buzzer;
-    bool dribbler;
-    bool discharge;
-    bool booster;
-    bool runPID;
-}robotCMD;
+    //TODO : To be implemented as template function
+}
 
-typedef struct
+bool getTheBit(unsigned char var , unsigned char bitPosition)
 {
-    bool led0;
-    bool led1;
+   unsigned char num = pow(2,bitPosition);
+   return (var&num);
+}
 
-}outputDebugPort;
-
-robotCMD recievedCMD;
-
-bool push[4];
-bool dip[8];
-
-unsigned char BatteryLevel;
-
-SPid plantPID[4];
-SPid anglePID;
-float gyroD = 0.296;
-short cycleCounter=0;
-
-#define anglePredictSteps 124
-float angleHistory[anglePredictSteps];
-int angleHistoryIndex = 0;
-float anglePredict = 0;
-
-unsigned char PID_Vals[4]; // P : I : IMAX : TORQUE
-
-float max_w_acc = 0.73f;
-float max_w_dec = 1.074f;
-
-unsigned char payload[11];
-
-int needAck = 0;
-float pwm[4];
-
-gyroData gdata;
-
-void constructAck ( )
+int getSign(int sign)
 {
-    //payload[0] = 74; //Vbat * 5
+   if(sign >= 0)
+     return 1;
+
+   return -1;
+}
+
+uint32_t AbsMotorSpeed(uint8_t motorNumber)
+{
+    if(motorNumber > 3)
+      return 0; ///TODO: Handle Error
+
+    return ioport_get_value ( motorvel , motorNumber );
+}
+
+float MotorSpeed(uint8_t motorNumber)
+{
+    if(motorNumber > 3)
+      return 0; ///TODO: Handle Error
+
+    uint8_t signVar = ioport_get_value ( motordir , 0 );
+    return ioport_get_value ( motorvel , motorNumber );
+    //return getSign(getTheBit(signVar,motorNumber+4))*ioport_get_value ( motorvel , motorNumber );
+}
+
+void constructAckPacket ( )
+{
     payload[0] = gdata.buff[2];
-
-    payload[1] = ioport_get_value ( motorvel , 0 ) * 2;
-    payload[2] = ioport_get_value ( motorvel , 1 ) * 2;
-    payload[3] = ioport_get_value ( motorvel , 2 ) * 2;
-    payload[4] = ioport_get_value ( motorvel , 3 ) * 2;
+    payload[1] = AbsMotorSpeed(0) * 2;
+    payload[2] = AbsMotorSpeed(1) * 2;
+    payload[3] = AbsMotorSpeed(2) * 2;
+    payload[4] = AbsMotorSpeed(3) * 2;
 
     payload[5] = ioport_get_value(debug , 0)>>8;
     if ( ioport_get_value(debug , 0)&1 )
@@ -131,10 +58,6 @@ void constructAck ( )
     payload[6] = ioport_get_value ( motordir , 0 );
     payload[6] |= ( ioport_get_value ( debug , 0 ) & 0xF0 ) >> 4;
 
-    //payload[5] = gdata.buff[0];
-    //payload[6] = gdata.buff[1];
-
-    //payload[7] = 0;
     payload[7] = gdata.buff[3];
 
     payload[8] = (ioport_get_value ( debug , 0 )&2)>>1;
@@ -142,83 +65,44 @@ void constructAck ( )
     payload[9] = abs(recievedCMD.angle);
     if ( recievedCMD.angle < 0 )
        payload[0] |= 128;
-
-    /*payload[0] = fabs ( pwm[0]/4.0) ;
-    payload[5] = fabs ( pwm[1]/4.0) ;
-    payload[6] = fabs ( des[0]/4.0) ;
-    payload[7] = fabs ( des[1]/4.0) ;
-    payload[8] = fabs ( des[2]/4.0) ;
-    payload[9] = fabs ( des[3]/4.0) ;*/
-
-
 }
 
-void sendAck()
+bool isAckProcessCompleted()
 {
-    if ( needAck == 6 )
-    {
-        constructAck();
-        needAck --;
-    }
-    else if ( needAck == 5 )
-    {
-        nrf24l01_set_as_tx();
-        needAck --;
-    }
-    else if ( needAck == 4 )
-    {
-        nrf24l01_write_tx_payload(payload,10,false);
-        needAck --;
-    }
-    else if ( needAck == 3 )
-    {
-        nrf24l01_transmit();
-        needAck --;
-    }
-    else if ( needAck == 2 )
-    {
-        if ( nrf24l01_irq_pin_active() )
-        {
-            if ( nrf24l01_irq_tx_ds_active() )
-            {
-                needAck --;
-                //needAck = 1;
-                nrf24l01_irq_clear_tx_ds();
-                nrf24l01_flush_tx();
-            }
-        }
-
-        //needAck --;
-    }
-    else if ( needAck == 1 )
-    {
-        //nrf24l01_flush_tx();
-        nrf24l01_set_as_rx();
-        needAck --;
-    }
-    else
-    {
-        needAck --;
-    }
+    return (ackStep<=0);
 }
 
-float omniMatrix[4][3];
-
-void recieveMatrix( int n )
+void sendAckProcess()
 {
-    for ( int i = 0 ; i < 3 ; i ++ )
+    switch(ackStep)
     {
-           omniMatrix[n][i] =  65536 * (int)(payload[i*3]&63);
-           omniMatrix[n][i] += 256   * (int)(payload[i*3+1]);
-           omniMatrix[n][i] +=         (int)(payload[i*3+2]);
-           omniMatrix[n][i] /= 4194303.0;
-
-           if ( payload[i*3]&64 )
-              omniMatrix[n][i] += 1.0;
-           if ( payload[i*3]&128 )
-              omniMatrix[n][i] = -omniMatrix[n][i];
+        case 6:
+             constructAckPacket();
+             break;
+        case 5:
+             nrf24l01_set_as_tx();
+             break;
+        case 4:
+             nrf24l01_write_tx_payload(payload,10,false);
+             break;
+        case 3:
+             nrf24l01_transmit();
+             break;
+        case 2:
+             if ( nrf24l01_irq_pin_active() )
+             {
+                if ( nrf24l01_irq_tx_ds_active() )
+                {
+                    nrf24l01_irq_clear_tx_ds();
+                    nrf24l01_flush_tx();
+                }
+             }
+             break;
+        case 1:
+             nrf24l01_set_as_rx();
+             break;
     }
-
+    ackStep--;
 }
 
 void recievePID()
@@ -264,32 +148,21 @@ void recievePID()
 void recivePacket()
 {
     robotCMD tmpCMD;
-
-    tmpCMD.vx = payload[1];
-    tmpCMD.vy = payload[2];
-    tmpCMD.angle = payload[3];
-    tmpCMD.targetAngle = payload[4];
-
-    if ( payload[9]&16 )
-       tmpCMD.vx = -tmpCMD.vx;
-    if ( payload[9]&32 )
-       tmpCMD.vy = -tmpCMD.vy;
-    if ( payload[9]&64 )
-       tmpCMD.angle = -tmpCMD.angle;
-    if ( payload[9]&128 )
-       tmpCMD.targetAngle = -tmpCMD.targetAngle;
-
+    tmpCMD.vx = payload[1] * getSign(getTheBit(payload[9],4));
+    tmpCMD.vy = payload[2] * getSign(getTheBit(payload[9],5));
+    tmpCMD.angle = payload[3] * getSign(getTheBit(payload[9],6));
+    tmpCMD.targetAngle = payload[4] * getSign(getTheBit(payload[9],6));
     tmpCMD.tW = (float)(payload[5])/25.0f;
-
     tmpCMD.direct = payload[6];
     tmpCMD.chip = payload[7];
-
     tmpCMD.buzzer = payload[8];
+    tmpCMD.booster = getTheBit(payload[9],3);
+    tmpCMD.discharge = getTheBit(payload[9],2);
+    tmpCMD.dribbler = getTheBit(payload[9],1);
+    tmpCMD.runPID = getTheBit(payload[9],0);
 
-    tmpCMD.booster = (payload[9]&8)>0;
-    tmpCMD.discharge = (payload[9]&4)>0;
-    tmpCMD.dribbler = (payload[9]&2)>0;
-    tmpCMD.runPID = (payload[9]&1)>0;
+    if(tmpCMD.vx > 10 || tmpCMD.vy > 10)
+       checkMotorFault = true;
 
     float newAngle = tmpCMD.angle;
     if ( newAngle <= 180 )
@@ -304,38 +177,38 @@ void recivePacket()
     recievedCMD = tmpCMD;
     recievedCMD.angle = newAngle;
 
-            float angleRad = (90.0-recievedCMD.angle) * (0.0174528);
-            float coss = cos ( angleRad );
-            float sinn = sin ( angleRad );
+    float angleRad = (90.0-recievedCMD.angle) * (0.0174528);
+    float coss = cos ( angleRad );
+    float sinn = sin ( angleRad );
 
-            angleRad = recievedCMD.vx * coss - recievedCMD.vy * sinn;
-            recievedCMD.vy = recievedCMD.vx * sinn + recievedCMD.vy * coss;
-            recievedCMD.vx = angleRad;
+    angleRad = recievedCMD.vx * coss - recievedCMD.vy * sinn;
+    recievedCMD.vy = recievedCMD.vx * sinn + recievedCMD.vy * coss;
+    recievedCMD.vx = angleRad;
 
-            des[0]=((recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
-            des[1]=(-(recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
-            des[2]=(-(recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
-            des[3]=((recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
+    des[0]=((recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
+    des[1]=(-(recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
+    des[2]=(-(recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
+    des[3]=((recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
 
-            des[0] *= -4.0f;
-            des[1] *= -4.0f;
-            des[2] *= -4.0f;
-            des[3] *= -4.0f;
+    des[0] *= -4.0f;
+    des[1] *= -4.0f;
+    des[2] *= -4.0f;
+    des[3] *= -4.0f;
 
-            ioport_set_value(kick,0,recievedCMD.direct);
-            ioport_set_value(kick,1,recievedCMD.chip);
-            pwmx_set_pulsewidth( md , recievedCMD.dribbler?1023.0:0.0 );
+    ioport_set_value(kick,0,recievedCMD.direct);
+    ioport_set_value(kick,1,recievedCMD.chip);
+    pwmx_set_pulsewidth( md , recievedCMD.dribbler?1023.0:0.0 );
 
-            if ( recievedCMD.buzzer > 0 )
-            {
-                pwm8_set_frequency(buzzer,recievedCMD.buzzer*59);
-                pwm8_set_dutycycle(buzzer,45);
-            }
-            else
-            {
-                pwm8_set_frequency(buzzer,2000);
-                pwm8_set_dutycycle(buzzer,0);
-            }
+    if ( recievedCMD.buzzer > 0 )
+    {
+        pwm8_set_frequency(buzzer,recievedCMD.buzzer*59);
+        pwm8_set_dutycycle(buzzer,45);
+    }
+    else
+    {
+        pwm8_set_frequency(buzzer,2000);
+        pwm8_set_dutycycle(buzzer,0);
+    }
 }
 
 int getDipState(int n)
@@ -364,15 +237,35 @@ int getRobotNum()
 
 }
 
-
-float curr_vel[4];
-
-/*inline float medianFilter ( float * data )
+int getPushState()
 {
-    if ( ( data[0] <= max ( data[1] , data[2] ) ) && ( data[0] >= min ( data[1] , data[2] ) ) ) return data[0];
-    if ( ( data[1] <= max ( data[0] , data[2] ) ) && ( data[1] >= min ( data[0] , data[2] ) ) ) return data[1];
-    if ( ( data[2] <= max ( data[1] , data[0] ) ) && ( data[2] >= min ( data[1] , data[0] ) ) ) return data[2];
-    return data[0];
+    unsigned int a =0;
+    a = ioport_get_value(debug , 0);
+    unsigned char c = (a>>4)%256;
+    return c;
+}
+
+void SetLed(unsigned char ledNumber , bool state)
+{
+    if(state)
+    {
+       ledState |= ledNumber;
+    }
+    else
+    {
+        if(ledState & ledNumber)
+           ledState -= (ledState & ledNumber);
+    }
+
+    ioport_set_value( debug , 0 , ledState );
+}
+
+/*inline void CalculateVels ( void )
+{
+    curr_vel[0] = 4.0 * MotorSpeed(0);
+    curr_vel[1] = 4.0 * MotorSpeed(1);
+    curr_vel[2] = 4.0 * MotorSpeed(2);
+    curr_vel[3] = 4.0 * MotorSpeed(3);
 }*/
 
 inline void CalculateVels ( void )
@@ -382,19 +275,19 @@ inline void CalculateVels ( void )
 
     unsigned char tmp_dir = ioport_get_value ( motordir , 0 );
 
-    curr_vel[0] = 8.0 * ioport_get_value ( motorvel , 0 );
+    curr_vel[0] = 4.0 * ioport_get_value ( motorvel , 0 );
     if ( tmp_dir & 16 )
        curr_vel[0] = -curr_vel[0];
 
-    curr_vel[1] = 8.0 * ioport_get_value ( motorvel , 1 );
+    curr_vel[1] = 4.0 * ioport_get_value ( motorvel , 1 );
     if ( tmp_dir & 32 )
        curr_vel[1] = -curr_vel[1];
 
-    curr_vel[2] = 8.0 * ioport_get_value ( motorvel , 2 );
+    curr_vel[2] = 4.0 * ioport_get_value ( motorvel , 2 );
     if ( tmp_dir & 64 )
        curr_vel[2] = -curr_vel[2];
 
-    curr_vel[3] = 8.0 * ioport_get_value ( motorvel , 3 );
+    curr_vel[3] = 4.0 * ioport_get_value ( motorvel , 3 );
     if ( tmp_dir & 128 )
        curr_vel[3] = -curr_vel[3];
 
@@ -411,13 +304,9 @@ inline void CalculateVels ( void )
         curr_vel[i] = medianFilter ( vel_buffer[i] );*/
 }
 
-//#define main_k 20
-
-
-
 inline void ControllLoop ( void )
 {
-    if ( recievedCMD.runPID == false )
+    if ( recievedCMD.runPID == false || isEncoderHasFault )
     {
         pwmx_set_pulsewidth( m0 , 0 );
         pwmx_set_pulsewidth( m1 , 0 );
@@ -425,25 +314,16 @@ inline void ControllLoop ( void )
         pwmx_set_pulsewidth( m3 , 0 );
         return;
     }
+
     pwm[0] = ( UpdatePID( &plantPID[0] , des[0]+desW-curr_vel[0] , curr_vel[0] ) + pwm[0] ) / 2.0;
     pwm[1] = ( UpdatePID( &plantPID[1] , des[1]+desW-curr_vel[1] , curr_vel[1] ) + pwm[1] ) / 2.0;
     pwm[2] = ( UpdatePID( &plantPID[2] , des[2]+desW-curr_vel[2] , curr_vel[2] ) + pwm[2] ) / 2.0;
     pwm[3] = ( UpdatePID( &plantPID[3] , des[3]+desW-curr_vel[3] , curr_vel[3] ) + pwm[3] ) / 2.0;
 
-    /*pwm[0] = P ( curr_vel[0] , des[0] , main_k );
-    pwm[1] = P ( curr_vel[1] , des[1] , main_k );
-    pwm[2] = P ( curr_vel[2] , des[2] , main_k );
-    pwm[3] = P ( curr_vel[3] , des[3] , main_k );*/
-
     pwm[0] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[0] ) );
     pwm[1] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[1] ) );
     pwm[2] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[2] ) );
     pwm[3] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[3] ) );
-
-    /*pwm[0] = pwm[0] + (curr_vel[0]*0.644);
-    pwm[1] = pwm[1] + (curr_vel[1]*0.644);
-    pwm[2] = pwm[2] + (curr_vel[2]*0.644);
-    pwm[3] = pwm[3] + (curr_vel[3]*0.644);*/
 
     if ( pwm[0] > 1023 )
        pwm[0] = 1023;
@@ -464,53 +344,33 @@ inline void ControllLoop ( void )
        pwm[3] = 1023;
     else if ( pwm[3] < -1023 )
          pwm[3] = -1023;
-    /*pwm[0] = min ( 1023 , max ( -1023 , pwm[0] ) );
-    pwm[1] = min ( 1023 , max ( -1023 , pwm[1] ) );
-    pwm[2] = min ( 1023 , max ( -1023 , pwm[2] ) );
-    pwm[3] = min ( 1023 , max ( -1023 , pwm[3] ) );*/
-    //pwm[1] = 800;
+
     pwmx_set_pulsewidth( m0 , abs(pwm[0]) );
     pwmx_set_pulsewidth( m1 , abs(pwm[1]) );
     pwmx_set_pulsewidth( m2 , abs(pwm[2]) );
     pwmx_set_pulsewidth( m3 , abs(pwm[3]) );
-
     ioport_set_value( motordir , 0 , sgn(pwm[0]) | (sgn(pwm[1])<<1) | (sgn(pwm[2])<<2) | (sgn(pwm[3])<<3) );
-    //ioport_set_value( motordir , 0 , sgn(pwm[0]) + (sgn(pwm[1])*2) + (sgn(pwm[2])*4) + (sgn(pwm[3])*8) );
 }
 
-float dess = 0;
-
-#define INTNUMBER    1
-#define GYROINTNUMBER    11
-
-//float angle = 0;
-
-//int sendCounter = 0;
-
-float oldDesW = 0;
-
-int noCMDCnounter = -1;
-
-__INTERRUPT_NATIVE void interrupt_handler(void)
+void CheckNoCommandState()
 {
-    ioport_set_value( debug , 0 , 4 );
-    /*int * ptr = (int*)interrupt_native_context(interrupt_get_current());
-    if (start && !stop)
-    {
-        (*ptr)++;
-    }*/
-
-    CalculateVels();
-    ControllLoop();
-
     if ( noCMDCnounter >= 0 )
        noCMDCnounter ++;
 
-    if ( ( needAck <= 0 ) && ( nrf24l01_irq_pin_active() ) )
+    if ( noCMDCnounter >= 1200 )
+    {
+        recievedCMD.runPID = false;
+        noCMDCnounter = 1200;
+    }
+}
+
+void NRFProcess()
+{
+    if ( isAckProcessCompleted() && ( nrf24l01_irq_pin_active() ) )
     {
         if ( nrf24l01_irq_rx_dr_active() )
         {
-            ioport_set_value( debug , 0 , 6 );
+            SetLed(RX_LED,ON);
             nrf24l01_read_rx_payload ( payload , 10 );
 
             switch ( payload[0]&0x0F )
@@ -523,33 +383,11 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
                 case 2:
                      recievePID();
                      break;
-
-                /*case 3:
-                     recieveMatrix(0);
-                     break;
-                case 4:
-                     recieveMatrix(1);
-                     break;
-                case 5:
-                     recieveMatrix(2);
-                     break;
-                case 6:
-                     recieveMatrix(3);
-                     break;*/
             }
-
-            /*switch ( (payload[0]&0xF0)/16 )
-            {
-                case 1:
-                     needAck = 6;
-                     break;
-            }*/
-
-            //recivePacket();
 
             if ( payload[0] > 15 )
             {
-                needAck = 7;
+                ackStep = 7;
             }
 
             nrf24l01_irq_clear_rx_dr();
@@ -557,18 +395,15 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
         }
     }
 
-    if ( needAck > 0 )
+    if ( !isAckProcessCompleted())
     {
-        ioport_set_value( debug , 0 , 6 );
-        sendAck();
+        SetLed(RX_LED,ON);
+        sendAckProcess();
     }
+}
 
-    if ( noCMDCnounter >= 1200 )
-    {
-        recievedCMD.runPID = false;
-        noCMDCnounter = 1200;
-    }
-
+void GyroProcess()
+{
     if ( getGyroscopeData(&gdata) )
     {
 
@@ -586,20 +421,13 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
 
     }
 
-      //desW = sqrt ( 21.4167f * max_w_dec * fabs( recievedCMD.targetAngle ) );
-      //if ( recievedCMD.targetAngle < 0 )
-      //   desW = -desW;
-
       desW = recievedCMD.angle-recievedCMD.targetAngle;
         if ( desW > 180 )
            desW -= 360;
         if ( desW < -180 )
            desW += 360;
-        //desW /= 2.0;
         desW = UpdatePID ( &anglePID , desW , 0 );
         desW += gdata.x*gyroD; //Calculate d term here, cause we have W from gyro
-        //desW = ( oldDesW + desW ) / 2.0;
-        //desW = max ( -120 , min ( 120 ,desW ) );
 
       if ( desW * oldDesW < 0 )
       {
@@ -607,7 +435,6 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
             if ( desW < 0 )
                tmp = -tmp;
             tmp += oldDesW;
-            //float tmp = oldAns[state.vision_id].X + 20.0f * max_acc.X * sgn ( ans.X );
 
             if ( tmp * desW > 0 )
             {
@@ -630,37 +457,71 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
             }
       }
       desW = max ( -120 , min ( 120 ,desW ) );
-      /*if ( fabs ( desW ) > 180 )
-      {
-            desW = 180.0f * sgn ( desW );
-      }*/
-      //desW = max ( -180 , min ( 180 ,desW ) );
-
-
       oldDesW = desW;
-
-      //desW *= 0.6666667;
-
-    /*dess+=0.05;
-    if ( dess >= 360 )
-       dess -= 360;
-    //des[1] = 800 * sin(3.14*dess/180.0);
-    //des[1] = (int)(des[1]/100) * 100;*/
-
-    ioport_set_value( debug , 0 , 0 );
-
-    interrupt_acknowledge(INTNUMBER);
 }
 
-/*__INTERRUPT_NATIVE void gyro_interrupt_handler(void)
+void CheckEncoderFaultProcess()
 {
-    ioport_set_value( debug , 0 , 2 );
-    getGyroscopeData(&gdata);
-    interrupt_acknowledge(GYROINTNUMBER);
-    ioport_set_value( debug , 0 , 0 );
-}*/
+    //TODO : Choose the if Fault action -> never run the motors or check it again
 
-void main( void )
+    if(!checkMotorFault)
+       return;
+
+    if(isEncoderHasFault)
+       return;
+
+    TimeToResetEncoderFaultValues--;
+    if(TimeToResetEncoderFaultValues<=0)
+    {
+        TimeToResetEncoderFaultValues = ENCODER_FAULT_CHECK_LOOP_COUNT;
+        for(int i=0;i<4;i++)
+        {
+            if(zeroVelCount[i] > (ENCODER_FAULT_CHECK_LOOP_COUNT/2))
+            {
+                isEncoderHasFault = true;
+                zeroVelCount[0]=0;
+                zeroVelCount[1]=0;
+                zeroVelCount[2]=0;
+                zeroVelCount[3]=0;
+                pwm8_set_frequency(buzzer,2000);
+                pwm8_set_pulsewidth(buzzer,100);
+                return;
+            }
+        }
+        if(isEncoderHasFault)
+           pwm8_set_pulsewidth(buzzer,0);
+        isEncoderHasFault = false;
+        zeroVelCount[0]=0;
+        zeroVelCount[1]=0;
+        zeroVelCount[2]=0;
+        zeroVelCount[3]=0;
+        return;
+    }
+
+    for(int i=0;i<4;i++)
+    {
+        if(fabs(curr_vel[i]) <= 10 && abs(pwm[0]) > 30) //Encoder Fault //TODO: opitimize the numbers
+           zeroVelCount[i]++;
+
+        if(fabs(pwm[i] - curr_vel[i]) > 900 ) //Motor Fault //TODO: opitimize the numbers
+           zeroVelCount[i]++;
+    }
+}
+
+__INTERRUPT_NATIVE void interrupt_handler(void)
+{
+    SetLed(LOOP_LED,ON);
+    CalculateVels();
+    ControllLoop();
+    NRFProcess();
+    CheckNoCommandState();
+    GyroProcess();
+    CheckEncoderFaultProcess();
+    SetLed(ALL_LED,OFF);
+    interrupt_acknowledge(LOOP_INT_NUMBER);
+}
+
+void InitDefaultValues()
 {
     des[0]=0;
     des[1]=0;
@@ -679,23 +540,26 @@ void main( void )
     recievedCMD.tW = 1;
     recievedCMD.vx = 0 ;
     recievedCMD.vy = 0 ;
+    checkMotorFault = false;
 
+    for(int i=0;i<4;i++)
+    {
+        zeroVelCount[i]=0;
+        isEncoderHasFault = false;
+    }
+    TimeToResetEncoderFaultValues = ENCODER_FAULT_CHECK_LOOP_COUNT;
+}
+
+void InitPrepherals()
+{
     volatile int    tenuscs         = 0;
-    interrupt_register_native( INTNUMBER, (void*)&tenuscs, interrupt_handler );
-    interrupt_configure( INTNUMBER, EDGE_RISING );
-
-    /*volatile int    gtenuscs         = 0;
-    interrupt_register_native( GYROINTNUMBER, (void*)&gtenuscs, gyro_interrupt_handler );
-    interrupt_configure( GYROINTNUMBER, LEVEL_HIGH );*/
-
+    interrupt_register_native( LOOP_INT_NUMBER, (void*)&tenuscs, interrupt_handler );
+    interrupt_configure( LOOP_INT_NUMBER, EDGE_RISING );
     motorvel = ioport_open(DRV_MOTORVEL);
     motordir = ioport_open(DRV_MOTORDIR);
     kick = ioport_open(DRV_KICKIO);
     debug = ioport_open(DRV_DEBUGIO);
-    batteryV = 0x5D;
-
     robotNum = getRobotNum();
-
     buzzer = pwm8_open(DRV_PWM8_1);
     pwm8_enable_controller(buzzer);
 
@@ -708,14 +572,17 @@ void main( void )
     }
 
     ioport_set_value( motordir , 0 , 0 );
-
     init_spi();
     servo = ioport_open(DRV_SERVOIO);
+    flash_init(flash_spi);
+}
+
+void InitNRF()
+{
     nrf24l01_initialize_debug(true,10,false);
     nrf24l01_rx_active_to_standby();
     nrf24l01_flush_rx();
     nrf24l01_set_rf_ch(55);
-    unsigned char own_rx_add[5];
     own_rx_add[0]=110;
     own_rx_add[1]=110;
     own_rx_add[2]=robotNum;
@@ -735,7 +602,10 @@ void main( void )
             pwm8_set_pulsewidth(buzzer,0);
         }
     }
+}
 
+void InitGyro()
+{
     if ( !initGyro() )
     {
         if ( ioport_get_value(debug , 0) & 0x4 )
@@ -746,7 +616,6 @@ void main( void )
             pwm8_set_pulsewidth(buzzer,0);
         }
     }
-
     if ( ioport_get_value(debug , 0) & 0x4 )
     {
         pwm8_set_frequency(buzzer,1000);
@@ -754,24 +623,16 @@ void main( void )
         delay_ms ( 200 );
         pwm8_set_pulsewidth(buzzer,0);
     }
+}
 
+void InitPID()
+{
     m0 = pwmx_open(DRV_PWMX_1);
     m1 = pwmx_open(DRV_PWMX_2);
     m2 = pwmx_open(DRV_PWMX_3);
     m3 = pwmx_open(DRV_PWMX_4);
     md = pwmx_open(DRV_PWMX_D);
 
-    /*pwmx_set_resolution_mode( m0 , PWMX_MODE_10BIT );
-    pwmx_set_resolution_mode( m1 , PWMX_MODE_10BIT );
-    pwmx_set_resolution_mode( m2 , PWMX_MODE_10BIT );
-    pwmx_set_resolution_mode( m3 , PWMX_MODE_10BIT );
-    pwmx_set_resolution_mode( md , PWMX_MODE_10BIT );
-
-    pwmx_set_prescaler( m0 , 0 );
-    pwmx_set_prescaler( m1 , 0 );
-    pwmx_set_prescaler( m2 , 0 );
-    pwmx_set_prescaler( m3 , 0 );
-    pwmx_set_prescaler( md , 0 );*/
 
     pwmx_enable_controller( m0 );
     pwmx_enable_controller( m1 );
@@ -793,9 +654,13 @@ void main( void )
 
     for ( int i = 0 ; i < anglePredictSteps ; i ++ )
         angleHistory[i] = 0;
+}
 
+void NRFChannelSearch(bool isBlocking)
+{
     bool found_ch = false;
     char rf_ch = 2;
+    int notFoundCounter=0;
 
     if ( ioport_get_value(debug , 0) & 0x4 )
     {
@@ -804,39 +669,44 @@ void main( void )
 
         while ( !found_ch )
         {
-        nrf24l01_rx_active_to_standby();
-        for ( unsigned char test_ch = 125 ; ( test_ch > 0 ) && ( !found_ch ) ; test_ch -= 5 )
-        {
-            nrf24l01_set_rf_ch(test_ch);
-            nrf24l01_rx_standby_to_active();
-            delay_ms(20);
-            nrf24l01_rx_active_to_standby();
-            if ( nrf24l01_irq_pin_active() )
+            notFoundCounter++;
+            if(!isBlocking && notFoundCounter > 10)
             {
-               if ( nrf24l01_irq_rx_dr_active() )
-               {
-                found_ch = true;
-                rf_ch = test_ch;
-                nrf24l01_irq_clear_rx_dr();
-                nrf24l01_flush_rx();
-               }
+                return;
             }
-        }
-        if ( !found_ch )
-        {
-            pwm8_set_frequency(buzzer,1000);
-            pwm8_set_pulsewidth(buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(buzzer,0);
-        }
-        }
+            nrf24l01_rx_active_to_standby();
+            for ( unsigned char test_ch = 125 ; ( test_ch > 0 ) && ( !found_ch ) ; test_ch -= 5 )
+            {
+                nrf24l01_set_rf_ch(test_ch);
+                nrf24l01_rx_standby_to_active();
+                delay_ms(20);
+                nrf24l01_rx_active_to_standby();
+                if ( nrf24l01_irq_pin_active() )
+                {
+                   if ( nrf24l01_irq_rx_dr_active() )
+                   {
+                    found_ch = true;
+                    rf_ch = test_ch;
+                    nrf24l01_irq_clear_rx_dr();
+                    nrf24l01_flush_rx();
+                   }
+                }
+            }
+            if ( !found_ch )
+            {
+                pwm8_set_frequency(buzzer,1000);
+                pwm8_set_pulsewidth(buzzer,100);
+                delay_ms ( 200 );
+                pwm8_set_pulsewidth(buzzer,0);
+            }
+            }
 
-        own_rx_add[2]=robotNum;
-        nrf24l01_set_rx_addr(own_rx_add,5,0);
-        nrf24l01_set_rf_ch(rf_ch);
-        nrf24l01_rx_standby_to_active();
-        delay_ms(1);
-    }
+            own_rx_add[2]=robotNum;
+            nrf24l01_set_rx_addr(own_rx_add,5,0);
+            nrf24l01_set_rf_ch(rf_ch);
+            nrf24l01_rx_standby_to_active();
+            delay_ms(1);
+        }
 
     if ( ioport_get_value(debug , 0) & 0x4 )
     {
@@ -845,15 +715,127 @@ void main( void )
         delay_ms ( 200 );
         pwm8_set_pulsewidth(buzzer,0);
     }
+}
 
-    //nrf24l01_set_rf_ch(110);
-    //nrf24l01_rx_standby_to_active();
+void Beep(int OnDelay , int offDelay , int count)
+{
+    pwm8_set_frequency(buzzer,400);
+    for(int i=0;i<count;i++)
+    {
+         pwm8_set_pulsewidth(buzzer,100);
+         delay_ms ( OnDelay );
+         pwm8_set_pulsewidth(buzzer,0);
+         delay_ms ( offDelay );
+    }
+}
 
-    //start         = true;
-    interrupt_acknowledge(INTNUMBER);
-    interrupt_enable( INTNUMBER );
+void Gyro_Calibration_Process()
+{
+    char data[6]={0};
+    TimeToEnterGyroCalibration = WAIT_FOR_GYRO_CALIBRATION_BUTTON;
+    while(TimeToEnterGyroCalibration > 0)
+    {
+        if(getTheBit(getPushState(),0)== 0)
+        {
+            pwm8_set_frequency(buzzer,1000);
+            pwm8_set_pulsewidth(buzzer,100);
+            delay_ms ( 200 );
+            pwm8_set_pulsewidth(buzzer,0);
+            delay_ms ( 200 );
+            pwm8_set_frequency(buzzer,800);
+            pwm8_set_pulsewidth(buzzer,100);
+            delay_ms ( 200 );
+            pwm8_set_pulsewidth(buzzer,0);
+            delay_ms ( 200 );
+            pwm8_set_frequency(buzzer,1200);
+            pwm8_set_pulsewidth(buzzer,100);
+            delay_ms ( 200 );
+            pwm8_set_pulsewidth(buzzer,0);
+            TimeToEnterGyroCalibration = 0;
+            recievedCMD.runPID = false;
+            delay_ms(500);
+            float gyro_offset_tmp = 0;
+            for(int i=0;i<100;i++)
+            {
+                getGyroscopeData(&gdata);
+                gyro_offset_tmp += gdata.x/100.0;
+                delay_ms(50);
+            }
+            GYRO_OFFSET = -(gyro_offset_tmp);
+            if(GYRO_OFFSET < 0)
+              data[0]=1;
+            data[1] = (int)(fabs(GYRO_OFFSET*1000.0))/100;
+            data[2] = (int)(fabs(GYRO_OFFSET*1000.0))%100;
+            flash_sector_erase(flash_spi,1,true);
+            flash_write(flash_spi,1,data,3,true);
+            TimeToEnterGyroCalibration=0;
+            pwm8_set_frequency(buzzer,1000);
+            pwm8_set_pulsewidth(buzzer,100);
+            delay_ms ( 200 );
+            pwm8_set_pulsewidth(buzzer,0);
+            isEncoderHasFault = false;
+            TimeToResetEncoderFaultValues = ENCODER_FAULT_CHECK_LOOP_COUNT;
+            zeroVelCount[0]=0;
+            zeroVelCount[1]=0;
+            zeroVelCount[2]=0;
+            zeroVelCount[3]=0;
+            desW=0;
+            des[0]=0;
+            des[1]=0;
+            des[2]=0;
+            des[3]=0;
+            recievedCMD.angle=0;
+            recievedCMD.targetAngle=0;
+            for(int t=0;t<anglePredictSteps;t++)
+            {
+               angleHistory[t]=0;
+            }
+            recievedCMD.runPID = true;
+            break;
+        }
+        delay_ms(1);
+        TimeToEnterGyroCalibration--;
+    }
+}
 
-    /*interrupt_acknowledge(GYROINTNUMBER);
-    interrupt_enable( GYROINTNUMBER );*/
+void Get_Gyro_Offset_From_Flash()
+{
+    unsigned char data[6]={255};
+    float res;
+    flash_read(flash_spi,1,data,5);
+    if(data[0]==255 || data[1]==255 || data[2]==255)
+      return;
+    res = data[1];
+    res = res*100 + data[2];
+    res = res / 1000.0;
+    if(data[0]==1)
+      res = -res;
+    if(fabs(res)< 6)
+       GYRO_OFFSET = res;
+}
+
+void main( void )
+{
+
+    InitDefaultValues();
+    InitPrepherals();
+    InitNRF();
+    InitGyro();
+    InitPID();
+    if(robotNum != 15)
+    {
+       NRFChannelSearch(false);
+    }
+
+    if(robotNum == 15)
+    {
+        Gyro_Calibration_Process();
+    }
+    Get_Gyro_Offset_From_Flash();
+    Beep(100,500,(int)GYRO_OFFSET);
+    interrupt_acknowledge(LOOP_INT_NUMBER);
+    interrupt_enable( LOOP_INT_NUMBER );
+
+
 }
 
