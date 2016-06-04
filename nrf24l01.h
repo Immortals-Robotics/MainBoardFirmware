@@ -15,16 +15,6 @@
 
 #include <stddef.h>
 
-#ifndef bool
-#define bool unsigned char
-#endif
-#ifndef false
-#define false 0
-#endif
-#ifndef true
-#define true !false
-#endif
-
 /////////////////////////////////////////////////////////////////////////////////
 // SPI function requirements
 //
@@ -386,7 +376,7 @@ void nrf24l01_initialize_debug_lite(bool rx, unsigned char p0_payload_width);
 //power-up, power-down functions
 void nrf24l01_power_up(bool rx_active_mode);
 void nrf24l01_power_up_param(bool rx_active_mode, unsigned char config);
-void nrf24l01_power_down();
+void nrf24l01_power_down(void);
 void nrf24l01_power_down_param(unsigned char config);
 
 //SPI commands defined by the spec
@@ -396,31 +386,31 @@ unsigned char nrf24l01_write_register(unsigned char regnumber, unsigned char * d
 unsigned char nrf24l01_read_register(unsigned char regnumber, unsigned char * data, unsigned int len);
 unsigned char nrf24l01_write_tx_payload(unsigned char * data, unsigned int len, bool transmit);
 unsigned char nrf24l01_read_rx_payload(unsigned char * data, unsigned int len);
-unsigned char nrf24l01_flush_tx();
-unsigned char nrf24l01_flush_rx();
-unsigned char nrf24l01_reuse_tx_pl();
-unsigned char nrf24l01_nop();
+unsigned char nrf24l01_flush_tx(void);
+unsigned char nrf24l01_flush_rx(void);
+unsigned char nrf24l01_reuse_tx_pl(void);
+unsigned char nrf24l01_nop(void);
 
 //RX/TX setting functions
 void nrf24l01_set_as_rx(bool rx_active_mode);
 void nrf24l01_set_as_rx_param(bool rx_active_mode, unsigned char config);
-void nrf24l01_rx_standby_to_active();
-void nrf24l01_rx_active_to_standby();
-void nrf24l01_set_as_tx();
+void nrf24l01_rx_standby_to_active(void);
+void nrf24l01_rx_active_to_standby(void);
+void nrf24l01_set_as_tx(void);
 void nrf24l01_set_as_tx_param(unsigned char config);
 
 //register-oriented get/set functions for commonly-used registers during operation
-unsigned char nrf24l01_get_config();
+unsigned char nrf24l01_get_config(void);
 void nrf24l01_set_config(unsigned char config);
-unsigned char nrf24l01_get_rf_ch();
+unsigned char nrf24l01_get_rf_ch(void);
 void nrf24l01_set_rf_ch(unsigned char channel);
-unsigned char nrf24l01_get_status();
-unsigned char nrf24l01_get_observe_tx();
+unsigned char nrf24l01_get_status(void);
+unsigned char nrf24l01_get_observe_tx(void);
 void nrf24l01_set_rx_addr(unsigned char * address, unsigned int len, unsigned char rxpipenum);
 void nrf24l01_set_tx_addr(unsigned char * address, unsigned int len);
 void nrf24l01_set_rx_pw(unsigned char payloadwidth, unsigned char rxpipenum);
 unsigned char nrf24l01_get_rx_pw(unsigned char rxpipenum);
-unsigned char nrf24l01_get_fifo_status();
+unsigned char nrf24l01_get_fifo_status(void);
 
 //auto-ack and pipe-related functions
 bool nrf24l01_aa_enabled(unsigned char rxpipenum);
@@ -429,43 +419,43 @@ void nrf24l01_aa_disable(unsigned char rxpipenum);
 bool nrf24l01_rx_pipe_enabled(unsigned char rxpipenum);
 void nrf24l01_rx_pipe_enable(unsigned char rxpipenum);
 void nrf24l01_rx_pipe_disable(unsigned char rxpipenum);
-unsigned char nrf24l01_get_plos_cnt();
-void nrf24l01_clear_plos_cnt();
+unsigned char nrf24l01_get_plos_cnt(void);
+void nrf24l01_clear_plos_cnt(void);
 void nrf24l01_clear_plos_cnt_param(unsigned char rf_ch);
-unsigned char nrf24l01_get_arc_cnt();
+unsigned char nrf24l01_get_arc_cnt(void);
 
 //utility functions
-bool nrf24l01_cd_active();
-void nrf24l01_clear_flush();
-unsigned char nrf24l01_get_rx_pipe();
+bool nrf24l01_cd_active(void);
+void nrf24l01_clear_flush(void);
+unsigned char nrf24l01_get_rx_pipe(void);
 unsigned char nrf24l01_get_rx_pipe_from_status(unsigned char status);
 void nrf24l01_get_all_registers(unsigned char * data);
 
 //interrupt check/clear functions
-bool nrf24l01_irq_pin_active();
-bool nrf24l01_irq_rx_dr_active();
-bool nrf24l01_irq_tx_ds_active();
-bool nrf24l01_irq_max_rt_active();
-void nrf24l01_irq_clear_all();
-void nrf24l01_irq_clear_rx_dr();
-void nrf24l01_irq_clear_tx_ds();
-void nrf24l01_irq_clear_max_rt();
+bool nrf24l01_irq_pin_active(void);
+bool nrf24l01_irq_rx_dr_active(void);
+bool nrf24l01_irq_tx_ds_active(void);
+bool nrf24l01_irq_max_rt_active(void);
+void nrf24l01_irq_clear_all(void);
+void nrf24l01_irq_clear_rx_dr(void);
+void nrf24l01_irq_clear_tx_ds(void);
+void nrf24l01_irq_clear_max_rt(void);
 
 //FIFO_STATUS check functions
-bool nrf24l01_fifo_tx_reuse();
-bool nrf24l01_fifo_tx_full();
-bool nrf24l01_fifo_tx_empty();
-bool nrf24l01_fifo_rx_full();
-bool nrf24l01_fifo_rx_empty();
+bool nrf24l01_fifo_tx_reuse(void);
+bool nrf24l01_fifo_tx_full(void);
+bool nrf24l01_fifo_tx_empty(void);
+bool nrf24l01_fifo_rx_full(void);
+bool nrf24l01_fifo_rx_empty(void);
 
 //IO interface-related functions
-void nrf24l01_transmit();
-void nrf24l01_clear_ce();
-void nrf24l01_set_ce();
-void nrf24l01_clear_csn();
-void nrf24l01_set_csn();
-bool nrf24l01_ce_pin_active();
-bool nrf24l01_csn_pin_active();
+void nrf24l01_transmit(void);
+void nrf24l01_clear_ce(void);
+void nrf24l01_set_ce(void);
+void nrf24l01_clear_csn(void);
+void nrf24l01_set_csn(void);
+bool nrf24l01_ce_pin_active(void);
+bool nrf24l01_csn_pin_active(void);
 
 //low-level functions for library use only
 unsigned char nrf24l01_execute_command(unsigned char instruction, unsigned char * data, unsigned int len, bool copydata);

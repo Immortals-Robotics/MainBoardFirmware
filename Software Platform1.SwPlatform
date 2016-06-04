@@ -2,105 +2,123 @@
 AutoSync=0
 
 [Interface0]
-Name=ad_adc
-
-[Interface1]
-Name=ad_dac
-
-[Interface2]
-Name=drv_i2cm
-
-[Interface3]
 Name=drv_ioport
 
-[Interface4]
-Name=drv_pwm8
-
-[Interface5]
-Name=drv_pwmx
-
-[Interface6]
-Name=ad_rtc
-
-[Interface7]
-Name=drv_spi
-
-[Interface8]
-Name=per_i2cm
-
-[Interface9]
-Name=per_ioport
-
-[Interface10]
+[Interface1]
 Name=lcd_adaptor
 
-[Interface11]
+[Interface2]
+Name=drv_pwm8
+
+[Interface3]
+Name=drv_pwmx
+
+[Interface4]
+Name=per_i2cm
+
+[Interface5]
+Name=per_ioport
+
+[Interface6]
 Name=per_pwm8
 
-[Interface12]
+[Interface7]
 Name=per_pwmx
 
-[Interface13]
+[Interface8]
 Name=per_spi
 
-[Interface14]
-Name=pal
+[Interface9]
+Name=adc_adaptor
 
-[Interface15]
-Name=pal_arch
+[Interface10]
+Name=can_adaptor
 
-[Interface16]
-Name=location_adaptor
+[Interface11]
+Name=dac_adaptor
 
-[Interface17]
+[Interface12]
+Name=ad_extint
+
+[Interface13]
 Name=lrwpan_radio
 
+[Interface14]
+Name=pwm_adaptor
+
+[Interface15]
+Name=rtc_adaptor
+
+[Interface16]
+Name=drv_i2cm
+
+[Interface17]
+Name=drv_spi
+
 [Interface18]
-Name=netif
+Name=pal
 
 [Interface19]
-Name=aes_adaptor
+Name=pal_arch
 
 [Interface20]
-Name=ethernet_adaptor
+Name=location_adaptor
 
 [Interface21]
-Name=ad_graphics
+Name=netif
 
 [Interface22]
-Name=interrupts
+Name=aes_adaptor
 
 [Interface23]
-Name=ad_pointer
+Name=ad_audiostream
 
 [Interface24]
-Name=timing
+Name=ad_codec
 
 [Interface25]
-Name=blockio_adaptor
+Name=ethernet_adaptor
 
 [Interface26]
-Name=keyboard_adaptor
+Name=ad_graphics
 
 [Interface27]
-Name=serial_adaptor
+Name=interrupts
 
 [Interface28]
-Name=textdisplay_adaptor
+Name=ad_pointer
 
 [Interface29]
-Name=ad_usbhost
+Name=timing
 
 [Interface30]
-Name=framework_config
+Name=ad_touchscreen
 
 [Interface31]
-Name=ifconfig
+Name=blockio_adaptor
 
 [Interface32]
-Name=init
+Name=keyboard_adaptor
 
 [Interface33]
+Name=serial_adaptor
+
+[Interface34]
+Name=textdisplay_adaptor
+
+[Interface35]
+Name=ad_usbhost
+
+[Interface36]
+Name=framework_config
+
+[Interface37]
+Name=ifconfig
+
+[Interface38]
+Name=init
+
+[Interface39]
 Name=sysutils
 
 [Plugin0]
@@ -215,6 +233,7 @@ Id=NMNCJTSR
 spimode=MODE0
 spi_frequency=2000000
 nb_multiplex_support=False
+channels=0
 LinkDown0=XWGMXGFL
 
 [Plugin5]
@@ -389,7 +408,8 @@ INTERRUPT_CONTROL_CFG=0x000017E0
 Name=interrupts
 VECTOR_BASE=0x100
 APPLICATION_MASK=0x2
-ISR_MAX=1
+MAX_HANDLERS=32
+HASH_SIZE=32
 
 [Plugin13]
 Name=timing

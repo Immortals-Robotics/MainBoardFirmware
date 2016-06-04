@@ -1,69 +1,55 @@
 #include "devices.h"
+
 #include <drv_ioport.h>
 #include <drv_pwmx.h>
 #include <drv_pwm8.h>
+#include <interrupts.h>
+
 #include <math.h>
 #include <stdlib.h>
 
-#include "nrf.h"
+#include "helpers.h"
+#include "nrf24l01.h"
 #include "gyro.h"
-
-//#define FLASH_PROM
-
-#include <interrupts.h>
-
 #include "pid.h"
 
-#ifndef max
-#define max(a,b) (a>b?a:b)
-#endif
-#ifndef min
-#define min(a,b) (a<b?a:b)
-#endif
+#include "writer.h"
+#include "reader.h"
+#include "data_lite.h"
 
-/*inline float max ( float a , float b )
-{
-    if ( a > b )
-       return a;
-    return b;
-}
+struct RobotCommand new_robot_cmd;
+struct RobotConfig new_robot_config;
+struct RobotFeedback new_robot_feedback;
 
-inline float min ( float a , float b )
-{
-    if ( a < b )
-       return a;
-    return b;
-}*/
-
-inline short sgn ( float a )
-{
-    if ( a > 0 )
-       return 0;
-    return 1;
-}
-
+////////////////////////////////////
+/// drivers
 ioport_t * motorvel;
 ioport_t * motordir;
 ioport_t * kick;
 extern ioport_t * servo;
 ioport_t * debug;
 
-pwmx_t* m0;
-pwmx_t* m1;
-pwmx_t* m2;
-pwmx_t* m3;
-pwmx_t* md;
+pwmx_t* motor_pwm[5];
+pwmx_t* motor_pwm_d;
 
-pwm8_t* buzzer;
+pwm8_t* buzzer_pwm;
+////////////////////////////////////
 
+////////////////////////////////////
+/// robot_config
 unsigned char robotNum=1;
+float gyroD = 0.296;
+float max_w_acc = 0.73f;
+float max_w_dec = 1.074f;
+////////////////////////////////////
 
-uint8_t batteryV;
 
+////////////////////////////////////
+/// robot_state
 float des[4];
 float desW;
 
-typedef struct
+struct robotCMD
 {
     float targetAngle;
     float angle;
@@ -77,87 +63,56 @@ typedef struct
     bool discharge;
     bool booster;
     bool runPID;
-}robotCMD;
+};
 
-typedef struct
-{
-    bool led0;
-    bool led1;
-
-}outputDebugPort;
-
-robotCMD recievedCMD;
-
-bool push[4];
-bool dip[8];
-
-unsigned char BatteryLevel;
-
-SPid plantPID[4];
-SPid anglePID;
-float gyroD = 0.296;
-short cycleCounter=0;
+struct robotCMD recievedCMD;
 
 #define anglePredictSteps 124
 float angleHistory[anglePredictSteps];
 int angleHistoryIndex = 0;
 float anglePredict = 0;
 
-unsigned char PID_Vals[4]; // P : I : IMAX : TORQUE
-
-float max_w_acc = 0.73f;
-float max_w_dec = 1.074f;
+float curr_vel[4];
 
 unsigned char payload[11];
+unsigned char send_payload[11];
 
 int needAck = 0;
-float pwm[4];
 
 gyroData gdata;
+////////////////////////////////////
+
 
 void constructAck ( )
 {
-    //payload[0] = 74; //Vbat * 5
-    payload[0] = gdata.buff[2];
+    send_payload[0] = gdata.buff[2];
 
-    payload[1] = ioport_get_value ( motorvel , 0 ) * 2;
-    payload[2] = ioport_get_value ( motorvel , 1 ) * 2;
-    payload[3] = ioport_get_value ( motorvel , 2 ) * 2;
-    payload[4] = ioport_get_value ( motorvel , 3 ) * 2;
+    send_payload[1] = (unsigned char)ioport_get_value ( motorvel , 0 ) * 2;
+    send_payload[2] = (unsigned char)ioport_get_value ( motorvel , 1 ) * 2;
+    send_payload[3] = (unsigned char)ioport_get_value ( motorvel , 2 ) * 2;
+    send_payload[4] = (unsigned char)ioport_get_value ( motorvel , 3 ) * 2;
 
-    payload[5] = ioport_get_value(debug , 0)>>8;
-    if ( ioport_get_value(debug , 0)&1 )
-       payload[5] |= 1;
-    payload[6] = ioport_get_value ( motordir , 0 );
-    payload[6] |= ( ioport_get_value ( debug , 0 ) & 0xF0 ) >> 4;
+    send_payload[5] = (unsigned char)ioport_get_value(debug , 0)>>8;
+    if ( (unsigned char)ioport_get_value(debug , 0)&1 )
+       send_payload[5] |= 1;
+    send_payload[6] = (unsigned char)ioport_get_value ( motordir , 0 );
+    send_payload[6] |= ( (unsigned char)ioport_get_value ( debug , 0 ) & 0xF0 ) >> 4;
 
-    //payload[5] = gdata.buff[0];
-    //payload[6] = gdata.buff[1];
+    send_payload[7] = gdata.buff[3];
 
-    //payload[7] = 0;
-    payload[7] = gdata.buff[3];
+    send_payload[8] = ((unsigned char)ioport_get_value ( debug , 0 )&2)>>1;
 
-    payload[8] = (ioport_get_value ( debug , 0 )&2)>>1;
-
-    payload[9] = abs(recievedCMD.angle);
+    send_payload[9] = (unsigned char)abs(recievedCMD.angle);
     if ( recievedCMD.angle < 0 )
-       payload[0] |= 128;
-
-    /*payload[0] = fabs ( pwm[0]/4.0) ;
-    payload[5] = fabs ( pwm[1]/4.0) ;
-    payload[6] = fabs ( des[0]/4.0) ;
-    payload[7] = fabs ( des[1]/4.0) ;
-    payload[8] = fabs ( des[2]/4.0) ;
-    payload[9] = fabs ( des[3]/4.0) ;*/
-
-
+       send_payload[0] |= 128;
 }
 
 void sendAck()
 {
     if ( needAck == 6 )
     {
-        constructAck();
+        //constructAck();
+        write_robot_feedback_fixed(send_payload, &new_robot_feedback);
         needAck --;
     }
     else if ( needAck == 5 )
@@ -167,7 +122,7 @@ void sendAck()
     }
     else if ( needAck == 4 )
     {
-        nrf24l01_write_tx_payload(payload,10,false);
+        nrf24l01_write_tx_payload(send_payload,10,false);
         needAck --;
     }
     else if ( needAck == 3 )
@@ -193,32 +148,13 @@ void sendAck()
     else if ( needAck == 1 )
     {
         //nrf24l01_flush_tx();
-        nrf24l01_set_as_rx();
+        nrf24l01_set_as_rx(true);
         needAck --;
     }
     else
     {
         needAck --;
     }
-}
-
-float omniMatrix[4][3];
-
-void recieveMatrix( int n )
-{
-    for ( int i = 0 ; i < 3 ; i ++ )
-    {
-           omniMatrix[n][i] =  65536 * (int)(payload[i*3]&63);
-           omniMatrix[n][i] += 256   * (int)(payload[i*3+1]);
-           omniMatrix[n][i] +=         (int)(payload[i*3+2]);
-           omniMatrix[n][i] /= 4194303.0;
-
-           if ( payload[i*3]&64 )
-              omniMatrix[n][i] += 1.0;
-           if ( payload[i*3]&128 )
-              omniMatrix[n][i] = -omniMatrix[n][i];
-    }
-
 }
 
 void recievePID()
@@ -233,10 +169,9 @@ void recievePID()
     float newMaxI = payload[3];
     newMaxI *= 4.0;
 
-    update_PID_Vals(&plantPID[0],newKp,newKi,0.0,newMaxI);
-    update_PID_Vals(&plantPID[1],newKp,newKi,0.0,newMaxI);
-    update_PID_Vals(&plantPID[2],newKp,newKi,0.0,newMaxI);
-    update_PID_Vals(&plantPID[3],newKp,newKi,0.0,newMaxI);
+    motor_pid_config.p_gain = newKp;
+    motor_pid_config.i_gain = newKi;
+    motor_pid_config.i_max = newMaxI;
 
     newKp = payload[4];
     newKp /= 10.0;
@@ -248,7 +183,9 @@ void recievePID()
     newMaxI = payload[6];
     newMaxI *= 4.0;
 
-    update_PID_Vals(&anglePID,newKp,newKi,0.0,newMaxI);
+    gyro_pid_config.p_gain = newKp;
+    gyro_pid_config.i_gain = newKi;
+    gyro_pid_config.i_max = newMaxI;
 
     float newKd = payload[7];
     newKd /= 500.0;
@@ -263,189 +200,140 @@ void recievePID()
 
 void recivePacket()
 {
-    robotCMD tmpCMD;
-
-    tmpCMD.vx = payload[1];
-    tmpCMD.vy = payload[2];
-    tmpCMD.angle = payload[3];
-    tmpCMD.targetAngle = payload[4];
+    recievedCMD.vx = payload[1];
+    recievedCMD.vy = payload[2];
+    if ( payload[3] <= 180 )
+        recievedCMD.angle = payload[3] + anglePredict;
+    recievedCMD.targetAngle = payload[4];
 
     if ( payload[9]&16 )
-       tmpCMD.vx = -tmpCMD.vx;
+       recievedCMD.vx = -recievedCMD.vx;
     if ( payload[9]&32 )
-       tmpCMD.vy = -tmpCMD.vy;
+       recievedCMD.vy = -recievedCMD.vy;
     if ( payload[9]&64 )
-       tmpCMD.angle = -tmpCMD.angle;
+       recievedCMD.angle = -recievedCMD.angle;
     if ( payload[9]&128 )
-       tmpCMD.targetAngle = -tmpCMD.targetAngle;
+       recievedCMD.targetAngle = -recievedCMD.targetAngle;
 
-    tmpCMD.tW = (float)(payload[5])/25.0f;
+    recievedCMD.tW = (float)(payload[5])/25.0f;
 
-    tmpCMD.direct = payload[6];
-    tmpCMD.chip = payload[7];
+    recievedCMD.direct = payload[6];
+    recievedCMD.chip = payload[7];
 
-    tmpCMD.buzzer = payload[8];
+    recievedCMD.buzzer = payload[8];
 
-    tmpCMD.booster = (payload[9]&8)>0;
-    tmpCMD.discharge = (payload[9]&4)>0;
-    tmpCMD.dribbler = (payload[9]&2)>0;
-    tmpCMD.runPID = (payload[9]&1)>0;
+    recievedCMD.booster = (payload[9]&8)>0;
+    recievedCMD.discharge = (payload[9]&4)>0;
+    recievedCMD.dribbler = (payload[9]&2)>0;
+    recievedCMD.runPID = (payload[9]&1)>0;
 
-    float newAngle = tmpCMD.angle;
-    if ( newAngle <= 180 )
+    const float angleRad = (90.0-recievedCMD.angle) * (0.0174528);
+    const float coss = cos ( angleRad );
+    const float sinn = sin ( angleRad );
+
+    const float local_vx = recievedCMD.vx * coss - recievedCMD.vy * sinn;
+    const float local_vy = recievedCMD.vx * sinn + recievedCMD.vy * coss;
+    recievedCMD.vy = local_vy;
+    recievedCMD.vx = local_vx;
+
+    des[0]=((recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
+    des[1]=(-(recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
+    des[2]=(-(recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
+    des[3]=((recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
+
+    des[0] *= -4.0f;
+    des[1] *= -4.0f;
+    des[2] *= -4.0f;
+    des[3] *= -4.0f;
+
+    ioport_set_value(kick,0,recievedCMD.direct);
+    ioport_set_value(kick,1,recievedCMD.chip);
+    pwmx_set_pulsewidth( motor_pwm_d , recievedCMD.dribbler?1023.0:0.0 );
+
+    if ( recievedCMD.buzzer > 0 )
     {
-        newAngle += anglePredict;
+        pwm8_set_frequency(buzzer_pwm,recievedCMD.buzzer*59);
+        pwm8_set_dutycycle(buzzer_pwm,45);
     }
     else
     {
-        newAngle = recievedCMD.angle;
+        pwm8_set_frequency(buzzer_pwm,2000);
+        pwm8_set_dutycycle(buzzer_pwm,0);
     }
-
-    recievedCMD = tmpCMD;
-    recievedCMD.angle = newAngle;
-
-            float angleRad = (90.0-recievedCMD.angle) * (0.0174528);
-            float coss = cos ( angleRad );
-            float sinn = sin ( angleRad );
-
-            angleRad = recievedCMD.vx * coss - recievedCMD.vy * sinn;
-            recievedCMD.vy = recievedCMD.vx * sinn + recievedCMD.vy * coss;
-            recievedCMD.vx = angleRad;
-
-            des[0]=((recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
-            des[1]=(-(recievedCMD.vy*0.8387)-(recievedCMD.vx*0.5446));//-(recievedCMD.w/6.66667));
-            des[2]=(-(recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
-            des[3]=((recievedCMD.vy*0.707)+(recievedCMD.vx*0.707));//-(recievedCMD.w/6.66667));
-
-            des[0] *= -4.0f;
-            des[1] *= -4.0f;
-            des[2] *= -4.0f;
-            des[3] *= -4.0f;
-
-            ioport_set_value(kick,0,recievedCMD.direct);
-            ioport_set_value(kick,1,recievedCMD.chip);
-            pwmx_set_pulsewidth( md , recievedCMD.dribbler?1023.0:0.0 );
-
-            if ( recievedCMD.buzzer > 0 )
-            {
-                pwm8_set_frequency(buzzer,recievedCMD.buzzer*59);
-                pwm8_set_dutycycle(buzzer,45);
-            }
-            else
-            {
-                pwm8_set_frequency(buzzer,2000);
-                pwm8_set_dutycycle(buzzer,0);
-            }
 }
 
 int getDipState(int n)
 {
-    unsigned int a =0;
-    a = ioport_get_value(debug , 0);
+    const unsigned int a = ioport_get_value(debug , 0);
 
     if(n==1)
-    {
-        unsigned char c = a>>12;
-        return c;
-    }
+        return (unsigned char)(a>>12);
     else if(n==2)
-    {
-        a>>8;
-        a = a%16;
-        return a;
-    }
-    return 0;
+        return (a>>8)%16;
+    else
+        return 0;
 }
 
 int getRobotNum()
 {
-    unsigned char a =  getDipState(1);
-    return  a;
-
+    return (unsigned char) getDipState(1);
 }
 
-
-float curr_vel[4];
-
-/*inline float medianFilter ( float * data )
+void CalculateVels ( void )
 {
-    if ( ( data[0] <= max ( data[1] , data[2] ) ) && ( data[0] >= min ( data[1] , data[2] ) ) ) return data[0];
-    if ( ( data[1] <= max ( data[0] , data[2] ) ) && ( data[1] >= min ( data[0] , data[2] ) ) ) return data[1];
-    if ( ( data[2] <= max ( data[1] , data[0] ) ) && ( data[2] >= min ( data[1] , data[0] ) ) ) return data[2];
-    return data[0];
-}*/
+    const unsigned char tmp_dir = (unsigned char)ioport_get_value ( motordir , 0 );
 
-inline void CalculateVels ( void )
-{
-    /*static float vel_buffer[4][3]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
-    static int index[4]={0,0,0,0};*/
-
-    unsigned char tmp_dir = ioport_get_value ( motordir , 0 );
-
-    curr_vel[0] = 8.0 * ioport_get_value ( motorvel , 0 );
+    curr_vel[0] = 8.0f * ioport_get_value ( motorvel , 0 );
     if ( tmp_dir & 16 )
        curr_vel[0] = -curr_vel[0];
 
-    curr_vel[1] = 8.0 * ioport_get_value ( motorvel , 1 );
+    curr_vel[1] = 8.0f * ioport_get_value ( motorvel , 1 );
     if ( tmp_dir & 32 )
        curr_vel[1] = -curr_vel[1];
 
-    curr_vel[2] = 8.0 * ioport_get_value ( motorvel , 2 );
+    curr_vel[2] = 8.0f * ioport_get_value ( motorvel , 2 );
     if ( tmp_dir & 64 )
        curr_vel[2] = -curr_vel[2];
 
-    curr_vel[3] = 8.0 * ioport_get_value ( motorvel , 3 );
+    curr_vel[3] = 8.0f * ioport_get_value ( motorvel , 3 );
     if ( tmp_dir & 128 )
        curr_vel[3] = -curr_vel[3];
-
-        /*if ( vel_buffer[i][index[i]] != curr_vel[i] )
-        {
-            if ( vel_buffer[i][index[i]] * curr_vel[i] < 0 )
-               curr_vel[i] = 0;
-            index[i] ++;
-            if ( index[i] > 2 )
-            index[i] = 0;
-            vel_buffer[i][index[i]] = curr_vel[i];
-        }
-
-        curr_vel[i] = medianFilter ( vel_buffer[i] );*/
 }
 
-//#define main_k 20
 
-
-
-inline void ControllLoop ( void )
+void ControllLoop ( void )
 {
     if ( recievedCMD.runPID == false )
     {
-        pwmx_set_pulsewidth( m0 , 0 );
-        pwmx_set_pulsewidth( m1 , 0 );
-        pwmx_set_pulsewidth( m2 , 0 );
-        pwmx_set_pulsewidth( m3 , 0 );
+        pwmx_set_pulsewidth( motor_pwm[0] , 0 );
+        pwmx_set_pulsewidth( motor_pwm[1] , 0 );
+        pwmx_set_pulsewidth( motor_pwm[2] , 0 );
+        pwmx_set_pulsewidth( motor_pwm[3] , 0 );
         return;
     }
-    pwm[0] = ( UpdatePID( &plantPID[0] , des[0]+desW-curr_vel[0] , curr_vel[0] ) + pwm[0] ) / 2.0;
-    pwm[1] = ( UpdatePID( &plantPID[1] , des[1]+desW-curr_vel[1] , curr_vel[1] ) + pwm[1] ) / 2.0;
-    pwm[2] = ( UpdatePID( &plantPID[2] , des[2]+desW-curr_vel[2] , curr_vel[2] ) + pwm[2] ) / 2.0;
-    pwm[3] = ( UpdatePID( &plantPID[3] , des[3]+desW-curr_vel[3] , curr_vel[3] ) + pwm[3] ) / 2.0;
+
+    float pwm[4];
+    pwm[0] = update_pid( &motor_pid[0] , des[0]+desW-curr_vel[0], &motor_pid_config);
+    pwm[1] = update_pid( &motor_pid[1] , des[1]+desW-curr_vel[1], &motor_pid_config);
+    pwm[2] = update_pid( &motor_pid[2] , des[2]+desW-curr_vel[2], &motor_pid_config);
+    pwm[3] = update_pid( &motor_pid[3] , des[3]+desW-curr_vel[3], &motor_pid_config);
 
     /*pwm[0] = P ( curr_vel[0] , des[0] , main_k );
     pwm[1] = P ( curr_vel[1] , des[1] , main_k );
     pwm[2] = P ( curr_vel[2] , des[2] , main_k );
     pwm[3] = P ( curr_vel[3] , des[3] , main_k );*/
 
-    pwm[0] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[0] ) );
+    /*pwm[0] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[0] ) );
     pwm[1] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[1] ) );
     pwm[2] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[2] ) );
-    pwm[3] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[3] ) );
+    pwm[3] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[3] ) );*/
 
     /*pwm[0] = pwm[0] + (curr_vel[0]*0.644);
     pwm[1] = pwm[1] + (curr_vel[1]*0.644);
     pwm[2] = pwm[2] + (curr_vel[2]*0.644);
     pwm[3] = pwm[3] + (curr_vel[3]*0.644);*/
 
-    if ( pwm[0] > 1023 )
+    /*if ( pwm[0] > 1023 )
        pwm[0] = 1023;
     else if ( pwm[0] < -1023 )
          pwm[0] = -1023;
@@ -463,19 +351,20 @@ inline void ControllLoop ( void )
     if ( pwm[3] > 1023 )
        pwm[3] = 1023;
     else if ( pwm[3] < -1023 )
-         pwm[3] = -1023;
+         pwm[3] = -1023;*/
+
     /*pwm[0] = min ( 1023 , max ( -1023 , pwm[0] ) );
     pwm[1] = min ( 1023 , max ( -1023 , pwm[1] ) );
     pwm[2] = min ( 1023 , max ( -1023 , pwm[2] ) );
     pwm[3] = min ( 1023 , max ( -1023 , pwm[3] ) );*/
     //pwm[1] = 800;
-    pwmx_set_pulsewidth( m0 , abs(pwm[0]) );
-    pwmx_set_pulsewidth( m1 , abs(pwm[1]) );
-    pwmx_set_pulsewidth( m2 , abs(pwm[2]) );
-    pwmx_set_pulsewidth( m3 , abs(pwm[3]) );
+    pwmx_set_pulsewidth( motor_pwm[0] , min_u_short((unsigned short)abs(pwm[0]), 1023) );
+    pwmx_set_pulsewidth( motor_pwm[1] , min_u_short((unsigned short)abs(pwm[1]), 1023) );
+    pwmx_set_pulsewidth( motor_pwm[2] , min_u_short((unsigned short)abs(pwm[2]), 1023) );
+    pwmx_set_pulsewidth( motor_pwm[3] , min_u_short((unsigned short)abs(pwm[3]), 1023) );
 
-    ioport_set_value( motordir , 0 , sgn(pwm[0]) | (sgn(pwm[1])<<1) | (sgn(pwm[2])<<2) | (sgn(pwm[3])<<3) );
-    //ioport_set_value( motordir , 0 , sgn(pwm[0]) + (sgn(pwm[1])*2) + (sgn(pwm[2])*4) + (sgn(pwm[3])*8) );
+    ioport_set_value( motordir , 0 , sgn_01_inv(pwm[0]) | (sgn_01_inv(pwm[1])<<1) | (sgn_01_inv(pwm[2])<<2) | (sgn_01_inv(pwm[3])<<3) );
+    //ioport_set_value( motordir , 0 , sgn_01_inv(pwm[0]) + (sgn_01_inv(pwm[1])*2) + (sgn_01_inv(pwm[2])*4) + (sgn_01_inv(pwm[3])*8) );
 }
 
 float dess = 0;
@@ -516,12 +405,14 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
             switch ( payload[0]&0x0F )
             {
                 case 1:
-                     recivePacket();
+                     //recivePacket();
+                     read_robot_command_fixed(payload, 19, &new_robot_cmd);
                      noCMDCnounter = 0;
                      break;
 
                 case 2:
-                     recievePID();
+                     //recievePID();
+                     read_robot_config_fixed(payload, 23, &new_robot_cmd);
                      break;
 
                 /*case 3:
@@ -596,7 +487,7 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
         if ( desW < -180 )
            desW += 360;
         //desW /= 2.0;
-        desW = UpdatePID ( &anglePID , desW , 0 );
+        desW = update_pid ( &gyro_pid , desW , &gyro_pid_config );
         desW += gdata.x*gyroD; //Calculate d term here, cause we have W from gyro
         //desW = ( oldDesW + desW ) / 2.0;
         //desW = max ( -120 , min ( 120 ,desW ) );
@@ -629,7 +520,7 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
                     desW = ( fabs ( oldDesW ) + max_w_acc );
             }
       }
-      desW = max ( -120 , min ( 120 ,desW ) );
+      desW = max_float ( -120 , min_float ( 120 ,desW ) );
       /*if ( fabs ( desW ) > 180 )
       {
             desW = 180.0f * sgn ( desW );
@@ -692,19 +583,18 @@ void main( void )
     motordir = ioport_open(DRV_MOTORDIR);
     kick = ioport_open(DRV_KICKIO);
     debug = ioport_open(DRV_DEBUGIO);
-    batteryV = 0x5D;
 
-    robotNum = getRobotNum();
+    robotNum = (unsigned char)getRobotNum();
 
-    buzzer = pwm8_open(DRV_PWM8_1);
-    pwm8_enable_controller(buzzer);
+    buzzer_pwm = pwm8_open(DRV_PWM8_1);
+    pwm8_enable_controller(buzzer_pwm);
 
     if ( ioport_get_value(debug , 0) & 0x4 )
     {
-        pwm8_set_frequency(buzzer,2000);
-        pwm8_set_pulsewidth(buzzer,100);
+        pwm8_set_frequency(buzzer_pwm,2000);
+        pwm8_set_pulsewidth(buzzer_pwm,100);
         delay_ms ( 200 );
-        pwm8_set_pulsewidth(buzzer,0);
+        pwm8_set_pulsewidth(buzzer_pwm,0);
     }
 
     ioport_set_value( motordir , 0 , 0 );
@@ -723,16 +613,16 @@ void main( void )
     own_rx_add[4]=110;
     nrf24l01_set_rx_addr(own_rx_add,5,0);
     own_rx_add[2]=30;
-    nrf24l01_set_tx_addr(own_rx_add,5,0);
+    nrf24l01_set_tx_addr(own_rx_add,5);
 
     if ( nrf24l01_get_status() == 0 )
     {
         if ( ioport_get_value(debug , 0) & 0x4 )
         {
-            pwm8_set_frequency(buzzer,1000);
-            pwm8_set_pulsewidth(buzzer,100);
+            pwm8_set_frequency(buzzer_pwm,1000);
+            pwm8_set_pulsewidth(buzzer_pwm,100);
             delay_ms ( 200 );
-            pwm8_set_pulsewidth(buzzer,0);
+            pwm8_set_pulsewidth(buzzer_pwm,0);
         }
     }
 
@@ -740,26 +630,26 @@ void main( void )
     {
         if ( ioport_get_value(debug , 0) & 0x4 )
         {
-            pwm8_set_frequency(buzzer,1000);
-            pwm8_set_pulsewidth(buzzer,100);
+            pwm8_set_frequency(buzzer_pwm,1000);
+            pwm8_set_pulsewidth(buzzer_pwm,100);
             delay_ms ( 200 );
-            pwm8_set_pulsewidth(buzzer,0);
+            pwm8_set_pulsewidth(buzzer_pwm,0);
         }
     }
 
     if ( ioport_get_value(debug , 0) & 0x4 )
     {
-        pwm8_set_frequency(buzzer,1000);
-        pwm8_set_pulsewidth(buzzer,100);
+        pwm8_set_frequency(buzzer_pwm,1000);
+        pwm8_set_pulsewidth(buzzer_pwm,100);
         delay_ms ( 200 );
-        pwm8_set_pulsewidth(buzzer,0);
+        pwm8_set_pulsewidth(buzzer_pwm,0);
     }
 
-    m0 = pwmx_open(DRV_PWMX_1);
-    m1 = pwmx_open(DRV_PWMX_2);
-    m2 = pwmx_open(DRV_PWMX_3);
-    m3 = pwmx_open(DRV_PWMX_4);
-    md = pwmx_open(DRV_PWMX_D);
+    motor_pwm[0] = pwmx_open(DRV_PWMX_1);
+    motor_pwm[1] = pwmx_open(DRV_PWMX_2);
+    motor_pwm[2] = pwmx_open(DRV_PWMX_3);
+    motor_pwm[3] = pwmx_open(DRV_PWMX_4);
+    motor_pwm_d = pwmx_open(DRV_PWMX_D);
 
     /*pwmx_set_resolution_mode( m0 , PWMX_MODE_10BIT );
     pwmx_set_resolution_mode( m1 , PWMX_MODE_10BIT );
@@ -773,23 +663,21 @@ void main( void )
     pwmx_set_prescaler( m3 , 0 );
     pwmx_set_prescaler( md , 0 );*/
 
-    pwmx_enable_controller( m0 );
-    pwmx_enable_controller( m1 );
-    pwmx_enable_controller( m2 );
-    pwmx_enable_controller( m3 );
-    pwmx_enable_controller( md );
+    pwmx_enable_controller( motor_pwm[0] );
+    pwmx_enable_controller( motor_pwm[1] );
+    pwmx_enable_controller( motor_pwm[2] );
+    pwmx_enable_controller( motor_pwm[3] );
+    pwmx_enable_controller( motor_pwm_d );
 
-    initSPid( &plantPID[0] );
-    initSPid( &plantPID[1] );
-    initSPid( &plantPID[2] );
-    initSPid( &plantPID[3] );
+    motor_pid_config.d_gain = 0.0f;
+    motor_pid_config.i_gain = 0.23f;
+    motor_pid_config.p_gain = 25.0f;
+    motor_pid_config.i_max = 328.0f;
 
-    initSPid( &anglePID );
-    anglePID.dGain = 0;
-    anglePID.iGain = 0.23;
-    anglePID.pGain = 5;
-    anglePID.iMax = 16;
-    anglePID.iMin = -16;
+    gyro_pid_config.d_gain = 0;
+    gyro_pid_config.i_gain = 0.23;
+    gyro_pid_config.p_gain = 5;
+    gyro_pid_config.i_max = 16;
 
     for ( int i = 0 ; i < anglePredictSteps ; i ++ )
         angleHistory[i] = 0;
@@ -824,10 +712,10 @@ void main( void )
         }
         if ( !found_ch )
         {
-            pwm8_set_frequency(buzzer,1000);
-            pwm8_set_pulsewidth(buzzer,100);
+            pwm8_set_frequency(buzzer_pwm,1000);
+            pwm8_set_pulsewidth(buzzer_pwm,100);
             delay_ms ( 200 );
-            pwm8_set_pulsewidth(buzzer,0);
+            pwm8_set_pulsewidth(buzzer_pwm,0);
         }
         }
 
@@ -840,10 +728,10 @@ void main( void )
 
     if ( ioport_get_value(debug , 0) & 0x4 )
     {
-        pwm8_set_frequency(buzzer,5000);
-        pwm8_set_pulsewidth(buzzer,100);
+        pwm8_set_frequency(buzzer_pwm,5000);
+        pwm8_set_pulsewidth(buzzer_pwm,100);
         delay_ms ( 200 );
-        pwm8_set_pulsewidth(buzzer,0);
+        pwm8_set_pulsewidth(buzzer_pwm,0);
     }
 
     //nrf24l01_set_rf_ch(110);
