@@ -24,20 +24,18 @@
 #define M25PX0_INSTR_DP         0xB9    // Deep power-down
 #define M25PX0_INSTR_RES        0xAB    // Release from deep power down and optionally read electronic signature
 
-extern spi_t * flash_spi;
-
 int flash_init(spi_t * driver)
 {
-    flash_spi = spi_open(DRV_SPI_1);
-    spi_set_baudrate( flash_spi,10000 );
-    spi_set_mode( flash_spi, SPI_MODE0 );
-    spi_cs_hi( flash_spi );                                                  // Reset chip's SPI FSM
-    spi_set_endianess( flash_spi, true );
-    spi_cs_lo( flash_spi );
-    spi_transceive8( flash_spi, M25PX0_INSTR_RES );
+    driver = spi_open(DRV_SPI_1);
+    spi_set_baudrate( driver,10000 );
+    spi_set_mode( driver, SPI_MODE0 );
+    spi_cs_hi( driver );                                                  // Reset chip's SPI FSM
+    spi_set_endianess( driver, true );
+    spi_cs_lo( driver );
+    spi_transceive8( driver, M25PX0_INSTR_RES );
     for ( clock_t tres = clock() + 3 * CLOCKS_PER_SEC / 1000000; clock() < tres; ) __nop();
-    int sig = (uint8_t)spi_transceive32( flash_spi, 0xFFFFFFFF ) & 0xFF;
-    spi_cs_hi( flash_spi );
+    int sig = (uint8_t)spi_transceive32( driver, 0xFFFFFFFF ) & 0xFF;
+    spi_cs_hi( driver );
     return sig;
 }
 

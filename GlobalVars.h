@@ -16,7 +16,7 @@
 #include "pid.h"
 #include "helpers.h"
 
-#define anglePredictSteps 124
+#define ANGLE_PREDICT_STEPS 124
 #define LOOP_INT_NUMBER    1
 #define GYRO_INT_NUMBER    11
 
@@ -33,24 +33,28 @@
 
 // Software Platform Variablses  ///////////////////////////////////////////////
 
-extern ioport_t * servo;
-ioport_t * motorvel;
-ioport_t * motordir;
-ioport_t * kick;
-ioport_t * debug;
+struct drivers_t
+{
+    ioport_t * servo;
+    ioport_t * motorvel;
+    ioport_t * motordir;
+    ioport_t * kick;
+    ioport_t * debug;
 
-pwmx_t* m0;
-pwmx_t* m1;
-pwmx_t* m2;
-pwmx_t* m3;
-pwmx_t* md;
-pwm8_t* buzzer;
+    pwmx_t* motor_pwm[4];
+    pwmx_t* motor_d_pwm;
+    pwm8_t* buzzer;
 
-spi_t*    flash_spi;
+    spi_t*    flash_spi;
+};
+
+struct drivers_t g_drivers;
+
+
 
 // Types and Structs Variablses  ///////////////////////////////////////////////
 
-typedef struct
+struct robot_cmd_t
 {
     float targetAngle;
     float angle;
@@ -64,20 +68,51 @@ typedef struct
     bool discharge;
     bool booster;
     bool runPID;
-}robotCMD;
+};
+
+struct robot_cmd_t g_robot_cmd;
 
 // Robot Variablses  ///////////////////////////////////////////////
 
-unsigned char robotNum=1;
-robotCMD recievedCMD;
-int noCMDCnounter = -1;
-unsigned char own_rx_add[5];
+struct robot_config_t
+{
+	uint8_t robot_num;
+    uint8_t own_rx_add[5];
+};
 
-unsigned char ledState=0;
+struct robot_config_t g_robot_config;
 
-float angleHistory[anglePredictSteps];
-int angleHistoryIndex = 0;
-float anglePredict = 0;
+struct robot_state_t
+{
+	int16_t no_cmd_counter;
+	float angle_predict;
+
+    uint8_t payload[11];
+
+    int16_t feedback_step;
+    float curr_vel[4];
+    float des[4];
+    float des_w;
+
+    int zeroVelCount[4];
+    int TimeToResetEncoderFaultValues;
+    bool isEncoderHasFault;
+    bool checkMotorFault;
+
+    int TimeToEnterGyroCalibration;
+
+    struct gyro_data_t gyro_data;
+};
+
+struct robot_state_t g_robot_state;
+
+/*uint8_t robotNum = 1;
+int16_t no_cmd_counter = -1;
+uint8_t own_rx_add[5];
+
+float angle_history[ANGLE_PREDICT_STEPS];
+int8_t angle_history_index = 0;
+float angle_predict = 0;
 
 unsigned char payload[11];
 
@@ -95,7 +130,7 @@ bool checkMotorFault;
 
 int TimeToEnterGyroCalibration;
 
-gyroData gdata;
+gyroData gdata;*/
 
 // Const Variablses  ///////////////////////////////////////////////
 

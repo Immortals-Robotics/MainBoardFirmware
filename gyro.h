@@ -1,43 +1,4 @@
-// 1
-//float GYRO_OFFSET = -1.23;
-
-// 2
-//float GYRO_OFFSET = 1.63;
-
-// 3(RIP) or 14
-//float GYRO_OFFSET = 0.895;
-
-// 4
-//float GYRO_OFFSET = 1.5;
-
-// 5
-//float GYRO_OFFSET = 4.23;
-
-// 6
-//float GYRO_OFFSET = 4.62;
-
-// 7*
-//float GYRO_OFFSET = -1.12;
-
-// 8*
-//float GYRO_OFFSET = -0.81;
-
-// 9*
-//float GYRO_OFFSET = -0.33;
-
-// 10
-//float GYRO_OFFSET = 4.96;
-
-// 11
-//float GYRO_OFFSET = 3.42;
-
-// 12
-//float GYRO_OFFSET = 4.31;
-
-// 13
 float GYRO_OFFSET = 0;
-
-
 
 #include <drv_i2cm.h>
 #include <timing.h>
@@ -67,43 +28,42 @@ int offy = 20;
 int offz = 93;
 #endif
 
-i2cm_t* gyroI2C;
+i2cm_t* gyro_i2c;
 
-typedef struct
+struct gyro_data_t
 {
-    uint8_t buff[TO_READ];
     float x;
     #ifdef YZ_READ
     float y;
     float z;
     #endif
     float temp;
-}gyroData;
+};
 
-bool writeI2C ( uint8_t registerAdd , uint8_t data )
+bool write_i2c ( uint8_t registerAdd , uint8_t data )
 {
     int retry;
     for ( retry = 10; retry; retry-- )
     {
-        if (  !i2cm_putchar( gyroI2C, true, GYRO_ADDR | I2C_WRITE ))  // Generate start and send device write address
+        if (  !i2cm_putchar( gyro_i2c, true, GYRO_ADDR | I2C_WRITE ))  // Generate start and send device write address
            break;
-        if ( retry ) i2cm_stop( gyroI2C );
+        if ( retry ) i2cm_stop( gyro_i2c );
         for ( clock_t t = clock() + CLOCKS_PER_SEC / 1000; clock() < t; ) __nop();
     }
     if (  !retry                                                // Address acknowledged
-          || i2cm_putchar( gyroI2C, false, registerAdd )                        // Set address counter
-          || i2cm_putchar( gyroI2C, false, data )                  // Send data
+          || i2cm_putchar( gyro_i2c, false, registerAdd )                        // Set address counter
+          || i2cm_putchar( gyro_i2c, false, data )                  // Send data
        )
     {
-       i2cm_stop( gyroI2C );
+       i2cm_stop( gyro_i2c );
        return false;
     }
-    i2cm_stop( gyroI2C );
+    i2cm_stop( gyro_i2c );
     return true;
 }
 
 //initializes the gyroscope
-bool initGyro()
+bool init_gyro()
 {
   /*****************************************
   * ITG 3200
@@ -117,22 +77,22 @@ bool initGyro()
   * no interrupt
   ******************************************/
 
-  gyroI2C = i2cm_open(DRV_I2CM_1);
+  gyro_i2c = i2cm_open(DRV_I2CM_1);
 
-  if ( gyroI2C == NULL )
+  if ( gyro_i2c == NULL )
   {
     return false;
   }
 
-  if ( i2cm_get_bus(gyroI2C) != -1 )
+  if ( i2cm_get_bus(gyro_i2c) != -1 )
   {
-    if ( !writeI2C(PWR_MGM,0x80)
-         ||!writeI2C(SMPLRT_DIV,0x0B)
-         ||!writeI2C(DLPF_FS,0x18)
-         ||!writeI2C(INT_CFG,0x01)
+    if ( !write_i2c(PWR_MGM,0x80)
+         ||!write_i2c(SMPLRT_DIV,0x0B)
+         ||!write_i2c(DLPF_FS,0x18)
+         ||!write_i2c(INT_CFG,0x01)
        )
     {
-       i2cm_release_bus( gyroI2C );
+       i2cm_release_bus( gyro_i2c );
        return false;
     }
 
@@ -155,7 +115,7 @@ bool initGyro()
     gyroConfigData[1] = 0x00;
     i2cm_write(gyroI2C,GYRO_ADDR|I2C_WRITE,gyroConfigData,2);*/
 
-    i2cm_release_bus( gyroI2C );
+    i2cm_release_bus( gyro_i2c );
     return true;
   }
   return false;
@@ -171,7 +131,7 @@ inline int tcmplnt16 ( int in )
 }
 
 
-bool getGyroscopeData(gyroData * result)
+bool get_gyro_data(struct gyro_data_t* const result)
 {
   /**************************************
   Gyro ITG-3200 I2C
@@ -182,66 +142,44 @@ bool getGyroscopeData(gyroData * result)
   z axis MSB = 21, z axis LSB = 22
   *************************************/
 
-  if ( i2cm_get_bus( gyroI2C ) != -1 )
+  if ( i2cm_get_bus( gyro_i2c ) == -1 )
+  	return false;
+
+  if (i2cm_putchar( gyro_i2c, true, GYRO_ADDR | I2C_WRITE )   // Generate start and send device write address
+         || i2cm_putchar( gyro_i2c, false, 0x1B )                        // Set address counter to 27
+     )
   {
-     if (   i2cm_putchar( gyroI2C, true, GYRO_ADDR | I2C_WRITE )   // Generate start and send device write address
-            || i2cm_putchar( gyroI2C, false, 0x1B )                        // Set address counter to 27
-        )
-     {
-        i2cm_stop( gyroI2C );
-     }
-
-     else if (i2cm_read( gyroI2C, GYRO_ADDR | I2C_READ, result->buff, TO_READ) != -1)
-     {
-        i2cm_release_bus( gyroI2C );
-        int tmp;
-        /*tmp = (result->buff[0] << 8) | result->buff[1];
-        tmp = tcmplnt16 ( tmp ) + 13200;
-        result->temp = (float)(tmp) / 280.0;*/
-
-        tmp = (result->buff[2] << 8) | result->buff[3];
-        tmp = tcmplnt16 ( tmp );
-        result->x =  (float)(tmp) / 14.375;
-        result->x += GYRO_OFFSET;
-        #ifdef YZ_READ
-        tmp = (result->buff[4] << 8) | result->buff[5];
-        tmp = tcmplnt16 ( tmp );
-        result->y = (float)(tmp) / 14.375;
-        tmp = (result->buff[6] << 8) | result->buff[7];
-        tmp = tcmplnt16 ( tmp );
-        result->z = (float)(tmp) / 14.375;
-        #endif
-        return true;
-     }
-     i2cm_release_bus( gyroI2C );
+     i2cm_stop( gyro_i2c );
+     return false;
   }
-  return false;
 
-  //uint8_t buff[TO_READ];
+  uint8_t buffer[TO_READ];
+  if (i2cm_read( gyro_i2c, GYRO_ADDR | I2C_READ, buffer, TO_READ) != -1)
+  {
+     i2cm_release_bus( gyro_i2c );
+     int tmp;
+     /*tmp = (result->buff[0] << 8) | result->buff[1];
+     tmp = tcmplnt16 ( tmp ) + 13200;
+     result->temp = (float)(tmp) / 280.0;*/
 
-  /*i2cm_write(gyroI2C,GYRO_ADDR, &regAddress , 1 );
-
-  i2cm_read(gyroI2C,GYRO_ADDR, result->buff,TO_READ); //read the gyro data from the ITG3200*/
-
-
+     tmp = (buffer[2] << 8) | buffer[3];
+     tmp = tcmplnt16 ( tmp );
+     result->x =  (float)(tmp) / 14.375;
+     result->x += GYRO_OFFSET;
+     #ifdef YZ_READ
+     tmp = (buffer[4] << 8) | buffer[5];
+     tmp = tcmplnt16 ( tmp );
+     result->y = (float)(tmp) / 14.375;
+     tmp = (buffer[6] << 8) | buffer[7];
+     tmp = tcmplnt16 ( tmp );
+     result->z = (float)(tmp) / 14.375;
+     #endif
+     return true;
+  }
+  else
+  {
+     i2cm_release_bus( gyro_i2c );
+     return false;
+  }
 }
 
-
-/*//reads num bytes starting from address register on device in to buff array
-void readFrom(int device, byte address, int num, byte buff[]) {
-  Wire.beginTransmission(device); //start transmission to device
-  Wire.send(address);        //sends address to read from
-  Wire.endTransmission(); //end transmission
-
-  Wire.beginTransmission(device); //start transmission to device
-  Wire.requestFrom(device, num);    // request 6 bytes from device
-
-  int i = 0;
-  while(Wire.available())    //device may send less than requested (abnormal)
-  {
-    buff[i] = Wire.receive(); // receive a byte
-    i++;
-  }
-  Wire.endTransmission(); //end transmission
-}
-*/
