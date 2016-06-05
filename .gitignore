@@ -11,5 +11,6 @@ Output/
 *.orig
 *.*_viewstate
 devices.h
+ioport.h
 swplatform.c
 swplatform.h
