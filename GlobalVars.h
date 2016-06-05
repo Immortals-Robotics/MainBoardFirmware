@@ -1,24 +1,20 @@
 #ifndef GLOBALVARS_H
 #define GLOBALVARS_H
 
-#include "devices.h"
+#include <math.h>
+#include <stdlib.h>
+
 #include <drv_ioport.h>
 #include <drv_pwmx.h>
 #include <drv_pwm8.h>
-#include <math.h>
-#include <stdlib.h>
-#include "nrf.h"
-#include "gyro.h"
 #include <interrupts.h>
+
+#include "devices.h"
+
+#include "nrf24l01.h"
+#include "gyro.h"
 #include "pid.h"
-
-#ifndef max
-#define max(a,b) (a>b?a:b)
-#endif
-#ifndef min
-#define min(a,b) (a<b?a:b)
-#endif
-
+#include "helpers.h"
 
 #define anglePredictSteps 124
 #define LOOP_INT_NUMBER    1
@@ -70,13 +66,6 @@ typedef struct
     bool runPID;
 }robotCMD;
 
-typedef struct
-{
-    bool led0;
-    bool led1;
-
-}outputDebugPort;
-
 // Robot Variablses  ///////////////////////////////////////////////
 
 unsigned char robotNum=1;
@@ -84,18 +73,11 @@ robotCMD recievedCMD;
 int noCMDCnounter = -1;
 unsigned char own_rx_add[5];
 
-bool push[4];
-bool dip[8];
 unsigned char ledState=0;
-
-SPid plantPID[4];
-SPid anglePID;
 
 float angleHistory[anglePredictSteps];
 int angleHistoryIndex = 0;
 float anglePredict = 0;
-
-unsigned char PID_Vals[4]; // P : I : IMAX : TORQUE
 
 unsigned char payload[11];
 

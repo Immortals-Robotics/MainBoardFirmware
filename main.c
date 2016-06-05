@@ -1,12 +1,5 @@
 #include "GlobalVars.h"
 
-inline short sgn ( float a )
-{
-    if ( a > 0 )
-       return 0;
-    return 1;
-}
-
 void setTheBit(unsigned char * var , unsigned char bitPosition , bool Value)
 {
     //TODO : To be implemented as template function
@@ -99,7 +92,7 @@ void sendAckProcess()
              }
              break;
         case 1:
-             nrf24l01_set_as_rx();
+             nrf24l01_set_as_rx(true);
              break;
     }
     ackStep--;
@@ -117,10 +110,9 @@ void recievePID()
     float newMaxI = payload[3];
     newMaxI *= 4.0;
 
-    update_PID_Vals(&plantPID[0],newKp,newKi,0.0,newMaxI);
-    update_PID_Vals(&plantPID[1],newKp,newKi,0.0,newMaxI);
-    update_PID_Vals(&plantPID[2],newKp,newKi,0.0,newMaxI);
-    update_PID_Vals(&plantPID[3],newKp,newKi,0.0,newMaxI);
+    motor_pid_config.p_gain = newKp;
+    motor_pid_config.i_gain = newKi;
+    motor_pid_config.i_max = newMaxI;
 
     newKp = payload[4];
     newKp /= 10.0;
@@ -132,7 +124,9 @@ void recievePID()
     newMaxI = payload[6];
     newMaxI *= 4.0;
 
-    update_PID_Vals(&anglePID,newKp,newKi,0.0,newMaxI);
+    gyro_pid_config.p_gain = newKp;
+    gyro_pid_config.i_gain = newKi;
+    gyro_pid_config.i_max = newMaxI;
 
     float newKd = payload[7];
     newKd /= 500.0;
@@ -270,43 +264,28 @@ void SetLed(unsigned char ledNumber , bool state)
 
 inline void CalculateVels ( void )
 {
-    /*static float vel_buffer[4][3]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
-    static int index[4]={0,0,0,0};*/
+    const unsigned char tmp_dir = (unsigned char)ioport_get_value ( motordir , 0 );
 
-    unsigned char tmp_dir = ioport_get_value ( motordir , 0 );
-
-    curr_vel[0] = 4.0 * ioport_get_value ( motorvel , 0 );
+    curr_vel[0] = 8.0f * ioport_get_value ( motorvel , 0 );
     if ( tmp_dir & 16 )
        curr_vel[0] = -curr_vel[0];
 
-    curr_vel[1] = 4.0 * ioport_get_value ( motorvel , 1 );
+    curr_vel[1] = 8.0f * ioport_get_value ( motorvel , 1 );
     if ( tmp_dir & 32 )
        curr_vel[1] = -curr_vel[1];
 
-    curr_vel[2] = 4.0 * ioport_get_value ( motorvel , 2 );
+    curr_vel[2] = 8.0f * ioport_get_value ( motorvel , 2 );
     if ( tmp_dir & 64 )
        curr_vel[2] = -curr_vel[2];
 
-    curr_vel[3] = 4.0 * ioport_get_value ( motorvel , 3 );
+    curr_vel[3] = 8.0f * ioport_get_value ( motorvel , 3 );
     if ( tmp_dir & 128 )
        curr_vel[3] = -curr_vel[3];
-
-        /*if ( vel_buffer[i][index[i]] != curr_vel[i] )
-        {
-            if ( vel_buffer[i][index[i]] * curr_vel[i] < 0 )
-               curr_vel[i] = 0;
-            index[i] ++;
-            if ( index[i] > 2 )
-            index[i] = 0;
-            vel_buffer[i][index[i]] = curr_vel[i];
-        }
-
-        curr_vel[i] = medianFilter ( vel_buffer[i] );*/
 }
 
 inline void ControllLoop ( void )
 {
-    if ( recievedCMD.runPID == false || isEncoderHasFault )
+if ( recievedCMD.runPID == false )
     {
         pwmx_set_pulsewidth( m0 , 0 );
         pwmx_set_pulsewidth( m1 , 0 );
@@ -315,41 +294,56 @@ inline void ControllLoop ( void )
         return;
     }
 
-    pwm[0] = ( UpdatePID( &plantPID[0] , des[0]+desW-curr_vel[0] , curr_vel[0] ) + pwm[0] ) / 2.0;
-    pwm[1] = ( UpdatePID( &plantPID[1] , des[1]+desW-curr_vel[1] , curr_vel[1] ) + pwm[1] ) / 2.0;
-    pwm[2] = ( UpdatePID( &plantPID[2] , des[2]+desW-curr_vel[2] , curr_vel[2] ) + pwm[2] ) / 2.0;
-    pwm[3] = ( UpdatePID( &plantPID[3] , des[3]+desW-curr_vel[3] , curr_vel[3] ) + pwm[3] ) / 2.0;
+    float pwm[4];
+    pwm[0] = update_pid( &motor_pid[0] , des[0]+desW-curr_vel[0], &motor_pid_config);
+    pwm[1] = update_pid( &motor_pid[1] , des[1]+desW-curr_vel[1], &motor_pid_config);
+    pwm[2] = update_pid( &motor_pid[2] , des[2]+desW-curr_vel[2], &motor_pid_config);
+    pwm[3] = update_pid( &motor_pid[3] , des[3]+desW-curr_vel[3], &motor_pid_config);
 
-    pwm[0] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[0] ) );
+    /*pwm[0] = P ( curr_vel[0] , des[0] , main_k );
+    pwm[1] = P ( curr_vel[1] , des[1] , main_k );
+    pwm[2] = P ( curr_vel[2] , des[2] , main_k );
+    pwm[3] = P ( curr_vel[3] , des[3] , main_k );*/
+
+    /*pwm[0] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[0] ) );
     pwm[1] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[1] ) );
     pwm[2] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[2] ) );
-    pwm[3] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[3] ) );
+    pwm[3] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[3] ) );*/
 
-    if ( pwm[0] > 1023 )
+    /*pwm[0] = pwm[0] + (curr_vel[0]*0.644);
+    pwm[1] = pwm[1] + (curr_vel[1]*0.644);
+    pwm[2] = pwm[2] + (curr_vel[2]*0.644);
+    pwm[3] = pwm[3] + (curr_vel[3]*0.644);*/
+
+    /*if ( pwm[0] > 1023 )
        pwm[0] = 1023;
     else if ( pwm[0] < -1023 )
          pwm[0] = -1023;
-
     if ( pwm[1] > 1023 )
        pwm[1] = 1023;
     else if ( pwm[1] < -1023 )
          pwm[1] = -1023;
-
     if ( pwm[2] > 1023 )
        pwm[2] = 1023;
     else if ( pwm[2] < -1023 )
          pwm[2] = -1023;
-
     if ( pwm[3] > 1023 )
        pwm[3] = 1023;
     else if ( pwm[3] < -1023 )
-         pwm[3] = -1023;
+         pwm[3] = -1023;*/
 
-    pwmx_set_pulsewidth( m0 , abs(pwm[0]) );
-    pwmx_set_pulsewidth( m1 , abs(pwm[1]) );
-    pwmx_set_pulsewidth( m2 , abs(pwm[2]) );
-    pwmx_set_pulsewidth( m3 , abs(pwm[3]) );
-    ioport_set_value( motordir , 0 , sgn(pwm[0]) | (sgn(pwm[1])<<1) | (sgn(pwm[2])<<2) | (sgn(pwm[3])<<3) );
+    /*pwm[0] = min ( 1023 , max ( -1023 , pwm[0] ) );
+    pwm[1] = min ( 1023 , max ( -1023 , pwm[1] ) );
+    pwm[2] = min ( 1023 , max ( -1023 , pwm[2] ) );
+    pwm[3] = min ( 1023 , max ( -1023 , pwm[3] ) );*/
+    //pwm[1] = 800;
+    pwmx_set_pulsewidth( m0 , min_u_short((unsigned short)abs(pwm[0]), 1023) );
+    pwmx_set_pulsewidth( m1 , min_u_short((unsigned short)abs(pwm[1]), 1023) );
+    pwmx_set_pulsewidth( m2 , min_u_short((unsigned short)abs(pwm[2]), 1023) );
+    pwmx_set_pulsewidth( m3 , min_u_short((unsigned short)abs(pwm[3]), 1023) );
+
+    ioport_set_value( motordir , 0 , sgn_01_inv(pwm[0]) | (sgn_01_inv(pwm[1])<<1) | (sgn_01_inv(pwm[2])<<2) | (sgn_01_inv(pwm[3])<<3) );
+    //ioport_set_value( motordir , 0 , sgn_01_inv(pwm[0]) + (sgn_01_inv(pwm[1])*2) + (sgn_01_inv(pwm[2])*4) + (sgn_01_inv(pwm[3])*8) );
 }
 
 void CheckNoCommandState()
@@ -426,7 +420,7 @@ void GyroProcess()
            desW -= 360;
         if ( desW < -180 )
            desW += 360;
-        desW = UpdatePID ( &anglePID , desW , 0 );
+        desW = update_pid ( &gyro_pid , desW , &gyro_pid_config );
         desW += gdata.x*gyroD; //Calculate d term here, cause we have W from gyro
 
       if ( desW * oldDesW < 0 )
@@ -456,7 +450,7 @@ void GyroProcess()
                     desW = ( fabs ( oldDesW ) + max_w_acc );
             }
       }
-      desW = max ( -120 , min ( 120 ,desW ) );
+      desW = max_float ( -120 , min_float ( 120 ,desW ) );
       oldDesW = desW;
 }
 
@@ -590,7 +584,7 @@ void InitNRF()
     own_rx_add[4]=110;
     nrf24l01_set_rx_addr(own_rx_add,5,0);
     own_rx_add[2]=30;
-    nrf24l01_set_tx_addr(own_rx_add,5,0);
+    nrf24l01_set_tx_addr(own_rx_add,5);
 
     if ( nrf24l01_get_status() == 0 )
     {
@@ -640,17 +634,23 @@ void InitPID()
     pwmx_enable_controller( m3 );
     pwmx_enable_controller( md );
 
-    initSPid( &plantPID[0] );
-    initSPid( &plantPID[1] );
-    initSPid( &plantPID[2] );
-    initSPid( &plantPID[3] );
 
-    initSPid( &anglePID );
-    anglePID.dGain = 0;
-    anglePID.iGain = 0.23;
-    anglePID.pGain = 5;
-    anglePID.iMax = 16;
-    anglePID.iMin = -16;
+    init_pid_state( &motor_pid[0] );
+    init_pid_state( &motor_pid[1] );
+    init_pid_state( &motor_pid[2] );
+    init_pid_state( &motor_pid[3] );
+
+    init_pid_state( &gyro_pid );
+
+    motor_pid_config.d_gain = 0.0f;
+    motor_pid_config.i_gain = 0.23f;
+    motor_pid_config.p_gain = 25.0f;
+    motor_pid_config.i_max = 328.0f;
+
+    gyro_pid_config.d_gain = 0;
+    gyro_pid_config.i_gain = 0.23;
+    gyro_pid_config.p_gain = 5;
+    gyro_pid_config.i_max = 16;
 
     for ( int i = 0 ; i < anglePredictSteps ; i ++ )
         angleHistory[i] = 0;
