@@ -1,3 +1,5 @@
+#include "flash.h"
+
 #include <drv_spi.h>
 #include "devices.h"
 #include <time.h>
@@ -26,7 +28,6 @@
 
 int flash_init(spi_t * driver)
 {
-    driver = spi_open(DRV_SPI_1);
     spi_set_baudrate( driver,10000 );
     spi_set_mode( driver, SPI_MODE0 );
     spi_cs_hi( driver );                                                  // Reset chip's SPI FSM

@@ -20,30 +20,30 @@ void read_uint16(const uint8_t* const buffer, size_t* const pos, uint16_t* const
 
 void read_uint32(const uint8_t* const buffer, size_t* const pos, uint32_t* const data);
 
-void read_float_h(const uint8_t* const buffer, size_t* const pos, union FLOAT_32* const data);
+void read_float_h(const uint8_t* const buffer, size_t* const pos, union float_32_u_t* const data);
 
-void read_float(const uint8_t* const buffer, size_t* const pos, union FLOAT_32* const data);
+void read_float(const uint8_t* const buffer, size_t* const pos, union float_32_u_t* const data);
 
-void read_v2f(const uint8_t* const buffer, size_t* const pos, struct Vector2f* const data);
+void read_v2f(const uint8_t* const buffer, size_t* const pos, struct vector2f_t* const data);
 
-void read_v2f_h(const uint8_t* const buffer, size_t* const pos, struct Vector2f* const data);
+void read_v2f_h(const uint8_t* const buffer, size_t* const pos, struct vector2f_t* const data);
 
-void read_v3f(const uint8_t* const buffer, size_t* const pos, struct Vector3f* const data);
+void read_v3f(const uint8_t* const buffer, size_t* const pos, struct vector3f_t* const data);
 
-void read_v3f_h(const uint8_t* const buffer, size_t* const pos, struct Vector3f* const data);
+void read_v3f_h(const uint8_t* const buffer, size_t* const pos, struct vector3f_t* const data);
 
-void read_v4f(const uint8_t* const buffer, size_t* const pos, struct Vector4f* const data);
+void read_v4f(const uint8_t* const buffer, size_t* const pos, struct vector4f_t* const data);
 
-void read_v4f_h(const uint8_t* const buffer, size_t* const pos, struct Vector4f* const data);
+void read_v4f_h(const uint8_t* const buffer, size_t* const pos, struct vector4f_t* const data);
 
-uint8_t read_robot_command_fixed(const uint8_t* const buffer, const size_t size, struct RobotCommand* const data);
+uint8_t read_robot_command_fixed(const uint8_t* const buffer, const size_t size, struct robot_command_msg_t* const data);
 
-uint8_t read_robot_config_fixed(const uint8_t* const buffer, const size_t size, struct RobotConfig* const data);
+uint8_t read_robot_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_config_msg_t* const data);
 
-uint8_t read_robot_matrix_fixed(const uint8_t* const buffer, const size_t size, struct RobotMatrix* const data);
+uint8_t read_robot_matrix_fixed(const uint8_t* const buffer, const size_t size, struct robot_matrix_msg_t* const data);
 
-uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size, struct RobotFeedback* const data);
+uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size, struct robot_feedback_msg_t* const data);
 
-uint8_t read_robot_feedback_custom_fixed(const uint8_t* const buffer, const size_t size, struct RobotFeedbackCustom* const data);
+uint8_t read_robot_feedback_custom_fixed(const uint8_t* const buffer, const size_t size, struct robot_feedback_custom_t* const data);
 
 #endif

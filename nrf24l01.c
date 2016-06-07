@@ -12,8 +12,80 @@
 
 #include "nrf24l01.h"
 
-extern spi_t* nrf_spi;
-extern ioport_t * servo;
+/////////////////////////////////////////////////////////////////////////////////
+// SPI function requirements
+//
+// The user must define a function to send one byte of data and also return the
+//   resulting byte of data data through the SPI port. The function used here
+//   has the function prototype
+//
+//      unsigned char spi_send_read_byte(unsigned char byte);
+//
+// This function should take the argument unsigned char byte and send it through
+//   the SPI port to the 24L01.  Then, it should wait until the 24L01 has returned
+//   its response over SPI.  This received byte should be the return value of the
+//   function.
+//
+// You should also change the include file name below to whatever the name of your
+//   SPI include file is.
+//////////////////////////////////////////////////////////////////////////////////
+
+#include "robot_data_types.h"
+#include <drv_spi.h>
+extern struct drivers_t g_drivers;
+static inline uint8_t _spi_send_read_byte(const uint8_t data)
+{
+    return spi_transceive8(g_drivers.nrf_spi,data);
+}
+
+static inline void _set_nrf_ce_pin(const bool value)
+{
+    ioport_set_value(g_drivers.servo_port, 0, value);
+}
+
+static bool _nrf_csn_state = true;
+
+static inline void _set_nrf_csn_pin()
+{
+    spi_cs_hi(g_drivers.nrf_spi);
+    _nrf_csn_state = true;
+}
+
+static inline void _clear_nrf_csn_pin()
+{
+    spi_cs_lo(g_drivers.nrf_spi);
+    _nrf_csn_state = false;
+}
+
+static inline bool _get_nrf_csn_pin()
+{
+    //return spi_get_cs(g_drivers.nrf_spi);
+    return _nrf_csn_state;
+}
+
+static inline bool _get_nrf_irq_pin(void)
+{
+    return ioport_get_value(g_drivers.servo_port , 0) & 0x01;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Delay function requirements
+//
+// The user must define a function that delays for the specified number of
+//   microseconds. This function needs to be as precise as possible, and the use
+//   of a timer module within your microcontroller is highly recommended. The
+//   function used here has the prototype
+//
+//      void delay_us(unsigned int microseconds);
+//
+// You should also change the include file name below to whatever the name of your
+//   delay include file is.
+//////////////////////////////////////////////////////////////////////////////////
+#include <timing.h>
+static inline void _delay_us(uint32_t microseconds)
+{
+    delay_us(microseconds);
+}
 
 //Arguments except opt_rx_standby_mode fill the actual register they are named 
 //  after. Registers that do not need to be initialized are not included here.
@@ -233,8 +305,8 @@ void nrf24l01_power_up(bool rx_active_mode)
     config |= nrf24l01_CONFIG_PWR_UP;
     
     nrf24l01_write_register(nrf24l01_CONFIG, &config, 1);
-    
-    delay_us(1500);
+
+    _delay_us(1500);
     
     if((config & nrf24l01_CONFIG_PRIM_RX) == 0)
         nrf24l01_clear_ce();
@@ -263,7 +335,7 @@ void nrf24l01_power_up_param(bool rx_active_mode, unsigned char config)
     
     nrf24l01_write_register(nrf24l01_CONFIG, &config, 1);
 
-    delay_us(1500);
+    _delay_us(1500);
 
     if((config & nrf24l01_CONFIG_PRIM_RX) == 0)
         nrf24l01_clear_ce();
@@ -502,7 +574,7 @@ unsigned char nrf24l01_nop()
 void nrf24l01_transmit()
 {
     nrf24l01_set_ce();
-    delay_us(10);
+    _delay_us(10);
     nrf24l01_clear_ce();
 }
 
@@ -511,14 +583,14 @@ static bool ce_state = false;
 //clears the pin on the host microcontroller that is attached to the 24l01's CE pin
 void nrf24l01_clear_ce()
 {
-    ioport_set_value( servo , 0 , 0 );
+    _set_nrf_ce_pin(0);
     ce_state = false;
 }
 
 //sets the pin on the host microcontroller that is attached to the 24l01's CE pin
 void nrf24l01_set_ce()
 {
-    ioport_set_value( servo , 0 , 1 );
+    _set_nrf_ce_pin(1);
     ce_state = true;
 }
 
@@ -528,26 +600,22 @@ bool nrf24l01_ce_pin_active()
     return ce_state;
 }
 
-static bool csn_state = true;
-
 //sets the pin on the host microcontroller that is attached to the 24l01's CSN pin
 void nrf24l01_clear_csn()
 {
-    spi_cs_lo(nrf_spi);
-    csn_state = false;
+    _clear_nrf_csn_pin();
 }
 
 //clears the pin on the host microcontroller that is attached to the 24l01's CSN pin
 void nrf24l01_set_csn()
 {
-    spi_cs_hi(nrf_spi);
-    csn_state = true;
+    _set_nrf_csn_pin();
 }
 
 //returns true if CSN is high, false if not
 bool nrf24l01_csn_pin_active()
 {
-    return csn_state;
+    return _get_nrf_csn_pin();
 }
 
 //sets the TX address in the TX_ADDR register
@@ -886,7 +954,7 @@ bool nrf24l01_fifo_rx_empty()
 //returns true if IRQ pin is low, false otherwise
 bool nrf24l01_irq_pin_active()
 {
-    if(( ioport_get_value(servo , 0) & 0x01 ) != 0)
+    if(_get_nrf_irq_pin() != 0)
         return false;
     else
         return true;
@@ -1011,11 +1079,11 @@ void nrf24l01_spi_send_read(unsigned char * data, unsigned int len, bool copydat
     for(count = 0; count < len; count++)
     {
         if(copydata != false)
-            data[count] = spi_send_read_byte(data[count]);
+            data[count] = _spi_send_read_byte(data[count]);
         else
         {
             tempbyte = data[count];
-            spi_send_read_byte(tempbyte);
+            _spi_send_read_byte(tempbyte);
         }
     }
 }

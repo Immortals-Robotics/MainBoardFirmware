@@ -2,10 +2,10 @@
 #define HALF_H
 #include <stdint.h>
 
-union FLOAT_32
+union float_32_u_t
 {
-	float    f32;
-	uint32_t u32;
+    float    f32;
+    uint32_t u32;
 };
 
 uint32_t half_to_float( uint16_t h );

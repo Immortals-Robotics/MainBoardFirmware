@@ -1,6 +1,37 @@
-#include "GlobalVars.h"
+#include <math.h>
+#include <stdlib.h>
 
-void construct_feedback_packet ( )
+#include <drv_ioport.h>
+#include <drv_pwmx.h>
+#include <drv_pwm8.h>
+#include <interrupts.h>
+#include <timing.h>
+
+#include "devices.h"
+
+#include "nrf24l01.h"
+#include "gyro.h"
+#include "pid.h"
+#include "flash.h"
+#include "helpers.h"
+#include "writer.h"
+#include "reader.h"
+#include "debug_io.h"
+
+#define ANGLE_PREDICT_STEPS 124
+#define LOOP_INT_NUMBER    1
+#define GYRO_INT_NUMBER    11
+#define NRF_RX_PAYLOAD_SIZE 10
+#define NRF_TX_PAYLOAD_SIZE 10
+
+#include "robot_data_types.h"
+
+struct drivers_t g_drivers;
+struct robot_command_msg_t g_robot_cmd;
+struct robot_config_t g_robot_config;
+struct robot_state_t g_robot_state;
+
+void construct_feedback_packet()
 {
     /*payload[0] = gdata.buff[2];
     payload[1] = curr_vel[0];
@@ -25,7 +56,7 @@ void construct_feedback_packet ( )
 
 bool is_feedback_process_completed()
 {
-    return (g_robot_state.feedback_step<=0);
+    return g_robot_state.feedback_step <= 0;
 }
 
 void send_feedback_process()
@@ -39,7 +70,7 @@ void send_feedback_process()
              nrf24l01_set_as_tx();
              break;
         case 4:
-             nrf24l01_write_tx_payload(g_robot_state.payload,10,false);
+             //nrf24l01_write_tx_payload(g_robot_state.payload,10,false);
              break;
         case 3:
              nrf24l01_transmit();
@@ -104,7 +135,7 @@ void recieve_pid()
 
 void recive_command()
 {
-	/*recievedCMD.vx = payload[1];
+    /*recievedCMD.vx = payload[1];
     recievedCMD.vy = payload[2];
     if ( payload[3] <= 180 )
         recievedCMD.angle = payload[3] + anglePredict;
@@ -166,120 +197,43 @@ void recive_command()
     }*/
 }
 
-uint8_t get_swicth(const uint8_t n)
-{
-	const uint32_t a = ioport_get_value(g_drivers.debug , 0);
-
-    if (n == 1)
-        return (a >> 12) & 0x0F;
-    else if (n == 2)
-        return (a >> 8) & 0x0F;
-    else
-        return 0;
-}
-
-uint8_t get_robot_num()
-{
-    return get_swicth(1);
-}
-
-uint8_t get_button()
-{
-    const uint32_t a = ioport_get_value(g_drivers.debug , 0);
-    return (a >> 4) & 0x0F;
-}
-
-void set_led(const uint8_t led_mask, bool state)
-{
-    static uint8_t ledState = 0;
-    set_bit_mask_u8(&ledState, led_mask, state);
-    ioport_set_value( g_drivers.debug , 0 , ledState );
-}
 
 void calculate_motor_vels ( void )
 {
-    const unsigned char tmp_dir = (unsigned char)ioport_get_value ( g_drivers.motordir , 0 );
+    const uint32_t tmp_dir = ioport_get_value(g_drivers.motordir_port, 0);
 
-    g_robot_state.curr_vel[0] = 8.0f * ioport_get_value ( g_drivers.motorvel , 0 );
-    if ( tmp_dir & 16 )
-       g_robot_state.curr_vel[0] = -g_robot_state.curr_vel[0];
-
-    g_robot_state.curr_vel[1] = 8.0f * ioport_get_value ( g_drivers.motorvel , 1 );
-    if ( tmp_dir & 32 )
-       g_robot_state.curr_vel[1] = -g_robot_state.curr_vel[1];
-
-    g_robot_state.curr_vel[2] = 8.0f * ioport_get_value ( g_drivers.motorvel , 2 );
-    if ( tmp_dir & 64 )
-       g_robot_state.curr_vel[2] = -g_robot_state.curr_vel[2];
-
-    g_robot_state.curr_vel[3] = 8.0f * ioport_get_value ( g_drivers.motorvel , 3 );
-    if ( tmp_dir & 128 )
-       g_robot_state.curr_vel[3] = -g_robot_state.curr_vel[3];
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        g_robot_state.motor_current[i] = 8.0f * ioport_get_value(g_drivers.motorvel_port, i);
+        if (get_bit_u32(tmp_dir, 4 + i))
+            g_robot_state.motor_current[i] = -g_robot_state.motor_current[i];
+    }
 }
 
 void control_loop ( void )
 {
-	if ( g_robot_cmd.runPID == false )
+    if ( g_robot_cmd.halt == 1 )
     {
-        pwmx_set_pulsewidth( g_drivers.motor_pwm[0] , 0 );
-        pwmx_set_pulsewidth( g_drivers.motor_pwm[1] , 0 );
-        pwmx_set_pulsewidth( g_drivers.motor_pwm[2] , 0 );
-        pwmx_set_pulsewidth( g_drivers.motor_pwm[3] , 0 );
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            pwmx_set_pulsewidth(g_drivers.motor_pwm[i], 0);
+        }
         return;
     }
 
-    float pwm[4];
-    pwm[0] = update_pid( &motor_pid[0] , g_robot_state.des[0]+g_robot_state.des_w-g_robot_state.curr_vel[0], &motor_pid_config);
-    pwm[1] = update_pid( &motor_pid[1] , g_robot_state.des[1]+g_robot_state.des_w-g_robot_state.curr_vel[1], &motor_pid_config);
-    pwm[2] = update_pid( &motor_pid[2] , g_robot_state.des[2]+g_robot_state.des_w-g_robot_state.curr_vel[2], &motor_pid_config);
-    pwm[3] = update_pid( &motor_pid[3] , g_robot_state.des[3]+g_robot_state.des_w-g_robot_state.curr_vel[3], &motor_pid_config);
+    uint32_t sign_bits = 0;
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        const float error = g_robot_state.motor_desired[i] + g_robot_state.omega + g_robot_state.motor_current[i];
+        g_robot_state.motor_pwm[i] = update_pid(&g_robot_state.motor_pid[i], error, &g_robot_config.motor_pid_config);
+        g_robot_state.motor_pwm[i] *= 1400.0f / (1400.0f - fabs(g_robot_state.motor_current[i]));
+        g_robot_state.motor_pwm[i] = min_float(1023.0f, max_float(-1023.0f, g_robot_state.motor_pwm[i]));
 
-    /*pwm[0] = P ( curr_vel[0] , des[0] , main_k );
-    pwm[1] = P ( curr_vel[1] , des[1] , main_k );
-    pwm[2] = P ( curr_vel[2] , des[2] , main_k );
-    pwm[3] = P ( curr_vel[3] , des[3] , main_k );*/
+        pwmx_set_pulsewidth(g_drivers.motor_pwm[i], (uint16_t)abs(g_robot_state.motor_pwm[i]));
+        sign_bits |= sgn_01_inv_f(g_robot_state.motor_pwm[i]) << i;
+    }
 
-    /*pwm[0] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[0] ) );
-    pwm[1] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[1] ) );
-    pwm[2] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[2] ) );
-    pwm[3] *= 1400.0 / ( 1400.0 - fabs ( curr_vel[3] ) );*/
-
-    /*pwm[0] = pwm[0] + (curr_vel[0]*0.644);
-    pwm[1] = pwm[1] + (curr_vel[1]*0.644);
-    pwm[2] = pwm[2] + (curr_vel[2]*0.644);
-    pwm[3] = pwm[3] + (curr_vel[3]*0.644);*/
-
-    /*if ( pwm[0] > 1023 )
-       pwm[0] = 1023;
-    else if ( pwm[0] < -1023 )
-         pwm[0] = -1023;
-    if ( pwm[1] > 1023 )
-       pwm[1] = 1023;
-    else if ( pwm[1] < -1023 )
-         pwm[1] = -1023;
-    if ( pwm[2] > 1023 )
-       pwm[2] = 1023;
-    else if ( pwm[2] < -1023 )
-         pwm[2] = -1023;
-    if ( pwm[3] > 1023 )
-       pwm[3] = 1023;
-    else if ( pwm[3] < -1023 )
-         pwm[3] = -1023;*/
-
-    /*pwm[0] = min ( 1023 , max ( -1023 , pwm[0] ) );
-    pwm[1] = min ( 1023 , max ( -1023 , pwm[1] ) );
-    pwm[2] = min ( 1023 , max ( -1023 , pwm[2] ) );
-    pwm[3] = min ( 1023 , max ( -1023 , pwm[3] ) );*/
-    //pwm[1] = 800;
-    pwmx_set_pulsewidth( g_drivers.motor_pwm[0] , min_u_short((unsigned short)abs(pwm[0]), 1023) );
-    pwmx_set_pulsewidth( g_drivers.motor_pwm[1] , min_u_short((unsigned short)abs(pwm[1]), 1023) );
-    pwmx_set_pulsewidth( g_drivers.motor_pwm[2] , min_u_short((unsigned short)abs(pwm[2]), 1023) );
-    pwmx_set_pulsewidth( g_drivers.motor_pwm[3] , min_u_short((unsigned short)abs(pwm[3]), 1023) );
-
-    ioport_set_value( g_drivers.motordir , 0 , sgn_01_inv_f(pwm[0]) |
-                                     (sgn_01_inv_f(pwm[1])<<1) |
-                                     (sgn_01_inv_f(pwm[2])<<2) |
-                                     (sgn_01_inv_f(pwm[3])<<3) );
+    ioport_set_value(g_drivers.motordir_port, 0, sign_bits);
 }
 
 void check_no_command_state()
@@ -289,7 +243,7 @@ void check_no_command_state()
 
     if ( g_robot_state.no_cmd_counter >= 1200 )
     {
-        g_robot_cmd.runPID = false;
+        g_robot_cmd.halt = 1;
         g_robot_state.no_cmd_counter = 1200;
     }
 }
@@ -300,10 +254,11 @@ void nrf_process()
     {
         if ( nrf24l01_irq_rx_dr_active() )
         {
-            set_led(RX_LED,ON);
-            nrf24l01_read_rx_payload ( g_robot_state.payload , 10 );
+            set_led(RX_LED);
+            uint8_t payload[NRF_RX_PAYLOAD_SIZE+1];
+            nrf24l01_read_rx_payload(payload, NRF_RX_PAYLOAD_SIZE);
 
-            switch ( g_robot_state.payload[0]&0x0F )
+            switch ( payload[0]&0x0F )
             {
                 case 1:
                      recive_command();
@@ -315,7 +270,7 @@ void nrf_process()
                      break;
             }
 
-            if ( g_robot_state.payload[0] > 15 )
+            if ( payload[0] > 15 )
             {
                 g_robot_state.feedback_step = 7;
             }
@@ -327,435 +282,376 @@ void nrf_process()
 
     if ( !is_feedback_process_completed())
     {
-        set_led(RX_LED,ON);
+        set_led(RX_LED);
         send_feedback_process();
     }
 }
 
 void gyro_process()
 {
-	static float angle_history[ANGLE_PREDICT_STEPS];
-    static int16_t angle_history_index = 0;
-	static float old_des_w = 0;
+    static float angle_history[ANGLE_PREDICT_STEPS] = {0};
+    static uint16_t angle_history_index = 0;
+    static float old_omega = 0;
 
-	/*for ( int i = 0 ; i < anglePredictSteps ; i ++ )
-        angleHistory[i] = 0;*/
-
-	if ( get_gyro_data(&g_robot_state.gyro_data) )
+    if ( get_gyro_data(&g_robot_state.gyro_data) )
     {
-		const float yaw = g_robot_state.gyro_data.x / 1285.0f;
+        const float yaw = g_robot_state.gyro_data.x / 1285.0f;
         g_robot_state.angle_predict -= angle_history[angle_history_index];
         angle_history[angle_history_index] = yaw;
         g_robot_state.angle_predict += yaw;
 
-        g_robot_cmd.angle += yaw;
-        if ( g_robot_cmd.angle > 180 )
-           g_robot_cmd.angle -= 360;
-        if ( g_robot_cmd.angle < -180 )
-           g_robot_cmd.angle += 360;
+        g_robot_cmd.orientation.f32 += yaw;
+        if (g_robot_cmd.orientation.f32 > 180.0f)
+           g_robot_cmd.orientation.f32 -= 360.0f;
+        if (g_robot_cmd.orientation.f32 < -180.0f)
+           g_robot_cmd.orientation.f32 += 360.0f;
 
-        angle_history_index = ( angle_history_index + 1 ) % angle_history_index;
+        angle_history_index = (angle_history_index + 1) % ANGLE_PREDICT_STEPS;
     }
 
-      float d_angle = g_robot_cmd.angle-g_robot_cmd.targetAngle;
-        if ( d_angle > 180 )
-           d_angle -= 360;
-        if ( d_angle < -180 )
-           d_angle += 360;
-        g_robot_state.des_w = update_pid ( &gyro_pid , d_angle , &gyro_pid_config );
-        g_robot_state.des_w += g_robot_state.gyro_data.x*gyroD; //Calculate d term here, cause we have W from gyro
+    float d_angle = g_robot_cmd.orientation.f32-g_robot_cmd.target_orientation.f32;
+    if (d_angle > 180.0f)
+        d_angle -= 360.0f;
+    if (d_angle < -180.0f)
+        d_angle += 360.0f;
+    g_robot_state.omega = update_pid(&g_robot_state.gyro_pid, d_angle, &g_robot_config.gyro_pid_config);
+    g_robot_state.omega += g_robot_state.gyro_data.x*g_robot_config.gyro_d; //Calculate d term here, cause we have omega from gyro
 
-      if ( g_robot_state.des_w * old_des_w < 0 )
-      {
-            float tmp = max_w_dec;
-            if ( g_robot_state.des_w < 0 )
+    if ( g_robot_state.omega * old_omega < 0 )
+    {
+        float tmp = g_robot_config.max_w_dec;
+        if ( g_robot_state.omega < 0 )
+           tmp = -tmp;
+        tmp += old_omega;
+
+        if ( tmp * g_robot_state.omega > 0 )
+        {
+            tmp = g_robot_config.max_w_acc;
+            if ( g_robot_state.omega < 0 )
                tmp = -tmp;
-            tmp += old_des_w;
-
-            if ( tmp * g_robot_state.des_w > 0 )
-            {
-                tmp = max_w_acc;
-                if ( g_robot_state.des_w < 0 )
-                   tmp = -tmp;
-                if ( fabs ( tmp ) > fabs ( g_robot_state.des_w ) )
-                    tmp = g_robot_state.des_w;
-            }
-            g_robot_state.des_w = tmp;
-      }
-      else
-      {
-            if ( fabs ( g_robot_state.des_w ) > fabs ( old_des_w ) + max_w_acc )
-            {
-                if ( g_robot_state.des_w < 0 )
-                   g_robot_state.des_w = -( fabs ( old_des_w ) + max_w_acc );
-                else
-                    g_robot_state.des_w = ( fabs ( old_des_w ) + max_w_acc );
-            }
-      }
-      g_robot_state.des_w = max_float ( -120 , min_float ( 120 ,g_robot_state.des_w ) );
-      old_des_w = g_robot_state.des_w;
+            if ( fabs ( tmp ) > fabs ( g_robot_state.omega ) )
+                tmp = g_robot_state.omega;
+        }
+        g_robot_state.omega = tmp;
+    }
+    else
+    {
+        if ( fabs ( g_robot_state.omega ) > fabs ( old_omega ) + g_robot_config.max_w_acc )
+        {
+            if ( g_robot_state.omega < 0 )
+               g_robot_state.omega = -( fabs ( old_omega ) + g_robot_config.max_w_acc );
+            else
+                g_robot_state.omega = ( fabs ( old_omega ) + g_robot_config.max_w_acc );
+        }
+    }
+    g_robot_state.omega = max_float ( -120 , min_float ( 120 ,g_robot_state.omega ) );
+    old_omega = g_robot_state.omega;
 }
 
 void check_encoder_fault_process()
 {
+    #define ENCODER_FAULT_CHECK_TIME_SEC 3
+    #define ENCODER_FAULT_CHECK_LOOP_COUNT (ENCODER_FAULT_CHECK_TIME_SEC*1280)
+
+    static uint16_t ticks_to_recalculate = ENCODER_FAULT_CHECK_LOOP_COUNT;
+    static uint16_t zero_vel_count[4] = {0};
+
     //TODO : Choose the if Fault action -> never run the motors or check it again
 
-    if(!g_robot_state.checkMotorFault)
+    if (!g_robot_state.check_motor_fault ||
+        g_robot_state.encoder_has_fault)
        return;
 
-    if(g_robot_state.isEncoderHasFault)
-       return;
-
-    g_robot_state.TimeToResetEncoderFaultValues--;
-    if(g_robot_state.TimeToResetEncoderFaultValues<=0)
+    ticks_to_recalculate--;
+    if (ticks_to_recalculate <= 0)
     {
-        g_robot_state.TimeToResetEncoderFaultValues = ENCODER_FAULT_CHECK_LOOP_COUNT;
-        for(int i=0;i<4;i++)
+        ticks_to_recalculate = ENCODER_FAULT_CHECK_LOOP_COUNT;
+        for (uint8_t i = 0; i < 4; i++)
         {
-            if(g_robot_state.zeroVelCount[i] > (ENCODER_FAULT_CHECK_LOOP_COUNT/2))
+            if (zero_vel_count[i] > (ENCODER_FAULT_CHECK_LOOP_COUNT / 2))
             {
-                g_robot_state.isEncoderHasFault = true;
-                g_robot_state.zeroVelCount[0]=0;
-                g_robot_state.zeroVelCount[1]=0;
-                g_robot_state.zeroVelCount[2]=0;
-                g_robot_state.zeroVelCount[3]=0;
-                pwm8_set_frequency(g_drivers.buzzer,2000);
-                pwm8_set_pulsewidth(g_drivers.buzzer,100);
+                g_robot_state.encoder_has_fault = true;
+                zero_vel_count[0]=0;
+                zero_vel_count[1]=0;
+                zero_vel_count[2]=0;
+                zero_vel_count[3]=0;
+                set_buzzer(2000);
                 return;
             }
         }
-        if(g_robot_state.isEncoderHasFault)
-           pwm8_set_pulsewidth(g_drivers.buzzer,0);
-        g_robot_state.isEncoderHasFault = false;
-        g_robot_state.zeroVelCount[0]=0;
-        g_robot_state.zeroVelCount[1]=0;
-        g_robot_state.zeroVelCount[2]=0;
-        g_robot_state.zeroVelCount[3]=0;
-        return;
+
+        if(g_robot_state.encoder_has_fault)
+           clear_buzzer();
+        g_robot_state.encoder_has_fault = false;
+        zero_vel_count[0]=0;
+        zero_vel_count[1]=0;
+        zero_vel_count[2]=0;
+        zero_vel_count[3]=0;
     }
-
-    /*for(int i=0;i<4;i++)
+    else
     {
-        if(fabs(curr_vel[i]) <= 10 && abs(pwm[0]) > 30) //Encoder Fault //TODO: opitimize the numbers
-           zeroVelCount[i]++;
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            if(fabs(g_robot_state.motor_current[i]) <= 10 && fabs(g_robot_state.motor_pwm[i]) > 30) //Encoder Fault //TODO: opitimize the numbers
+               zero_vel_count[i]++;
 
-        if(fabs(pwm[i] - curr_vel[i]) > 900 ) //Motor Fault //TODO: opitimize the numbers
-           zeroVelCount[i]++;
-    }*/
+            if(fabs(g_robot_state.motor_pwm[i] - g_robot_state.motor_current[i]) > 900 ) //Motor Fault //TODO: opitimize the numbers
+               zero_vel_count[i]++;
+        }
+    }
 }
 
 __INTERRUPT_NATIVE void interrupt_handler(void)
 {
-    set_led(LOOP_LED,ON);
+    set_led(LOOP_LED);
     calculate_motor_vels();
     control_loop();
     nrf_process();
     check_no_command_state();
     gyro_process();
     check_encoder_fault_process();
-    set_led(ALL_LED,OFF);
+    clear_led(ALL_LED);
     interrupt_acknowledge(LOOP_INT_NUMBER);
 }
 
 void init_default_values()
 {
-    g_robot_state.des[0]=0;
-    g_robot_state.des[1]=0;
-    g_robot_state.des[2]=0;
-    g_robot_state.des[3]=0;
-    g_robot_state.des_w = 0;
+    g_robot_state.gyro_pid.i_state = 0.0f;
+    g_robot_state.gyro_pid.prev_error = 0.0f;
 
-	g_robot_state.no_cmd_counter = -1;
-    g_robot_state.angle_predict = 0;
-    g_robot_state.feedback_step = 0;
-
-
-    g_robot_cmd.angle = 0.0;
-    g_robot_cmd.booster = false;
-    g_robot_cmd.buzzer = 0;
-    g_robot_cmd.chip = 0;
-    g_robot_cmd.direct = 0;
-    g_robot_cmd.discharge = false;
-    g_robot_cmd.dribbler = false;
-    g_robot_cmd.runPID = true;
-    g_robot_cmd.targetAngle = 0;
-    g_robot_cmd.tW = 1;
-    g_robot_cmd.vx = 0 ;
-    g_robot_cmd.vy = 0 ;
-
-    g_robot_state.checkMotorFault = false;
-	g_robot_state.isEncoderHasFault = false;
-	g_robot_state.TimeToResetEncoderFaultValues = ENCODER_FAULT_CHECK_LOOP_COUNT;
-
-    for(int i=0;i<4;i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
-        g_robot_state.zeroVelCount[i]=0;
+        g_robot_state.motor_pid[i].i_state = 0.0f;
+        g_robot_state.motor_pid[i].prev_error = 0.0f;
+        g_robot_state.motor_desired[i] = 0.0f;
+        g_robot_state.motor_current[i] = 0.0f;
+        g_robot_state.motor_pwm[i] = 0.0f;
     }
 
+    g_robot_state.angle_predict = 0.0f;
+    g_robot_state.omega = 0.0f;
+    g_robot_state.gyro_data.x = 0.0f;
+    g_robot_state.no_cmd_counter = -1;
+    g_robot_state.feedback_step = 0;
+
+    g_robot_state.encoder_has_fault = false;
+    g_robot_state.check_motor_fault = false;
+
+    g_robot_config.robot_num = 0;
+    g_robot_config.motor_pid_config.d_gain = 0.0f;
+    g_robot_config.motor_pid_config.i_gain = 0.23f;
+    g_robot_config.motor_pid_config.p_gain = 25.0f;
+    g_robot_config.motor_pid_config.i_max = 328.0f;
+
+    g_robot_config.gyro_pid_config.d_gain = 0.0f;
+    g_robot_config.gyro_pid_config.i_gain = 0.23f;
+    g_robot_config.gyro_pid_config.p_gain = 5.0f;
+    g_robot_config.gyro_pid_config.i_max = 16.0f;
+
+    g_robot_config.gyro_d = 0.296f;
+    g_robot_config.max_w_acc = 0.73f;
+    g_robot_config.max_w_dec = 1.074f;
+    g_robot_config.gyro_offset = 0.0f;
 }
 
 void init_prepherals()
 {
-    volatile int    tenuscs         = 0;
-    interrupt_register_native( LOOP_INT_NUMBER, (void*)&tenuscs, interrupt_handler );
-    interrupt_configure( LOOP_INT_NUMBER, EDGE_RISING );
-    g_drivers.motorvel = ioport_open(DRV_MOTORVEL);
-    g_drivers.motordir = ioport_open(DRV_MOTORDIR);
-    g_drivers.kick = ioport_open(DRV_KICKIO);
-    g_drivers.debug = ioport_open(DRV_DEBUGIO);
-    g_robot_config.robot_num = get_robot_num();
-    g_drivers.buzzer = pwm8_open(DRV_PWM8_1);
-    pwm8_enable_controller(g_drivers.buzzer);
+    g_drivers.servo_port    = ioport_open(DRV_SERVOIO);
+    g_drivers.motorvel_port = ioport_open(DRV_MOTORVEL);
+    g_drivers.motordir_port = ioport_open(DRV_MOTORDIR);
+    g_drivers.kick_port     = ioport_open(DRV_KICKIO);
+    g_drivers.debug_port    = ioport_open(DRV_DEBUGIO);
+    g_drivers.motor_pwm[0]  = pwmx_open(DRV_PWMX_1);
+    g_drivers.motor_pwm[1]  = pwmx_open(DRV_PWMX_2);
+    g_drivers.motor_pwm[2]  = pwmx_open(DRV_PWMX_3);
+    g_drivers.motor_pwm[3]  = pwmx_open(DRV_PWMX_4);
+    g_drivers.motor_d_pwm   = pwmx_open(DRV_PWMX_D);
+    g_drivers.buzzer_pwm    = pwm8_open(DRV_PWM8_1);
 
-    if ( ioport_get_value(g_drivers.debug , 0) & 0x4 )
+    g_drivers.flash_spi     = spi_open(DRV_SPI_1);
+    g_drivers.nrf_spi       = spi_open(DRV_SPI_2);
+    g_drivers.gyro_i2c      = i2cm_open(DRV_I2CM_1);
+
+    pwmx_enable_controller(g_drivers.motor_pwm[0]);
+    pwmx_enable_controller(g_drivers.motor_pwm[1]);
+    pwmx_enable_controller(g_drivers.motor_pwm[2]);
+    pwmx_enable_controller(g_drivers.motor_pwm[3]);
+    pwmx_enable_controller(g_drivers.motor_d_pwm);
+    pwm8_enable_controller(g_drivers.buzzer_pwm);
+
+    if (get_fpga_delay_boot_state())
     {
-        pwm8_set_frequency(g_drivers.buzzer,2000);
-        pwm8_set_pulsewidth(g_drivers.buzzer,100);
-        delay_ms ( 200 );
-        pwm8_set_pulsewidth(g_drivers.buzzer,0);
+        beep(2000, 200);
     }
 
-    ioport_set_value( g_drivers.motordir , 0 , 0 );
-    init_spi();
-    g_drivers.servo = ioport_open(DRV_SERVOIO);
     flash_init(g_drivers.flash_spi);
+
+    g_robot_config.robot_num = get_robot_num();
 }
 
 void init_nrf()
 {
-    nrf24l01_initialize_debug(true,10,false);
+    nrf24l01_initialize_debug(true, NRF_RX_PAYLOAD_SIZE, false);
     nrf24l01_rx_active_to_standby();
     nrf24l01_flush_rx();
     nrf24l01_set_rf_ch(55);
-    g_robot_config.own_rx_add[0]=110;
-    g_robot_config.own_rx_add[1]=110;
-    g_robot_config.own_rx_add[2]=g_robot_config.robot_num;
-    g_robot_config.own_rx_add[3]=110;
-    g_robot_config.own_rx_add[4]=110;
-    nrf24l01_set_rx_addr(g_robot_config.own_rx_add,5,0);
-    g_robot_config.own_rx_add[2]=30;
-    nrf24l01_set_tx_addr(g_robot_config.own_rx_add,5);
+	uint8_t own_rx_add[5] = {110, 110, g_robot_config.robot_num, 110, 110};
+    nrf24l01_set_rx_addr(own_rx_add, 5, 0);
+    own_rx_add[2] = 30;
+    nrf24l01_set_tx_addr(own_rx_add, 5);
 
-    if ( nrf24l01_get_status() == 0 )
+    if (nrf24l01_get_status() == 0)
     {
-        if ( ioport_get_value(g_drivers.debug , 0) & 0x4 )
+        if (get_fpga_delay_boot_state())
         {
-            pwm8_set_frequency(g_drivers.buzzer,1000);
-            pwm8_set_pulsewidth(g_drivers.buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(g_drivers.buzzer,0);
+            beep(1000, 200);
         }
     }
 }
 
 void init_gyro_m()
 {
-    if ( !init_gyro() )
+    if (!init_gyro())
     {
-        if ( ioport_get_value(g_drivers.debug , 0) & 0x4 )
+        if (get_fpga_delay_boot_state())
         {
-            pwm8_set_frequency(g_drivers.buzzer,1000);
-            pwm8_set_pulsewidth(g_drivers.buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(g_drivers.buzzer,0);
+            beep(1000, 200);
         }
     }
-    if ( ioport_get_value(g_drivers.debug , 0) & 0x4 )
+    if (get_fpga_delay_boot_state())
     {
-        pwm8_set_frequency(g_drivers.buzzer,1000);
-        pwm8_set_pulsewidth(g_drivers.buzzer,100);
-        delay_ms ( 200 );
-        pwm8_set_pulsewidth(g_drivers.buzzer,0);
+        beep(1000, 200);
     }
-}
-
-void init_pid()
-{
-    g_drivers.motor_pwm[0] = pwmx_open(DRV_PWMX_1);
-    g_drivers.motor_pwm[1] = pwmx_open(DRV_PWMX_2);
-    g_drivers.motor_pwm[2] = pwmx_open(DRV_PWMX_3);
-    g_drivers.motor_pwm[3] = pwmx_open(DRV_PWMX_4);
-    g_drivers.motor_d_pwm = pwmx_open(DRV_PWMX_D);
-
-    pwmx_enable_controller( g_drivers.motor_pwm[0] );
-    pwmx_enable_controller( g_drivers.motor_pwm[1] );
-    pwmx_enable_controller( g_drivers.motor_pwm[2] );
-    pwmx_enable_controller( g_drivers.motor_pwm[3] );
-    pwmx_enable_controller( g_drivers.motor_d_pwm );
-
-
-    init_pid_state( &motor_pid[0] );
-    init_pid_state( &motor_pid[1] );
-    init_pid_state( &motor_pid[2] );
-    init_pid_state( &motor_pid[3] );
-
-    init_pid_state( &gyro_pid );
-
-    motor_pid_config.d_gain = 0.0f;
-    motor_pid_config.i_gain = 0.23f;
-    motor_pid_config.p_gain = 25.0f;
-    motor_pid_config.i_max = 328.0f;
-
-    gyro_pid_config.d_gain = 0;
-    gyro_pid_config.i_gain = 0.23;
-    gyro_pid_config.p_gain = 5;
-    gyro_pid_config.i_max = 16;
-
-
 }
 
 void nrf_channel_search(bool blocking)
 {
-    bool found_ch = false;
-    char rf_ch = 2;
-    int notFoundCounter=0;
-
-    if ( ioport_get_value(g_drivers.debug , 0) & 0x4 )
+    if (get_fpga_delay_boot_state())
     {
-        g_robot_config.own_rx_add[2]=25;
-        nrf24l01_set_rx_addr(g_robot_config.own_rx_add,5,0);
+		bool found_ch = false;
+    	uint8_t rf_ch = 2;
+    	uint8_t not_found_counter = 0;
 
-        while ( !found_ch )
+        uint8_t own_rx_add[5] = {110, 110, 25, 110, 110};
+        nrf24l01_set_rx_addr(own_rx_add, 5, 0);
+
+        while (!found_ch)
         {
-            notFoundCounter++;
-            if(!blocking && notFoundCounter > 10)
+            not_found_counter++;
+            if (!blocking && not_found_counter > 10)
             {
                 return;
             }
+
             nrf24l01_rx_active_to_standby();
-            for ( unsigned char test_ch = 125 ; ( test_ch > 0 ) && ( !found_ch ) ; test_ch -= 5 )
+            for (uint8_t test_ch = 125; test_ch > 0; test_ch -= 5)
             {
                 nrf24l01_set_rf_ch(test_ch);
                 nrf24l01_rx_standby_to_active();
                 delay_ms(20);
                 nrf24l01_rx_active_to_standby();
-                if ( nrf24l01_irq_pin_active() )
+                if (nrf24l01_irq_pin_active())
                 {
-                   if ( nrf24l01_irq_rx_dr_active() )
+                   if (nrf24l01_irq_rx_dr_active())
                    {
-                    found_ch = true;
-                    rf_ch = test_ch;
-                    nrf24l01_irq_clear_rx_dr();
-                    nrf24l01_flush_rx();
+                       found_ch = true;
+                       rf_ch = test_ch;
+                       nrf24l01_irq_clear_rx_dr();
+                       nrf24l01_flush_rx();
+                       break;
                    }
                 }
             }
             if ( !found_ch )
             {
-                pwm8_set_frequency(g_drivers.buzzer,1000);
-                pwm8_set_pulsewidth(g_drivers.buzzer,100);
-                delay_ms ( 200 );
-                pwm8_set_pulsewidth(g_drivers.buzzer,0);
+                beep(1000, 200);
             }
         }
 
-        g_robot_config.own_rx_add[2]=g_robot_config.robot_num;
-        nrf24l01_set_rx_addr(g_robot_config.own_rx_add,5,0);
+        own_rx_add[2] = g_robot_config.robot_num;
+        nrf24l01_set_rx_addr(own_rx_add, 5, 0);
         nrf24l01_set_rf_ch(rf_ch);
         nrf24l01_rx_standby_to_active();
         delay_ms(1);
     }
 
-    if ( ioport_get_value(g_drivers.debug , 0) & 0x4 )
+    if (get_fpga_delay_boot_state())
     {
-        pwm8_set_frequency(g_drivers.buzzer,5000);
-        pwm8_set_pulsewidth(g_drivers.buzzer,100);
-        delay_ms ( 200 );
-        pwm8_set_pulsewidth(g_drivers.buzzer,0);
-    }
-}
-
-void beep(const int on_delay , const int off_delay , const int count)
-{
-    pwm8_set_frequency(g_drivers.buzzer,400);
-    for(int i=0;i<count;i++)
-    {
-         pwm8_set_pulsewidth(g_drivers.buzzer,100);
-         delay_ms ( on_delay );
-         pwm8_set_pulsewidth(g_drivers.buzzer,0);
-         delay_ms ( off_delay );
+        beep(5000, 200);
     }
 }
 
 void gyro_calibration_process()
 {
-    char data[6]={0};
-    g_robot_state.TimeToEnterGyroCalibration = WAIT_FOR_GYRO_CALIBRATION_BUTTON;
-    while(g_robot_state.TimeToEnterGyroCalibration > 0)
+    const uint16_t WAIT_FOR_GYRO_CALIBRATION_BUTTON_TICKS = 5000;
+    uint16_t remaining_ticks = WAIT_FOR_GYRO_CALIBRATION_BUTTON_TICKS;
+
+    while (remaining_ticks > 0)
     {
-        if(get_bit_u8(get_button(),0)== 0)
+        if (get_button_bit(0) == 0)
         {
-            pwm8_set_frequency(g_drivers.buzzer,1000);
-            pwm8_set_pulsewidth(g_drivers.buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(g_drivers.buzzer,0);
-            delay_ms ( 200 );
-            pwm8_set_frequency(g_drivers.buzzer,800);
-            pwm8_set_pulsewidth(g_drivers.buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(g_drivers.buzzer,0);
-            delay_ms ( 200 );
-            pwm8_set_frequency(g_drivers.buzzer,1200);
-            pwm8_set_pulsewidth(g_drivers.buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(g_drivers.buzzer,0);
-            g_robot_state.TimeToEnterGyroCalibration = 0;
-            g_robot_cmd.runPID = false;
+            remaining_ticks = 0;
+
+            // wait and beep
+            beep(1000, 200);
+            delay_ms(200);
+            beep(800, 200);
+            delay_ms(200);
+            beep(1200, 200);
+            g_robot_cmd.halt = 1;
             delay_ms(500);
-            float gyro_offset_tmp = 0;
-            for(int i=0;i<100;i++)
+
+            // compute the offset
+            union float_32_u_t gyro_offset_tmp;
+            gyro_offset_tmp.f32 = 0.0f;
+            for(uint8_t i = 0; i < 100; i++)
             {
                 get_gyro_data(&g_robot_state.gyro_data);
-                gyro_offset_tmp += g_robot_state.gyro_data.x/100.0;
+                gyro_offset_tmp.f32 += g_robot_state.gyro_data.x / 100.0f;
                 delay_ms(50);
             }
-            GYRO_OFFSET = -(gyro_offset_tmp);
-            if(GYRO_OFFSET < 0)
-              data[0]=1;
-            data[1] = (int)(fabs(GYRO_OFFSET*1000.0))/100;
-            data[2] = (int)(fabs(GYRO_OFFSET*1000.0))%100;
-            flash_sector_erase(g_drivers.flash_spi,1,true);
-            flash_write(g_drivers.flash_spi,1,data,3,true);
-            g_robot_state.TimeToEnterGyroCalibration=0;
-            pwm8_set_frequency(g_drivers.buzzer,1000);
-            pwm8_set_pulsewidth(g_drivers.buzzer,100);
-            delay_ms ( 200 );
-            pwm8_set_pulsewidth(g_drivers.buzzer,0);
-            g_robot_state.isEncoderHasFault = false;
-            g_robot_state.TimeToResetEncoderFaultValues = ENCODER_FAULT_CHECK_LOOP_COUNT;
-            g_robot_state.zeroVelCount[0]=0;
-            g_robot_state.zeroVelCount[1]=0;
-            g_robot_state.zeroVelCount[2]=0;
-            g_robot_state.zeroVelCount[3]=0;
-			g_robot_state.des[0]=0;
-    		g_robot_state.des[1]=0;
-    		g_robot_state.des[2]=0;
-    		g_robot_state.des[3]=0;
-    		g_robot_state.des_w = 0;
-            g_robot_cmd.angle=0;
-            g_robot_cmd.targetAngle=0;
-            g_robot_cmd.runPID = true;
+            g_robot_config.gyro_offset = -gyro_offset_tmp.f32;
+
+            // store the offset to flash memory
+            uint8_t data[4];
+            size_t length = 0;
+            write_float(data, &length, gyro_offset_tmp);
+            flash_sector_erase(g_drivers.flash_spi, 1, true);
+            flash_write(g_drivers.flash_spi, 1, data, length, true);
+
+            beep(1000, 200);
             break;
         }
         delay_ms(1);
-        g_robot_state.TimeToEnterGyroCalibration--;
+        remaining_ticks--;
     }
 }
 
 void get_gyro_offset_from_flash()
 {
-    unsigned char data[6]={255};
-    float res;
-    flash_read(g_drivers.flash_spi,1,data,5);
-    if(data[0]==255 || data[1]==255 || data[2]==255)
+    uint8_t data[4] = {255, 255, 255, 255};
+
+    flash_read(g_drivers.flash_spi, 1, data, 4);
+    // check if data is valid
+    if (data[0] == 255 || data[1] == 255 || data[2] == 255 || data[3] == 255)
       return;
-    res = data[1];
-    res = res*100 + data[2];
-    res = res / 1000.0;
-    if(data[0]==1)
-      res = -res;
-    if(fabs(res)< 6)
-       GYRO_OFFSET = res;
+
+    union float_32_u_t res;
+    size_t pos = 0;
+    read_float(data, &pos, &res);
+    // sanity check
+    if (fabs(res.f32) < 6.0f)
+       g_robot_config.gyro_offset = res.f32;
+}
+
+void init_interrupts()
+{
+    volatile int tenuscs = 0;
+    interrupt_register_native(LOOP_INT_NUMBER, (void*)&tenuscs, interrupt_handler);
+    interrupt_configure(LOOP_INT_NUMBER, EDGE_RISING);
+
+    interrupt_acknowledge(LOOP_INT_NUMBER);
+    interrupt_enable(LOOP_INT_NUMBER);
 }
 
 void main( void )
@@ -764,7 +660,7 @@ void main( void )
     init_prepherals();
     init_nrf();
     init_gyro_m();
-    init_pid();
+
     if(g_robot_config.robot_num != 15)
     {
        nrf_channel_search(false);
@@ -774,11 +670,9 @@ void main( void )
     {
         gyro_calibration_process();
     }
+
     get_gyro_offset_from_flash();
-    beep(100,500,(int)GYRO_OFFSET);
-    interrupt_acknowledge(LOOP_INT_NUMBER);
-    interrupt_enable( LOOP_INT_NUMBER );
 
-
+    init_interrupts();
 }
 

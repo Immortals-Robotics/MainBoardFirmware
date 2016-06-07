@@ -1,27 +1,29 @@
 #ifndef DATA_LITE_H
 #define DATA_LITE_H
 
+#include <stdint.h>
+
 #include "half.h"
 
-struct Vector2f
+struct vector2f_t
 {
-	union  FLOAT_32 x;
-	union  FLOAT_32 y;
+	union  float_32_u_t x;
+	union  float_32_u_t y;
 };
 
-struct Vector3f
+struct vector3f_t
 {
-	union  FLOAT_32 x;
-	union  FLOAT_32 y;
-	union  FLOAT_32 z;
+	union  float_32_u_t x;
+	union  float_32_u_t y;
+	union  float_32_u_t z;
 };
 
-struct Vector4f
+struct vector4f_t
 {
-	union  FLOAT_32 x;
-	union  FLOAT_32 y;
-	union  FLOAT_32 z;
-	union  FLOAT_32 w;
+	union  float_32_u_t x;
+	union  float_32_u_t y;
+	union  float_32_u_t z;
+	union  float_32_u_t w;
 };
 
 struct bits8_t
@@ -92,13 +94,13 @@ struct bits32_t
 	uint8_t bit31 : 1;
 };
 
-enum TeamColor
+enum team_color_e
 {
 	TEAM_COLOR_BLUE = 0,
 	TEAM_COLOR_YELLOW = 1
 };
 
-enum FeedbackRequestType
+enum feedback_request_e
 {
 	FEEDBACK_TYPE_DEBUG = 0,
 	FEEDBACK_TYPE_INFO = 1,
@@ -106,62 +108,62 @@ enum FeedbackRequestType
 	FEEDBACK_TYPE_CUSTOM = 3
 };
 
-enum ShootType
+enum shoot_type_e
 {
 	SHOOT_TYPE_DIRECT = 0,
 	SHOOT_TYPE_CHIP = 1
 };
 
-struct RobotCommand
+struct robot_command_msg_t
 {
 	// commands
-	struct  Vector2f   velocity;
-	union  FLOAT_32    omega;
-	union  FLOAT_32    target_orientation;
+	struct  vector2f_t   velocity;
+	union  float_32_u_t    omega;
+	union  float_32_u_t    target_orientation;
 
-	union  FLOAT_32    orientation;
+	union  float_32_u_t    orientation;
 
-	union  FLOAT_32    shoot_power;
-	union  FLOAT_32    dribbler;
-	union  FLOAT_32    servo;
+	union  float_32_u_t    shoot_power;
+	union  float_32_u_t    dribbler;
+	union  float_32_u_t    servo;
 
 	// debug
 	uint8_t      beep;
 
-	enum ShootType shoot_type;
-	enum FeedbackRequestType feedback;
+	enum shoot_type_e shoot_type;
+	enum feedback_request_e feedback;
 	uint8_t            halt : 1;
 	uint8_t            has_orientation : 1;
 };
 
-struct RobotConfig
+struct robot_config_msg_t
 {
-	union FLOAT_32      kp;
-	union FLOAT_32      ki;
-	union FLOAT_32      kd;
-	union FLOAT_32      i_limit;
+	union float_32_u_t      kp;
+	union float_32_u_t      ki;
+	union float_32_u_t      kd;
+	union float_32_u_t      i_limit;
 
-	union FLOAT_32      head_offset;
+	union float_32_u_t      head_offset;
 
-	struct Vector3f   direct_coeffs;
-	struct Vector3f   chip_coeffs;
+	struct vector3f_t   direct_coeffs;
+	struct vector3f_t   chip_coeffs;
 };
 
-struct RobotMatrix
+struct robot_matrix_msg_t
 {
-	struct Vector3f matrix[4];
+	struct vector3f_t matrix[4];
 };
 
-struct RobotFeedback
+struct robot_feedback_msg_t
 {
-	union FLOAT_32     battery_voltage;
-	union FLOAT_32     capacitor_voltage;
+	union float_32_u_t     battery_voltage;
+	union float_32_u_t     capacitor_voltage;
 
-	union FLOAT_32     omega;
-	union FLOAT_32     orientation;
-	
-	struct Vector4f  motor_velocity;
-	struct Vector4f  motor_target;
+	union float_32_u_t     omega;
+	union float_32_u_t     orientation;
+
+	struct vector4f_t  motor_velocity;
+	struct vector4f_t  motor_target;
 
 	struct bits8_t  motor_fault;
 	struct bits8_t button_status;
@@ -172,7 +174,7 @@ struct RobotFeedback
 	uint8_t      dribbler_connected : 1;
 };
 
-struct RobotFeedbackCustom
+struct robot_feedback_custom_t
 {
 	uint32_t    length;
 	void*     debug_dump;

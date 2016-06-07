@@ -10,48 +10,11 @@
 *
 *****************************************************************************/
 
-#ifndef NRF24L01_H_
-#define NRF24L01_H_
+#ifndef NRF24L01_H
+#define NRF24L01_H
 
 #include <stddef.h>
-
-/////////////////////////////////////////////////////////////////////////////////
-// SPI function requirements
-//
-// The user must define a function to send one byte of data and also return the
-//   resulting byte of data data through the SPI port. The function used here 
-//   has the function prototype
-//
-//      unsigned char spi_send_read_byte(unsigned char byte);
-//
-// This function should take the argument unsigned char byte and send it through
-//   the SPI port to the 24L01.  Then, it should wait until the 24L01 has returned
-//   its response over SPI.  This received byte should be the return value of the
-//   function.
-//
-// You should also change the include file name below to whatever the name of your 
-//   SPI include file is.
-//////////////////////////////////////////////////////////////////////////////////
-#include "nrf.h"
-#define spi_send_read_byte(byte)    spi1_send_read_byte(byte)
-
-
-/////////////////////////////////////////////////////////////////////////////////
-// Delay function requirements
-//
-// The user must define a function that delays for the specified number of 
-//   microseconds. This function needs to be as precise as possible, and the use
-//   of a timer module within your microcontroller is highly recommended. The 
-//   function used here has the prototype
-//
-//      void delay_us(unsigned int microseconds);
-//
-// You should also change the include file name below to whatever the name of your 
-//   delay include file is.
-//////////////////////////////////////////////////////////////////////////////////
-//#define delay_us(microseconds)      DelayUS(microseconds)
-//esme male altium shansi ba in yeki dar umade :D
-
+#include <stdbool.h>
 
 //////////////////////////////////////////////////////////////////////////////////
 // IO pin definitions
@@ -461,4 +424,4 @@ bool nrf24l01_csn_pin_active(void);
 unsigned char nrf24l01_execute_command(unsigned char instruction, unsigned char * data, unsigned int len, bool copydata);
 void nrf24l01_spi_send_read(unsigned char * data, unsigned int len, bool copydata);
 
-#endif /*NRF24L01_H_*/
+#endif /*NRF24L01_H*/

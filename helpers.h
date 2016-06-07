@@ -1,45 +1,52 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-void set_bit_pos_u8(uint8_t* const var, const uint8_t bit_position , const bool value)
-{
-    if (value)
-    	(*var) |= 1 << bit_position;
-    else
-    	(*var) &= ~(1 << bit_position);
-}
+#include <stdint.h>
+#include <stdbool.h>
 
-void set_bit_mask_u8(uint8_t* const var, const uint8_t bit_mask , const bool value)
-{
-    if (value)
-    	(*var) |= bit_mask;
-    else
-    	(*var) &= ~(bit_mask);
-}
+inline void set_bit_pos_u8 (uint8_t*  const var, const uint8_t bit_position) { (*var) |= 1 << bit_position; }
+inline void set_bit_pos_u16(uint16_t* const var, const uint8_t bit_position) { (*var) |= 1 << bit_position; }
+inline void set_bit_pos_u32(uint32_t* const var, const uint8_t bit_position) { (*var) |= 1 << bit_position; }
 
-bool get_bit_u8(const uint8_t var, const uint8_t bit_position) { return (var >> bit_position) & 0x01; /*just because i like hex numbers more :D*/ }
+inline void clear_bit_pos_u8 (uint8_t*  const var, const uint8_t bit_position) { (*var) &= ~(1 << bit_position); }
+inline void clear_bit_pos_u16(uint16_t* const var, const uint8_t bit_position) { (*var) &= ~(1 << bit_position); }
+inline void clear_bit_pos_u32(uint32_t* const var, const uint8_t bit_position) { (*var) &= ~(1 << bit_position); }
 
-int8_t getSign(int var) { return var >= 0 ? 1 : -1; }
+inline void set_bit_mask_u8 (uint8_t*  const var, const uint8_t  bit_mask) { (*var) |= bit_mask; }
+inline void set_bit_mask_u16(uint16_t* const var, const uint16_t bit_mask) { (*var) |= bit_mask; }
+inline void set_bit_mask_u32(uint32_t* const var, const uint32_t bit_mask) { (*var) |= bit_mask; }
 
+inline void clear_bit_mask_u8 (uint8_t*  const var, const uint8_t  bit_mask) { (*var) &= ~(bit_mask); }
+inline void clear_bit_mask_u16(uint16_t* const var, const uint16_t bit_mask) { (*var) &= ~(bit_mask); }
+inline void clear_bit_mask_u32(uint32_t* const var, const uint32_t bit_mask) { (*var) &= ~(bit_mask); }
 
-signed char max_s_char ( signed char a , signed char b ) { return a > b ? a : b; }
-signed char min_s_char ( signed char a , signed char b ) { return a < b ? a : b; }
-unsigned char max_u_char ( unsigned char a , unsigned char b ) { return a > b ? a : b; }
-unsigned char min_u_char ( unsigned char a , unsigned char b ) { return a < b ? a : b; }
+inline bool get_bit_u8 (const uint8_t  var, const uint8_t bit_position) { return var & (1 << bit_position); }
+inline bool get_bit_u16(const uint16_t var, const uint8_t bit_position) { return var & (1 << bit_position); }
+inline bool get_bit_u32(const uint32_t var, const uint8_t bit_position) { return var & (1 << bit_position); }
 
-signed short max_s_short ( signed short a , signed short b ) { return a > b ? a : b; }
-signed short min_s_short ( signed short a , signed short b ) { return a < b ? a : b; }
-unsigned short max_u_short ( unsigned short a , unsigned short b ) { return a > b ? a : b; }
-unsigned short min_u_short ( unsigned short a , unsigned short b ) { return a < b ? a : b; }
+inline bool get_bit_mask_u8 (const uint8_t  var, const uint8_t  bit_mask) { return var & bit_mask; }
+inline bool get_bit_mask_u16(const uint16_t var, const uint16_t bit_mask) { return var & bit_mask; }
+inline bool get_bit_mask_u32(const uint32_t var, const uint32_t bit_mask) { return var & bit_mask; }
 
-signed int max_s_int ( signed int a , signed int b ) { return a > b ? a : b; }
-signed int min_s_int ( signed int a , signed int b ) { return a < b ? a : b; }
-unsigned int max_u_int ( unsigned int a , unsigned int b ) { return a > b ? a : b; }
-unsigned int min_u_int ( unsigned int a , unsigned int b ) { return a < b ? a : b; }
+inline int8_t  max_s8(const int8_t  a, const int8_t  b) { return a > b ? a : b; }
+inline int8_t  min_s8(const int8_t  a, const int8_t  b) { return a < b ? a : b; }
+inline uint8_t max_u8(const uint8_t a, const uint8_t b) { return a > b ? a : b; }
+inline uint8_t min_u8(const uint8_t a, const uint8_t b) { return a < b ? a : b; }
 
-float max_float ( float a , float b ) { return a > b ? a : b; }
-float min_float ( float a , float b ) { return a < b ? a : b; }
+inline int16_t  max_s16(const int16_t  a, const int16_t  b) { return a > b ? a : b; }
+inline int16_t  min_s16(const int16_t  a, const int16_t  b) { return a < b ? a : b; }
+inline uint16_t max_u16(const uint16_t a, const uint16_t b) { return a > b ? a : b; }
+inline uint16_t min_u16(const uint16_t a, const uint16_t b) { return a < b ? a : b; }
 
-short sgn_01_inv_f ( float a ) { return a > 0 ? 0 : 1; }
+inline int32_t  max_s32(const int32_t  a, const int32_t  b) { return a > b ? a : b; }
+inline int32_t  min_s32(const int32_t  a, const int32_t  b) { return a < b ? a : b; }
+inline uint32_t max_u32(const uint32_t a, const uint32_t b) { return a > b ? a : b; }
+inline uint32_t min_u32(const uint32_t a, const uint32_t b) { return a < b ? a : b; }
+
+inline float max_float(const float a, const float b) { return a > b ? a : b; }
+inline float min_float(const float a, const float b) { return a < b ? a : b; }
+
+inline int8_t sgn_01_inv_f(const float a) { return a >= 0 ? 0 : 1; }
+inline int8_t sgn_32(const int32_t a) { return a >= 0 ? 1 : -1; }
 
 #endif
