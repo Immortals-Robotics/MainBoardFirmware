@@ -2,8 +2,10 @@
 #define DATA_LITE_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "half.h"
+#include "defines.h"
 
 struct vector2f_t
 {
@@ -28,70 +30,70 @@ struct vector4f_t
 
 struct bits8_t
 {
-	uint8_t bit0 : 1;
-	uint8_t bit1 : 1;
-	uint8_t bit2 : 1;
-	uint8_t bit3 : 1;
-	uint8_t bit4 : 1;
-	uint8_t bit5 : 1;
-	uint8_t bit6 : 1;
-	uint8_t bit7 : 1;
+	bool bit0 : 1;
+	bool bit1 : 1;
+	bool bit2 : 1;
+	bool bit3 : 1;
+	bool bit4 : 1;
+	bool bit5 : 1;
+	bool bit6 : 1;
+	bool bit7 : 1;
 };
 
 struct bits16_t
 {
-	uint8_t bit0 : 1;
-	uint8_t bit1 : 1;
-	uint8_t bit2 : 1;
-	uint8_t bit3 : 1;
-	uint8_t bit4 : 1;
-	uint8_t bit5 : 1;
-	uint8_t bit6 : 1;
-	uint8_t bit7 : 1;
-	uint8_t bit8 : 1;
-	uint8_t bit9 : 1;
-	uint8_t bit10 : 1;
-	uint8_t bit11 : 1;
-	uint8_t bit12 : 1;
-	uint8_t bit13 : 1;
-	uint8_t bit14 : 1;
-	uint8_t bit15 : 1;
+	bool bit0 : 1;
+	bool bit1 : 1;
+	bool bit2 : 1;
+	bool bit3 : 1;
+	bool bit4 : 1;
+	bool bit5 : 1;
+	bool bit6 : 1;
+	bool bit7 : 1;
+	bool bit8 : 1;
+	bool bit9 : 1;
+	bool bit10 : 1;
+	bool bit11 : 1;
+	bool bit12 : 1;
+	bool bit13 : 1;
+	bool bit14 : 1;
+	bool bit15 : 1;
 };
 
 struct bits32_t
 {
-	uint8_t bit0  : 1;
-	uint8_t bit1  : 1;
-	uint8_t bit2  : 1;
-	uint8_t bit3  : 1;
-	uint8_t bit4  : 1;
-	uint8_t bit5  : 1;
-	uint8_t bit6  : 1;
-	uint8_t bit7  : 1;
-	uint8_t bit8  : 1;
-	uint8_t bit9  : 1;
-	uint8_t bit10 : 1;
-	uint8_t bit11 : 1;
-	uint8_t bit12 : 1;
-	uint8_t bit13 : 1;
-	uint8_t bit14 : 1;
-	uint8_t bit15 : 1;
-	uint8_t bit16 : 1;
-	uint8_t bit17 : 1;
-	uint8_t bit18 : 1;
-	uint8_t bit19 : 1;
-	uint8_t bit20 : 1;
-	uint8_t bit21 : 1;
-	uint8_t bit22 : 1;
-	uint8_t bit23 : 1;
-	uint8_t bit24 : 1;
-	uint8_t bit25 : 1;
-	uint8_t bit26 : 1;
-	uint8_t bit27 : 1;
-	uint8_t bit28 : 1;
-	uint8_t bit29 : 1;
-	uint8_t bit30 : 1;
-	uint8_t bit31 : 1;
+	bool bit0  : 1;
+	bool bit1  : 1;
+	bool bit2  : 1;
+	bool bit3  : 1;
+	bool bit4  : 1;
+	bool bit5  : 1;
+	bool bit6  : 1;
+	bool bit7  : 1;
+	bool bit8  : 1;
+	bool bit9  : 1;
+	bool bit10 : 1;
+	bool bit11 : 1;
+	bool bit12 : 1;
+	bool bit13 : 1;
+	bool bit14 : 1;
+	bool bit15 : 1;
+	bool bit16 : 1;
+	bool bit17 : 1;
+	bool bit18 : 1;
+	bool bit19 : 1;
+	bool bit20 : 1;
+	bool bit21 : 1;
+	bool bit22 : 1;
+	bool bit23 : 1;
+	bool bit24 : 1;
+	bool bit25 : 1;
+	bool bit26 : 1;
+	bool bit27 : 1;
+	bool bit28 : 1;
+	bool bit29 : 1;
+	bool bit30 : 1;
+	bool bit31 : 1;
 };
 
 enum team_color_e
@@ -100,7 +102,7 @@ enum team_color_e
 	TEAM_COLOR_YELLOW = 1
 };
 
-enum feedback_request_e
+enum feedback_type_e
 {
 	FEEDBACK_TYPE_DEBUG = 0,
 	FEEDBACK_TYPE_INFO = 1,
@@ -131,20 +133,29 @@ struct robot_command_msg_t
 	uint8_t      beep;
 
 	enum shoot_type_e shoot_type;
-	enum feedback_request_e feedback;
-	uint8_t            halt : 1;
-	uint8_t            has_orientation : 1;
+	enum feedback_type_e feedback_request;
+	bool            halt : 1;
+	bool            has_orientation : 1;
 };
 
-struct robot_config_msg_t
+struct robot_control_config_msg_t
 {
-	union float_32_u_t      kp;
-	union float_32_u_t      ki;
-	union float_32_u_t      kd;
-	union float_32_u_t      i_limit;
+	union float_32_u_t      motor_kp;
+	union float_32_u_t      motor_ki;
+	union float_32_u_t      motor_kd;
+	union float_32_u_t      motor_i_limit;
 
-	union float_32_u_t      head_offset;
+	union float_32_u_t      gyro_kp;
+	union float_32_u_t      gyro_ki;
+	union float_32_u_t      gyro_kd;
+	union float_32_u_t      gyro_i_limit;
 
+	union float_32_u_t      max_w_acc;
+	union float_32_u_t      max_w_dec;
+};
+
+struct robot_shoot_config_msg_t
+{
 	struct vector3f_t   direct_coeffs;
 	struct vector3f_t   chip_coeffs;
 };
@@ -161,23 +172,29 @@ struct robot_feedback_msg_t
 
 	union float_32_u_t     omega;
 	union float_32_u_t     orientation;
-
+	
 	struct vector4f_t  motor_velocity;
 	struct vector4f_t  motor_target;
 
 	struct bits8_t  motor_fault;
 	struct bits8_t button_status;
 
-	uint8_t      fault : 1;
-	uint8_t      ball_detected : 1;
-	uint8_t      booster_enabled : 1;
-	uint8_t      dribbler_connected : 1;
+	bool      fault : 1;
+	bool      ball_detected : 1;
+	bool      booster_enabled : 1;
+	bool      dribbler_connected : 1;
 };
 
 struct robot_feedback_custom_t
 {
-	uint32_t    length;
+	uint8_t    length;
 	void*     debug_dump;
+};
+
+struct robot_wrapper_msg_t
+{
+	uint8_t  length;
+	uint8_t  data[MAX_PAYLOAD_SIZE - 1];
 };
 
 #endif

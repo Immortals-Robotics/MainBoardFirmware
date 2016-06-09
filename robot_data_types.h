@@ -42,6 +42,8 @@ struct robot_config_t
     float max_w_dec;
     float gyro_d;
     float gyro_offset;
+
+	bool check_motor_fault;
 };
 
 struct robot_state_t
@@ -53,15 +55,12 @@ struct robot_state_t
     float motor_current[4];
     float motor_pwm[4];
 
+	float orientation;
     float angle_predict;
-    float omega;
-    struct gyro_data_t gyro_data;
-
-    int16_t no_cmd_counter;
-    uint8_t feedback_step;
+    float omega_desired;
+    float omega_current;
 
     bool encoder_has_fault;
-    bool check_motor_fault;
 };
 
 #endif

@@ -20,8 +20,20 @@ uint8_t GYRO_ADDR = 0xD2; // gyro address, binary = 11101001 when AD0 is connect
 #define TO_READ 4 // 2 bytes for each axis x, y, z
 #endif
 
+struct gyro_data_t
+{
+    float x;
+    #ifdef YZ_READ
+    float y;
+    float z;
+    #endif
+    float temp;
+};
+
 extern struct drivers_t g_drivers;
 extern struct robot_config_t g_robot_config;
+
+static struct gyro_data_t gyro_data;
 
 static bool _write_i2c ( uint8_t registerAdd , uint8_t data )
 {
@@ -107,7 +119,7 @@ inline int tcmplnt16 ( int in )
 }
 
 
-bool get_gyro_data(struct gyro_data_t* const result)
+static bool get_gyro_data(void)
 {
   /**************************************
   Gyro ITG-3200 I2C
@@ -140,15 +152,15 @@ bool get_gyro_data(struct gyro_data_t* const result)
 
      tmp = (buffer[2] << 8) | buffer[3];
      tmp = tcmplnt16 ( tmp );
-     result->x =  (float)(tmp) / 14.375;
-     result->x += g_robot_config.gyro_offset;
+     gyro_data.x =  (float)(tmp) / 14.375f;
+     gyro_data.x += g_robot_config.gyro_offset;
      #ifdef YZ_READ
      tmp = (buffer[4] << 8) | buffer[5];
      tmp = tcmplnt16 ( tmp );
-     result->y = (float)(tmp) / 14.375;
+     gyro_data.y = (float)(tmp) / 14.375f;
      tmp = (buffer[6] << 8) | buffer[7];
      tmp = tcmplnt16 ( tmp );
-     result->z = (float)(tmp) / 14.375;
+     gyro_data.z = (float)(tmp) / 14.375f;
      #endif
      return true;
   }
@@ -157,5 +169,11 @@ bool get_gyro_data(struct gyro_data_t* const result)
      i2cm_release_bus( g_drivers.gyro_i2c );
      return false;
   }
+}
+
+float get_gyro_omega(void)
+{
+	get_gyro_data();
+    return gyro_data.x;
 }
 

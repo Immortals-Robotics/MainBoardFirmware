@@ -38,12 +38,16 @@ void read_v4f_h(const uint8_t* const buffer, size_t* const pos, struct vector4f_
 
 uint8_t read_robot_command_fixed(const uint8_t* const buffer, const size_t size, struct robot_command_msg_t* const data);
 
-uint8_t read_robot_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_config_msg_t* const data);
+uint8_t read_robot_control_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_control_config_msg_t* const data);
+
+uint8_t read_robot_shoot_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_shoot_config_msg_t* const data);
 
 uint8_t read_robot_matrix_fixed(const uint8_t* const buffer, const size_t size, struct robot_matrix_msg_t* const data);
 
 uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size, struct robot_feedback_msg_t* const data);
 
 uint8_t read_robot_feedback_custom_fixed(const uint8_t* const buffer, const size_t size, struct robot_feedback_custom_t* const data);
+
+uint8_t read_robot_wrapper_fixed(const uint8_t* const buffer, const size_t size, struct robot_wrapper_msg_t* const data);
 
 #endif

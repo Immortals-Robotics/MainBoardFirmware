@@ -38,12 +38,16 @@ void write_v4f(uint8_t* const buffer, size_t* const pos, const struct vector4f_t
 
 size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_command_msg_t* const data);
 
-size_t write_robot_config_fixed(uint8_t* const buffer, const struct robot_config_msg_t* const data);
+size_t write_robot_control_config_fixed(uint8_t* const buffer, const struct robot_control_config_msg_t* const data);
+
+size_t write_robot_shoot_config_fixed(uint8_t* const buffer, const struct robot_shoot_config_msg_t* const data);
 
 size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix_msg_t* const data);
 
-size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data);
+size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data, enum feedback_type_e type);
 
 size_t write_robot_feedback_custom_fixed(uint8_t* const buffer, const struct robot_feedback_custom_t* const data);
+
+size_t write_robot_wrapper_fixed(uint8_t* const buffer, const struct robot_wrapper_msg_t* const data);
 
 #endif
