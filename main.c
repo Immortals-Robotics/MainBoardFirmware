@@ -44,7 +44,7 @@ void calculate_motor_vels ( void )
 
 void control_loop ( void )
 {
-    if ( g_robot_cmd.halt == 1 )
+    if ( g_robot_cmd.halt == true )
     {
         for (uint8_t i = 0; i < 4; i++)
         {
@@ -210,7 +210,9 @@ void init_default_values()
         g_robot_state.motor_pwm[i] = 0.0f;
     }
 
-	g_robot_state.orientation = 0.0f;
+	g_robot_cmd.halt = false;
+
+    g_robot_state.orientation = 0.0f;
     g_robot_state.angle_predict = 0.0f;
     g_robot_state.omega_desired = 0.0f;
     g_robot_state.omega_current = 0.0f;

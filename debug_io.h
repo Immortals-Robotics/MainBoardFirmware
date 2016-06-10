@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define LOOP_LED 2
-#define RX_LED 4
+#define LOOP_LED 4
+#define RX_LED 2
 #define ALL_LED LOOP_LED+RX_LED
 #define ON  1
 #define OFF 0

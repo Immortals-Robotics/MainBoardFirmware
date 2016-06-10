@@ -87,12 +87,11 @@ static void send_feedback_process()
         case 2:
              if ( nrf24l01_irq_pin_active() )
              {
-                if ( nrf24l01_irq_tx_ds_active() )
-                {
-                    nrf24l01_irq_clear_tx_ds();
-                    nrf24l01_flush_tx();
-                }
+                nrf24l01_irq_clear_all();
+                nrf24l01_flush_tx();
              }
+             else
+             	feedback_step++;
              break;
         case 1:
              nrf24l01_set_as_rx(true);
@@ -136,6 +135,8 @@ static void process_received_command(const struct robot_command_msg_t* const com
 
 	g_robot_cmd = *command;
     feedback_step = FEEDBACK_SEND_STEPS;
+
+	no_cmd_counter = 0;
 }
 
 static void process_received_control_config(const struct robot_control_config_msg_t* const config)
@@ -183,7 +184,7 @@ void nrf_process(void)
                 if (msg_type == TYPE_COMMAND)
                 {
                     struct robot_command_msg_t tmp_command;
-                    if (read_robot_command_fixed(wrapper_msg.data, wrapper_msg.length, &g_robot_cmd) == PARSE_RESULT_SUCCESS)
+                    if (read_robot_command_fixed(wrapper_msg.data, wrapper_msg.length, &tmp_command) == PARSE_RESULT_SUCCESS)
                     {
                         process_received_command(&tmp_command);
                     }
