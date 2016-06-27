@@ -64,8 +64,9 @@ static void construct_feedback_packet(void)
 
 static void send_feedback()
 {
-    construct_feedback_packet();
+    nrf24l01_set_rf_ch(g_robot_config.nrf_channel_tx);
     nrf24l01_set_as_tx();
+    construct_feedback_packet();
     nrf24l01_write_tx_payload(payload, NRF_TX_PAYLOAD_SIZE, true);
 
     pending_feedback = -1;
@@ -168,6 +169,7 @@ void nrf_process(void)
     else if ( nrf24l01_irq_tx_ds_active() )
     {
         nrf24l01_flush_tx();
+        nrf24l01_set_rf_ch(g_robot_config.nrf_channel_rx);
         nrf24l01_set_as_rx(true);
         nrf24l01_irq_clear_tx_ds();
     }
@@ -187,7 +189,7 @@ void init_nrf(void)
     nrf24l01_initialize_debug(true, NRF_RX_PAYLOAD_SIZE, false);
     nrf24l01_rx_active_to_standby();
     nrf24l01_flush_rx();
-    nrf24l01_set_rf_ch(g_robot_config.nrf_channel);
+    nrf24l01_set_rf_ch(g_robot_config.nrf_channel_rx);
     uint8_t own_rx_add[5] = {110, 110, g_robot_config.robot_num, 110, 110};
     nrf24l01_set_rx_addr(own_rx_add, 5, 0);
     own_rx_add[2] = 30;
@@ -210,7 +212,6 @@ void nrf_channel_search()
     if (get_fpga_delay_boot_state())
     {
         bool found_ch = false;
-        uint8_t rf_ch = 2;
 
         uint8_t own_rx_add[5] = {110, 110, 25, 110, 110};
         nrf24l01_set_rx_addr(own_rx_add, 5, 0);
@@ -228,8 +229,13 @@ void nrf_channel_search()
                 {
                    if (nrf24l01_irq_rx_dr_active())
                    {
+                       nrf24l01_read_rx_payload(payload, NRF_RX_PAYLOAD_SIZE);
+                       if (payload[0] != test_ch)
+                       	  continue;
+
                        found_ch = true;
-                       rf_ch = test_ch;
+                       g_robot_config.nrf_channel_rx = payload[0];
+                       g_robot_config.nrf_channel_tx = payload[1];
                        nrf24l01_irq_clear_rx_dr();
                        nrf24l01_flush_rx();
                        break;
@@ -244,10 +250,8 @@ void nrf_channel_search()
 
         own_rx_add[2] = g_robot_config.robot_num;
         nrf24l01_set_rx_addr(own_rx_add, 5, 0);
-        nrf24l01_set_rf_ch(rf_ch);
+        nrf24l01_set_rf_ch(g_robot_config.nrf_channel_rx);
         nrf24l01_rx_standby_to_active();
         delay_ms(1);
-
-		g_robot_config.nrf_channel = rf_ch;
     }
 }

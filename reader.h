@@ -6,6 +6,11 @@
 
 #include "data_lite.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 void read_bytes(const uint8_t* const buffer, size_t* const pos, void* const data, const size_t count);
 
 void read_bits8(const uint8_t* const buffer, size_t* const pos, struct bits8_t* const data);
@@ -51,5 +56,9 @@ uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size
 uint8_t read_robot_feedback_custom_fixed(const uint8_t* const buffer, const size_t size, struct robot_feedback_custom_t* const data);
 
 uint8_t read_robot_wrapper_fixed(const uint8_t* const buffer, const size_t size, struct robot_wrapper_msg_t* const data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

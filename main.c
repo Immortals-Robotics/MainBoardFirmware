@@ -263,7 +263,8 @@ __noinline void init_default_values()
 	g_robot_config.check_motor_fault = false;
     g_robot_config.use_encoders = false;
 
-	g_robot_config.nrf_channel = 55;
+	g_robot_config.nrf_channel_rx = 55;
+    g_robot_config.nrf_channel_tx = 40;
 }
 
 void init_prepherals()
@@ -410,7 +411,8 @@ __noinline void read_on_board_config_from_flash()
 	g_robot_config.gyro_offset = on_board_config.gyro_offset.f32;
     g_robot_config.use_encoders = on_board_config.use_encoders;
 
-	g_robot_config.nrf_channel = on_board_config.nrf_channel;
+	g_robot_config.nrf_channel_rx = on_board_config.nrf_channel_rx;
+    g_robot_config.nrf_channel_tx = on_board_config.nrf_channel_tx;
 }
 
 __noinline void write_on_board_config_to_flash()
@@ -433,7 +435,8 @@ __noinline void write_on_board_config_to_flash()
 	on_board_config.gyro_offset.f32 = g_robot_config.gyro_offset;
     on_board_config.use_encoders = g_robot_config.use_encoders;
 
-	on_board_config.nrf_channel = g_robot_config.nrf_channel;
+	on_board_config.nrf_channel_rx = g_robot_config.nrf_channel_rx;
+    on_board_config.nrf_channel_tx = g_robot_config.nrf_channel_tx;
 
 	uint8_t data[MAX_ON_BOARD_SIZE + 1];
 	data[0] = write_robot_on_board_config_fixed(data + 1, &on_board_config);

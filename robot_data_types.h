@@ -46,7 +46,8 @@ struct robot_config_t
     bool check_motor_fault;
     bool use_encoders;
 
-	uint8_t nrf_channel;
+	uint8_t nrf_channel_rx;
+    uint8_t nrf_channel_tx;
 };
 
 struct robot_state_t

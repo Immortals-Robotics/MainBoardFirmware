@@ -6,6 +6,11 @@
 
 #include "data_lite.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 void write_bytes(uint8_t* const buffer, size_t* const pos, const void* const data, const size_t count);
 
 void write_bits8(uint8_t* const buffer, size_t* const pos, const struct bits8_t* const data);
@@ -51,5 +56,9 @@ size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feed
 size_t write_robot_feedback_custom_fixed(uint8_t* const buffer, const struct robot_feedback_custom_t* const data);
 
 size_t write_robot_wrapper_fixed(uint8_t* const buffer, const struct robot_wrapper_msg_t* const data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
