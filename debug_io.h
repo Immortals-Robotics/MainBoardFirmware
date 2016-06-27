@@ -10,21 +10,21 @@
 #define ON  1
 #define OFF 0
 
-bool get_fpga_delay_boot_state(void);
+__noinline bool get_fpga_delay_boot_state(void);
 
-uint8_t get_swicth(void);
-bool get_swicth_bit(const uint8_t bit);
-uint8_t get_robot_num(void);
+__noinline uint8_t get_swicth(void);
+__noinline bool get_swicth_bit(const uint8_t bit);
+__noinline uint8_t get_robot_num(void);
 
-uint8_t get_button(void);
-bool get_button_bit(const uint8_t bit);
+__noinline uint8_t get_button(void);
+__noinline bool get_button_bit(const uint8_t bit);
 
-void set_led(const uint8_t led_mask);
-void clear_led(const uint8_t led_mask);
-void set_buzzer(const uint16_t freq);
-void clear_buzzer(void);
-void beep(const uint16_t freq, const uint32_t delay);
-void beep_multi(const uint32_t on_delay, const uint32_t off_delay, const uint8_t count);
+__noinline void set_led(const uint8_t led_mask);
+__noinline void clear_led(const uint8_t led_mask);
+__noinline void set_buzzer(const uint16_t freq);
+__noinline void clear_buzzer(void);
+__noinline void beep(const uint16_t freq, const uint32_t delay);
+__noinline void beep_multi(const uint32_t on_delay, const uint32_t off_delay, const uint8_t count);
 
 #endif
 

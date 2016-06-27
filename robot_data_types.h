@@ -43,7 +43,10 @@ struct robot_config_t
     float gyro_d;
     float gyro_offset;
 
-	bool check_motor_fault;
+    bool check_motor_fault;
+    bool use_encoders;
+
+	uint8_t nrf_channel;
 };
 
 struct robot_state_t
@@ -55,7 +58,7 @@ struct robot_state_t
     float motor_current[4];
     float motor_pwm[4];
 
-	float orientation;
+    float orientation;
     float angle_predict;
     float omega_desired;
     float omega_current;

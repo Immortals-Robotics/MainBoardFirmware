@@ -42,6 +42,8 @@ size_t write_robot_control_config_fixed(uint8_t* const buffer, const struct robo
 
 size_t write_robot_shoot_config_fixed(uint8_t* const buffer, const struct robot_shoot_config_msg_t* const data);
 
+size_t write_robot_on_board_config_fixed(uint8_t* const buffer, const struct robot_on_board_config_t* const data);
+
 size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix_msg_t* const data);
 
 size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data, enum feedback_type_e type);

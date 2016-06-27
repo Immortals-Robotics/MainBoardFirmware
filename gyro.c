@@ -35,15 +35,15 @@ extern struct robot_config_t g_robot_config;
 
 static struct gyro_data_t gyro_data;
 
-static bool _write_i2c ( uint8_t registerAdd , uint8_t data )
+__noinline static bool _write_i2c ( uint8_t registerAdd , uint8_t data )
 {
     int retry;
     for ( retry = 10; retry; retry-- )
     {
         if (  !i2cm_putchar( g_drivers.gyro_i2c, true, GYRO_ADDR | I2C_WRITE ))  // Generate start and send device write address
            break;
-        if ( retry ) i2cm_stop( g_drivers.gyro_i2c );
-        for ( clock_t t = clock() + CLOCKS_PER_SEC / 1000; clock() < t; ) __nop();
+        i2cm_stop( g_drivers.gyro_i2c );
+        delay_ms(1);
     }
     if (  !retry                                                // Address acknowledged
           || i2cm_putchar( g_drivers.gyro_i2c, false, registerAdd )                        // Set address counter
@@ -72,41 +72,22 @@ bool init_gyro(void)
   * no interrupt
   ******************************************/
 
-  if ( i2cm_get_bus(g_drivers.gyro_i2c) != -1 )
+  if ( i2cm_get_bus(g_drivers.gyro_i2c) == -1 )
+      return false;
+
+  if ( !_write_i2c(PWR_MGM,0x80)
+       ||!_write_i2c(SMPLRT_DIV,0x0B)
+       ||!_write_i2c(DLPF_FS,0x18)
+       ||!_write_i2c(INT_CFG,0x01)
+     )
   {
-    if ( !_write_i2c(PWR_MGM,0x80)
-         ||!_write_i2c(SMPLRT_DIV,0x0B)
-         ||!_write_i2c(DLPF_FS,0x18)
-         ||!_write_i2c(INT_CFG,0x01)
-       )
-    {
-       i2cm_release_bus( g_drivers.gyro_i2c );
-       return false;
-    }
-
-
-    /*uint8_t gyroConfigData[2];
-
-    gyroConfigData[0] = PWR_MGM;
-    gyroConfigData[1] = 0x00;
-    i2cm_write(gyroI2C,GYRO_ADDR|I2C_WRITE,gyroConfigData,2);
-
-    gyroConfigData[0] = SMPLRT_DIV;
-    gyroConfigData[1] = 0x07; // EB, 50, 80, 7F, DE, 23, 20, FF
-    i2cm_write(gyroI2C,GYRO_ADDR|I2C_WRITE,gyroConfigData,2);
-
-    gyroConfigData[0] = DLPF_FS;
-    gyroConfigData[1] = 0x1E; // +/- 2000 dgrs/sec, 1KHz, 1E, 19
-    i2cm_write(gyroI2C,GYRO_ADDR|I2C_WRITE,gyroConfigData,2);
-
-    gyroConfigData[0] = INT_CFG;
-    gyroConfigData[1] = 0x00;
-    i2cm_write(gyroI2C,GYRO_ADDR|I2C_WRITE,gyroConfigData,2);*/
-
-    i2cm_release_bus( g_drivers.gyro_i2c );
-    return true;
+     i2cm_release_bus( g_drivers.gyro_i2c );
+     return false;
   }
-  return false;
+
+  i2cm_release_bus( g_drivers.gyro_i2c );
+  return true;
+
 }
 
 inline int tcmplnt16 ( int in )

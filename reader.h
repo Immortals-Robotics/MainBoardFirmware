@@ -42,6 +42,8 @@ uint8_t read_robot_control_config_fixed(const uint8_t* const buffer, const size_
 
 uint8_t read_robot_shoot_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_shoot_config_msg_t* const data);
 
+uint8_t read_robot_on_board_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_on_board_config_t* const data);
+
 uint8_t read_robot_matrix_fixed(const uint8_t* const buffer, const size_t size, struct robot_matrix_msg_t* const data);
 
 uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size, struct robot_feedback_msg_t* const data);

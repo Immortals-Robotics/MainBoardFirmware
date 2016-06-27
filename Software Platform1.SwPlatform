@@ -434,24 +434,20 @@ INTERRUPT_CONTROL_CFG=0x000017E0
 [Plugin12]
 Name=interrupts
 VECTOR_BASE=0x100
-APPLICATION_MASK=0x30002
-MAX_HANDLERS=32
-HASH_SIZE=32
+APPLICATION_MASK=0xC002
+MAX_HANDLERS=16
+HASH_SIZE=16
 
 [Plugin13]
 Name=timing
-USETIMERS=True
-MAX=4
-PALBASE=100
+USETIMERS=False
 
 [Plugin14]
 Name=framework_config
 ndebug=True
 ndebug_define=True
 clockhz=36864000
-generate_app_code=True
-generate_app_code_topstack_only=True
-call_app_code=False
+generate_app_code=False
 
 [Plugin15]
 Name=ifconfig

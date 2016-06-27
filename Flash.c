@@ -26,7 +26,7 @@
 #define M25PX0_INSTR_DP         0xB9    // Deep power-down
 #define M25PX0_INSTR_RES        0xAB    // Release from deep power down and optionally read electronic signature
 
-int flash_init(spi_t * driver)
+__noinline int flash_init(spi_t * driver)
 {
     spi_set_baudrate( driver,10000 );
     spi_set_mode( driver, SPI_MODE0 );
@@ -40,7 +40,7 @@ int flash_init(spi_t * driver)
     return sig;
 }
 
-int flash_get_status(spi_t * driver)
+__noinline int flash_get_status(spi_t * driver)
 {
     int ret = -1;
     spi_cs_lo( driver );
@@ -50,7 +50,7 @@ int flash_get_status(spi_t * driver)
     return ret;
 }
 
-int flash_write(spi_t * driver, uint32_t address, void * buffer, size_t buflen , bool blocking)
+__noinline int flash_write(spi_t * driver, uint32_t address, void * buffer, size_t buflen , bool blocking)
 {
     size_t bytes;
     uint8_t * buf8;
@@ -125,7 +125,7 @@ int flash_write(spi_t * driver, uint32_t address, void * buffer, size_t buflen ,
     return buflen;
 }
 
-int flash_read( spi_t * driver, uint32_t address, void * buffer, size_t buflen )
+__noinline int flash_read( spi_t * driver, uint32_t address, void * buffer, size_t buflen )
 {
     uint8_t * buf8;
     uint16_t * buf16;
@@ -184,7 +184,7 @@ int flash_read( spi_t * driver, uint32_t address, void * buffer, size_t buflen )
      return buflen;
 }
 
-int flash_set_protection( spi_t * driver, uint8_t pattern )
+__noinline int flash_set_protection( spi_t * driver, uint8_t pattern )
 {
     int retval = M25PX0_ERR_SPI;
     uint8_t status;
@@ -204,7 +204,7 @@ int flash_set_protection( spi_t * driver, uint8_t pattern )
   return retval;
 }
 
-int flash_sector_erase( spi_t * driver, uint32_t address , bool blocking)
+__noinline int flash_sector_erase( spi_t * driver, uint32_t address , bool blocking)
 {
     int retval = M25PX0_ERR_SPI;
     spi_cs_hi( driver );                                                  // Make sure flash memory's SPI FSM is reset

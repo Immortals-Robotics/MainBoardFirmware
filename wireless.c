@@ -16,9 +16,10 @@
 
 #define NRF_RX_PAYLOAD_SIZE MAX_PAYLOAD_SIZE
 #define NRF_TX_PAYLOAD_SIZE MAX_PAYLOAD_SIZE
-#define NO_CMD_COUNTER_LIMIT 600
 
-static int16_t no_cmd_counter = -1;
+#define NO_CMD_TIME_LIMIT UINT64_MAX // in ms
+static uint64_t last_cmd_time_ms = 0;
+static int8_t pending_feedback = -1;
 
 static uint8_t payload[MAX_PAYLOAD_SIZE];
 
@@ -56,7 +57,7 @@ static void construct_feedback_packet(void)
     // TODO: dribbler conected
 
     struct robot_wrapper_msg_t wrapper_msg;
-    wrapper_msg.length = (uint8_t)write_robot_feedback_fixed(wrapper_msg.data, &feedback_msg, g_robot_cmd.feedback_request);
+    wrapper_msg.length = (uint8_t)write_robot_feedback_fixed(wrapper_msg.data, &feedback_msg, pending_feedback);
 
     write_robot_wrapper_fixed(payload, &wrapper_msg);
 }
@@ -64,13 +65,10 @@ static void construct_feedback_packet(void)
 static void send_feedback()
 {
     construct_feedback_packet();
-	nrf24l01_set_as_tx();
-    nrf24l01_write_tx_payload(payload, NRF_TX_PAYLOAD_SIZE, false);
-    nrf24l01_transmit();
-	while ( !nrf24l01_irq_pin_active() );
-    nrf24l01_irq_clear_all();
-    nrf24l01_flush_tx();
-    nrf24l01_set_as_rx(true);
+    nrf24l01_set_as_tx();
+    nrf24l01_write_tx_payload(payload, NRF_TX_PAYLOAD_SIZE, true);
+
+    pending_feedback = -1;
 }
 
 static void process_received_command(const struct robot_command_msg_t* const command)
@@ -108,9 +106,10 @@ static void process_received_command(const struct robot_command_msg_t* const com
 
     g_robot_cmd = *command;
 
-	// TODO: send feedback
+    // TODO: send feedback
+    pending_feedback = (int8_t) g_robot_cmd.feedback_request;
 
-    no_cmd_counter = 0;
+    last_cmd_time_ms = clock_ms();
 }
 
 static void process_received_control_config(const struct robot_control_config_msg_t* const config)
@@ -129,24 +128,17 @@ static void process_received_control_config(const struct robot_control_config_ms
     g_robot_config.max_w_dec = config->max_w_dec.f32;
 }
 
-void update_no_command_state(void)
-{
-    if ( no_cmd_counter >= 0 )
-       no_cmd_counter ++;
-
-    no_cmd_counter = min_s16(no_cmd_counter, NO_CMD_COUNTER_LIMIT);
-}
-
 bool get_no_command_limit_reached(void)
 {
-    return no_cmd_counter >= NO_CMD_COUNTER_LIMIT ? true : false;
+    const uint64_t elapsed_since_last_cmd_ms = elapsed_time_ms(last_cmd_time_ms);
+    return elapsed_since_last_cmd_ms >= NO_CMD_TIME_LIMIT ? true : false;
 }
 
 void nrf_process(void)
 {
     if ( nrf24l01_irq_rx_dr_active() )
     {
-		nrf24l01_read_rx_payload(payload, NRF_RX_PAYLOAD_SIZE);
+        nrf24l01_read_rx_payload(payload, NRF_RX_PAYLOAD_SIZE);
 
         struct robot_wrapper_msg_t wrapper_msg;
         if (read_robot_wrapper_fixed(payload, NRF_RX_PAYLOAD_SIZE, &wrapper_msg) == PARSE_RESULT_SUCCESS)
@@ -170,8 +162,23 @@ void nrf_process(void)
             }
         }
 
-        nrf24l01_irq_clear_rx_dr();
         nrf24l01_flush_rx();
+        nrf24l01_irq_clear_rx_dr();
+    }
+    else if ( nrf24l01_irq_tx_ds_active() )
+    {
+        nrf24l01_flush_tx();
+        nrf24l01_set_as_rx(true);
+        nrf24l01_irq_clear_tx_ds();
+    }
+    else
+    {
+        nrf24l01_irq_clear_all();
+    }
+
+    if (pending_feedback >= 0)
+    {
+        send_feedback();
     }
 }
 
@@ -180,11 +187,14 @@ void init_nrf(void)
     nrf24l01_initialize_debug(true, NRF_RX_PAYLOAD_SIZE, false);
     nrf24l01_rx_active_to_standby();
     nrf24l01_flush_rx();
-    nrf24l01_set_rf_ch(55);
+    nrf24l01_set_rf_ch(g_robot_config.nrf_channel);
     uint8_t own_rx_add[5] = {110, 110, g_robot_config.robot_num, 110, 110};
     nrf24l01_set_rx_addr(own_rx_add, 5, 0);
     own_rx_add[2] = 30;
     nrf24l01_set_tx_addr(own_rx_add, 5);
+
+    nrf24l01_rx_standby_to_active();
+    delay_ms(1);
 
     if (nrf24l01_get_status() == 0)
     {
@@ -195,25 +205,18 @@ void init_nrf(void)
     }
 }
 
-void nrf_channel_search(bool blocking)
+void nrf_channel_search()
 {
     if (get_fpga_delay_boot_state())
     {
         bool found_ch = false;
         uint8_t rf_ch = 2;
-        uint8_t not_found_counter = 0;
 
         uint8_t own_rx_add[5] = {110, 110, 25, 110, 110};
         nrf24l01_set_rx_addr(own_rx_add, 5, 0);
 
         while (!found_ch)
         {
-            not_found_counter++;
-            if (!blocking && not_found_counter > 10)
-            {
-                return;
-            }
-
             nrf24l01_rx_active_to_standby();
             for (uint8_t test_ch = 125; test_ch > 0; test_ch -= 5)
             {
@@ -244,10 +247,7 @@ void nrf_channel_search(bool blocking)
         nrf24l01_set_rf_ch(rf_ch);
         nrf24l01_rx_standby_to_active();
         delay_ms(1);
-    }
 
-    if (get_fpga_delay_boot_state())
-    {
-        beep(5000, 200);
+		g_robot_config.nrf_channel = rf_ch;
     }
 }

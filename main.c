@@ -19,8 +19,8 @@
 
 #define ANGLE_PREDICT_STEPS 73
 #define LOOP_INT_NUMBER    1
-#define GYRO_INT_NUMBER    16
-#define NRF_INT_NUMBER     17
+#define GYRO_INT_NUMBER    14
+#define NRF_INT_NUMBER     15
 
 #include "robot_data_types.h"
 
@@ -30,6 +30,9 @@ struct drivers_t g_drivers;
 struct robot_command_msg_t g_robot_cmd;
 struct robot_config_t g_robot_config;
 struct robot_state_t g_robot_state;
+
+__noinline void read_on_board_config_from_flash(void);
+__noinline void write_on_board_config_to_flash(void);
 
 void calculate_motor_vels ( void )
 {
@@ -134,11 +137,11 @@ void gyro_process()
 
 void check_encoder_fault_process()
 {
-    #define ENCODER_FAULT_CHECK_TIME_SEC 3
-    #define ENCODER_FAULT_CHECK_LOOP_COUNT (ENCODER_FAULT_CHECK_TIME_SEC*1280)
+    #define ENCODER_FAULT_CHECK_TIME_MS 3000
 
-    static uint16_t ticks_to_recalculate = ENCODER_FAULT_CHECK_LOOP_COUNT;
-    static uint16_t zero_vel_count[4] = {0};
+	static uint64_t last_check_time_ms = 0;
+
+    static uint16_t zero_vel_count[4] = {0, 0, 0, 0};
 
     //TODO : Choose the if Fault action -> never run the motors or check it again
 
@@ -146,13 +149,14 @@ void check_encoder_fault_process()
         g_robot_state.encoder_has_fault)
        return;
 
-    ticks_to_recalculate--;
-    if (ticks_to_recalculate <= 0)
+
+    if (elapsed_time_ms(last_check_time_ms) > ENCODER_FAULT_CHECK_TIME_MS)
     {
-        ticks_to_recalculate = ENCODER_FAULT_CHECK_LOOP_COUNT;
+        last_check_time_ms = clock_ms();
+
         for (uint8_t i = 0; i < 4; i++)
         {
-            if (zero_vel_count[i] > (ENCODER_FAULT_CHECK_LOOP_COUNT / 2))
+            if (zero_vel_count[i] > 1000)
             {
                 g_robot_state.encoder_has_fault = true;
                 zero_vel_count[0]=0;
@@ -192,11 +196,9 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
 	calculate_motor_vels();
     control_loop();
 
-	update_no_command_state();
+	check_encoder_fault_process();
 	if (get_no_command_limit_reached())
         g_robot_cmd.halt = true;
-
-    check_encoder_fault_process();
 
 	clear_led(LOOP_LED);
     interrupt_acknowledge(LOOP_INT_NUMBER);
@@ -214,12 +216,11 @@ __INTERRUPT_NATIVE void nrf_interrupt_handler(void)
     set_led(RX_LED);
 	nrf_process();
 
-	nrf24l01_irq_clear_all();
     clear_led(RX_LED);
     interrupt_acknowledge(NRF_INT_NUMBER);
 }
 
-void init_default_values()
+__noinline void init_default_values()
 {
     g_robot_state.gyro_pid.i_state = 0.0f;
     g_robot_state.gyro_pid.prev_error = 0.0f;
@@ -258,6 +259,11 @@ void init_default_values()
     g_robot_config.max_w_acc = 0.73f;
     g_robot_config.max_w_dec = 1.074f;
     g_robot_config.gyro_offset = 0.0f;
+
+	g_robot_config.check_motor_fault = false;
+    g_robot_config.use_encoders = false;
+
+	g_robot_config.nrf_channel = 55;
 }
 
 void init_prepherals()
@@ -310,17 +316,15 @@ void init_gyro_m()
     }
 }
 
-void gyro_calibration_process()
+void diag_process()
 {
-    const uint16_t WAIT_FOR_GYRO_CALIBRATION_BUTTON_TICKS = 5000;
-    uint16_t remaining_ticks = WAIT_FOR_GYRO_CALIBRATION_BUTTON_TICKS;
+    #define WAIT_FOR_DIAG_BUTTON_MS 10000
+    uint64_t start_time_ms = clock_ms();
 
-    while (remaining_ticks > 0)
+    while (elapsed_time_ms(start_time_ms) < WAIT_FOR_DIAG_BUTTON_MS)
     {
         if (get_button_bit(0) == 0)
         {
-            remaining_ticks = 0;
-
             // wait and beep
             beep(1000, 200);
             delay_ms(200);
@@ -341,73 +345,129 @@ void gyro_calibration_process()
             g_robot_config.gyro_offset = -gyro_offset_tmp.f32;
 
             // store the offset to flash memory
-            uint8_t data[4];
-            size_t length = 0;
-            write_float(data, &length, gyro_offset_tmp);
-            flash_sector_erase(g_drivers.flash_spi, 1, true);
-            flash_write(g_drivers.flash_spi, 1, data, length, true);
+            write_on_board_config_to_flash();
 
             beep(1000, 200);
             break;
         }
-        delay_ms(1);
-        remaining_ticks--;
+		else if (get_button_bit(1) == 0)
+        {
+            // wait and beep
+            beep(1000, 200);
+            delay_ms(200);
+
+			init_default_values();
+            write_on_board_config_to_flash();
+
+            beep(1000, 200);
+            break;
+        }
+		else if (get_button_bit(2) == 0)
+        {
+            nrf_channel_search();
+
+            write_on_board_config_to_flash();
+
+        	beep(5000, 200);
+            break;
+        }
     }
 }
 
-void get_gyro_offset_from_flash()
+__noinline void read_on_board_config_from_flash()
 {
-    uint8_t data[4] = {255, 255, 255, 255};
+    uint8_t data[MAX_ON_BOARD_SIZE + 1];
 
-    flash_read(g_drivers.flash_spi, 1, data, 4);
+    flash_read(g_drivers.flash_spi, 1, data, MAX_ON_BOARD_SIZE + 1);
+
+	const uint8_t length = data[0];
+    uint8_t *buffer = data + 1;
+
     // check if data is valid
-    if (data[0] == 255 || data[1] == 255 || data[2] == 255 || data[3] == 255)
+    if (length > MAX_ON_BOARD_SIZE)
       return;
 
-    union float_32_u_t res;
-    size_t pos = 0;
-    read_float(data, &pos, &res);
-    // sanity check
-    if (fabs(res.f32) < 6.0f)
-       g_robot_config.gyro_offset = res.f32;
+	struct robot_on_board_config_t on_board_config;
+    uint8_t result = read_robot_on_board_config_fixed(buffer, length, &on_board_config);
+
+	if (result != PARSE_RESULT_SUCCESS)
+    	return;
+
+	// TODO
+    g_robot_config.motor_pid_config.p_gain = on_board_config.control_config.motor_kp.f32;
+    g_robot_config.motor_pid_config.i_gain = on_board_config.control_config.motor_ki.f32;
+    g_robot_config.motor_pid_config.d_gain = on_board_config.control_config.motor_kd.f32;
+    g_robot_config.motor_pid_config.i_max = on_board_config.control_config.motor_i_limit.f32;
+
+	g_robot_config.gyro_pid_config.p_gain = on_board_config.control_config.gyro_kp.f32;
+    g_robot_config.gyro_pid_config.i_gain = on_board_config.control_config.gyro_ki.f32;
+    g_robot_config.gyro_d = on_board_config.control_config.gyro_kd.f32;
+    g_robot_config.gyro_pid_config.i_max = on_board_config.control_config.gyro_i_limit.f32;
+
+	g_robot_config.max_w_acc = on_board_config.control_config.max_w_acc.f32;
+    g_robot_config.max_w_dec = on_board_config.control_config.max_w_dec.f32;
+
+	g_robot_config.gyro_offset = on_board_config.gyro_offset.f32;
+    g_robot_config.use_encoders = on_board_config.use_encoders;
+
+	g_robot_config.nrf_channel = on_board_config.nrf_channel;
 }
 
-void init_interrupts()
+__noinline void write_on_board_config_to_flash()
 {
-    interrupt_register_native(LOOP_INT_NUMBER, NULL, interrupt_handler);
-    interrupt_configure(LOOP_INT_NUMBER, EDGE_RISING);
-	interrupt_register_native(GYRO_INT_NUMBER, NULL, gyro_interrupt_handler);
-    interrupt_configure(GYRO_INT_NUMBER, EDGE_RISING);
-	interrupt_register_native(NRF_INT_NUMBER, NULL, nrf_interrupt_handler);
-    interrupt_configure(NRF_INT_NUMBER, LEVEL_HIGH);
+	struct robot_on_board_config_t on_board_config;
 
-	interrupt_acknowledge(LOOP_INT_NUMBER);
-    interrupt_enable(LOOP_INT_NUMBER);
-    interrupt_acknowledge(GYRO_INT_NUMBER);
-    interrupt_enable(GYRO_INT_NUMBER);
-	interrupt_acknowledge(NRF_INT_NUMBER);
-    interrupt_enable(NRF_INT_NUMBER);
+	on_board_config.control_config.motor_kp.f32 = g_robot_config.motor_pid_config.p_gain;
+    on_board_config.control_config.motor_ki.f32 = g_robot_config.motor_pid_config.i_gain;
+    on_board_config.control_config.motor_kd.f32 = g_robot_config.motor_pid_config.d_gain;
+    on_board_config.control_config.motor_i_limit.f32 = g_robot_config.motor_pid_config.i_max;
+
+	on_board_config.control_config.gyro_kp.f32 = g_robot_config.gyro_pid_config.p_gain;
+    on_board_config.control_config.gyro_ki.f32 = g_robot_config.gyro_pid_config.i_gain;
+    on_board_config.control_config.gyro_kd.f32 = g_robot_config.gyro_d;
+    on_board_config.control_config.gyro_i_limit.f32 = g_robot_config.gyro_pid_config.i_max;
+
+	on_board_config.control_config.max_w_acc.f32 = g_robot_config.max_w_acc;
+    on_board_config.control_config.max_w_dec.f32 = g_robot_config.max_w_dec;
+
+	on_board_config.gyro_offset.f32 = g_robot_config.gyro_offset;
+    on_board_config.use_encoders = g_robot_config.use_encoders;
+
+	on_board_config.nrf_channel = g_robot_config.nrf_channel;
+
+	uint8_t data[MAX_ON_BOARD_SIZE + 1];
+	data[0] = write_robot_on_board_config_fixed(data + 1, &on_board_config);
+
+	flash_sector_erase(g_drivers.flash_spi, 1, true);
+	flash_write(g_drivers.flash_spi, 1, data, MAX_ON_BOARD_SIZE + 1, true);
 }
 
 void main( void )
 {
     init_default_values();
     init_prepherals();
-    init_nrf();
-    init_gyro_m();
 
-    if(g_robot_config.robot_num != 15)
-    {
-       nrf_channel_search(false);
-    }
+	read_on_board_config_from_flash();
 
-    if(g_robot_config.robot_num == 15)
-    {
-        gyro_calibration_process();
-    }
+	init_gyro_m();
+	init_nrf();
 
-    get_gyro_offset_from_flash();
+	if(g_robot_config.robot_num == 15)
+        diag_process();
 
-    init_interrupts();
+	interrupt_register_native(LOOP_INT_NUMBER, NULL, interrupt_handler);
+    interrupt_configure(LOOP_INT_NUMBER, EDGE_RISING);
+	interrupt_acknowledge(LOOP_INT_NUMBER);
+    interrupt_enable(LOOP_INT_NUMBER);
+
+	interrupt_register_native(GYRO_INT_NUMBER, NULL, gyro_interrupt_handler);
+    interrupt_configure(GYRO_INT_NUMBER, EDGE_RISING);
+    interrupt_acknowledge(GYRO_INT_NUMBER);
+    interrupt_enable(GYRO_INT_NUMBER);
+
+	interrupt_register_native(NRF_INT_NUMBER, NULL, nrf_interrupt_handler);
+    interrupt_configure(NRF_INT_NUMBER, LEVEL_HIGH);
+	interrupt_acknowledge(NRF_INT_NUMBER);
+    interrupt_enable(NRF_INT_NUMBER);
 }
 

@@ -160,6 +160,15 @@ struct robot_shoot_config_msg_t
 	struct vector3f_t   chip_coeffs;
 };
 
+struct robot_on_board_config_t
+{
+	struct robot_control_config_msg_t   control_config;
+	struct robot_shoot_config_msg_t   shoot_config;
+	union float_32_u_t gyro_offset;
+	uint8_t nrf_channel;
+	uint8_t use_encoders;
+};
+
 struct robot_matrix_msg_t
 {
 	struct vector3f_t matrix[4];
