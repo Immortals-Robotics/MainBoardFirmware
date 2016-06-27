@@ -2,11 +2,11 @@
 
 #include "helpers.h"
 
-#define CONTROL_LOOP_DT 0.778f
+#define CONTROL_LOOP_DT 1.556f
 
 float update_pid(struct pid_state_t* const state, const float error, const struct pid_config_t* const config)
 {
-	const float p_term = config->p_gain * error;
+    const float p_term = config->p_gain * error;
 
     state->i_state += error * CONTROL_LOOP_DT;
     state->i_state = min_float(config->i_max, max_float(-config->i_max, state->i_state));

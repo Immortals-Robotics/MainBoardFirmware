@@ -17,9 +17,10 @@
 #include "reader.h"
 #include "debug_io.h"
 
-#define ANGLE_PREDICT_STEPS 124
+#define ANGLE_PREDICT_STEPS 73
 #define LOOP_INT_NUMBER    1
-#define GYRO_INT_NUMBER    11
+#define GYRO_INT_NUMBER    16
+#define NRF_INT_NUMBER     17
 
 #include "robot_data_types.h"
 
@@ -36,7 +37,7 @@ void calculate_motor_vels ( void )
 
     for (uint8_t i = 0; i < 4; i++)
     {
-        g_robot_state.motor_current[i] = 8.0f * ioport_get_value(g_drivers.motorvel_port, i);
+        g_robot_state.motor_current[i] = 4.0f * ioport_get_value(g_drivers.motorvel_port, i);
         if (get_bit_u32(tmp_dir, 4 + i))
             g_robot_state.motor_current[i] = -g_robot_state.motor_current[i];
     }
@@ -74,9 +75,11 @@ void gyro_process()
     static uint16_t angle_history_index = 0;
     static float old_omega_desired = 0;
 
-	g_robot_state.omega_current = get_gyro_omega();
+	const float gyro_dt = 1.0f / 650.0f;
 
-	const float d_omega = g_robot_state.omega_current / 1285.0f;
+    g_robot_state.omega_current = get_gyro_omega();
+
+    const float d_omega = g_robot_state.omega_current * gyro_dt;
 
     g_robot_state.angle_predict -= angle_history[angle_history_index];
     angle_history[angle_history_index] = d_omega;
@@ -185,15 +188,35 @@ void check_encoder_fault_process()
 __INTERRUPT_NATIVE void interrupt_handler(void)
 {
     set_led(LOOP_LED);
-    calculate_motor_vels();
+
+	calculate_motor_vels();
     control_loop();
-    nrf_process();
-    if (get_no_command_limit_reached())
-    	g_robot_cmd.halt = true;
-    gyro_process();
+
+	update_no_command_state();
+	if (get_no_command_limit_reached())
+        g_robot_cmd.halt = true;
+
     check_encoder_fault_process();
-    clear_led(ALL_LED);
+
+	clear_led(LOOP_LED);
     interrupt_acknowledge(LOOP_INT_NUMBER);
+}
+
+__INTERRUPT_NATIVE void gyro_interrupt_handler(void)
+{
+    gyro_process();
+
+    interrupt_acknowledge(GYRO_INT_NUMBER);
+}
+
+__INTERRUPT_NATIVE void nrf_interrupt_handler(void)
+{
+    set_led(RX_LED);
+	nrf_process();
+
+	nrf24l01_irq_clear_all();
+    clear_led(RX_LED);
+    interrupt_acknowledge(NRF_INT_NUMBER);
 }
 
 void init_default_values()
@@ -210,7 +233,7 @@ void init_default_values()
         g_robot_state.motor_pwm[i] = 0.0f;
     }
 
-	g_robot_cmd.halt = false;
+    g_robot_cmd.halt = false;
 
     g_robot_state.orientation = 0.0f;
     g_robot_state.angle_predict = 0.0f;
@@ -351,12 +374,19 @@ void get_gyro_offset_from_flash()
 
 void init_interrupts()
 {
-    volatile int tenuscs = 0;
-    interrupt_register_native(LOOP_INT_NUMBER, (void*)&tenuscs, interrupt_handler);
+    interrupt_register_native(LOOP_INT_NUMBER, NULL, interrupt_handler);
     interrupt_configure(LOOP_INT_NUMBER, EDGE_RISING);
+	interrupt_register_native(GYRO_INT_NUMBER, NULL, gyro_interrupt_handler);
+    interrupt_configure(GYRO_INT_NUMBER, EDGE_RISING);
+	interrupt_register_native(NRF_INT_NUMBER, NULL, nrf_interrupt_handler);
+    interrupt_configure(NRF_INT_NUMBER, LEVEL_HIGH);
 
-    interrupt_acknowledge(LOOP_INT_NUMBER);
+	interrupt_acknowledge(LOOP_INT_NUMBER);
     interrupt_enable(LOOP_INT_NUMBER);
+    interrupt_acknowledge(GYRO_INT_NUMBER);
+    interrupt_enable(GYRO_INT_NUMBER);
+	interrupt_acknowledge(NRF_INT_NUMBER);
+    interrupt_enable(NRF_INT_NUMBER);
 }
 
 void main( void )

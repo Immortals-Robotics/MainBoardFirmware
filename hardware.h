@@ -84,10 +84,10 @@
 //..............................................................................
 
 //..............................................................................
-#define INTERRUPT_CONTROL_CFG      0x00001FE2
-#define INTERRUPT_KINDS_CFG        0x00001FE2
-#define INTERRUPT_EDGE_KIND_CFG    0x00001FE2
-#define INTERRUPT_LVL_KIND_CFG     0x00000000
+#define INTERRUPT_CONTROL_CFG      0x000317E2
+#define INTERRUPT_KINDS_CFG        0x000117E2
+#define INTERRUPT_EDGE_KIND_CFG    0x000117E2
+#define INTERRUPT_LVL_KIND_CFG     0x00020000
 //..............................................................................
 
 //..............................................................................

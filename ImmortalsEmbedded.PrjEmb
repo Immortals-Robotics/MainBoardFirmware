@@ -557,8 +557,6 @@ SwPlatformDefaultVersion=AD13
 S09=0
 R10=0
 AD13=1
-Family=TSK3000
-Processor=ProcTSK3000
 ProcTSK3000=1
 CompAlignComposites=CompACOptimal
 CompACNatural=0
@@ -588,9 +586,11 @@ LkOL0=0
 LkOL1=0
 LkOL2=1
 LkOLAdv=0
+ASP_Enable=False
+Family=Legacy
+Processor=ProcTSK3000
 Choices_HardwareUnits=MultiplyDivideUnit
 MultiplyDivideUnit=1
-ASP_Enable=False
 
 [Generic_Directories]
 BinDir1=$(PRODDIR)\c3000\bin
@@ -714,7 +714,7 @@ OutputDefault22=0
 [OutputGroup2]
 Name=Simulator Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=HP LaserJet Professional P1102
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 
 [OutputGroup3]

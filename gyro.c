@@ -15,9 +15,9 @@ uint8_t GYRO_ADDR = 0xD2; // gyro address, binary = 11101001 when AD0 is connect
 #define PWR_MGM 0x3E
 
 #ifdef YZ_READ
-#define TO_READ 8 // 2 bytes for each axis x, y, z
+#define TO_READ 6 // 2 bytes for each axis x, y, z
 #else
-#define TO_READ 4 // 2 bytes for each axis x, y, z
+#define TO_READ 2 // 2 bytes for each axis x, y, z
 #endif
 
 struct gyro_data_t
@@ -134,7 +134,7 @@ static bool get_gyro_data(void)
     return false;
 
   if (i2cm_putchar( g_drivers.gyro_i2c, true, GYRO_ADDR | I2C_WRITE )   // Generate start and send device write address
-         || i2cm_putchar( g_drivers.gyro_i2c, false, 0x1B )                        // Set address counter to 27
+         || i2cm_putchar( g_drivers.gyro_i2c, false, 0x1D )                        // Set address counter to 27
      )
   {
      i2cm_stop( g_drivers.gyro_i2c );
@@ -150,15 +150,15 @@ static bool get_gyro_data(void)
      tmp = tcmplnt16 ( tmp ) + 13200;
      result->temp = (float)(tmp) / 280.0;*/
 
-     tmp = (buffer[2] << 8) | buffer[3];
+     tmp = (buffer[0] << 8) | buffer[1];
      tmp = tcmplnt16 ( tmp );
      gyro_data.x =  (float)(tmp) / 14.375f;
      gyro_data.x += g_robot_config.gyro_offset;
      #ifdef YZ_READ
-     tmp = (buffer[4] << 8) | buffer[5];
+     tmp = (buffer[2] << 8) | buffer[3];
      tmp = tcmplnt16 ( tmp );
      gyro_data.y = (float)(tmp) / 14.375f;
-     tmp = (buffer[6] << 8) | buffer[7];
+     tmp = (buffer[4] << 8) | buffer[5];
      tmp = tcmplnt16 ( tmp );
      gyro_data.z = (float)(tmp) / 14.375f;
      #endif
@@ -173,7 +173,7 @@ static bool get_gyro_data(void)
 
 float get_gyro_omega(void)
 {
-	get_gyro_data();
+    get_gyro_data();
     return gyro_data.x;
 }
 

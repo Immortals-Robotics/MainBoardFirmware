@@ -105,7 +105,7 @@ Record=Constraint | TargetKind=Port | TargetId=C_SPI_DIN | FPGA_PINNUM=P129
 Record=Constraint | TargetKind=Port | TargetId=C_SPI_CLK | FPGA_PINNUM=P130
 Record=Constraint | TargetKind=Port | TargetId=C_SPI_DOUT | FPGA_PINNUM=P131
 Record=Constraint | TargetKind=Port | TargetId=C_SPI_SEL_FLSH | FPGA_PINNUM=P132
-Record=Constraint | TargetKind=Port | TargetId=GYROINT | FPGA_PINNUM=P112
+Record=Constraint | TargetKind=Port | TargetId=GYROINT | FPGA_PINNUM=P135
 Record=Constraint | TargetKind=Port | TargetId=CHARGE_PULSE | FPGA_PINNUM=P113
 Record=Constraint | TargetKind=Port | TargetId=SCL | FPGA_PINNUM=P107
 Record=Constraint | TargetKind=Port | TargetId=SDA | FPGA_PINNUM=P108
