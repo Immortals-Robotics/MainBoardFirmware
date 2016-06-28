@@ -46,10 +46,12 @@ static void construct_feedback_packet(void)
     feedback_msg.motor_target.z.f32 = g_robot_state.motor_desired[2] + g_robot_state.omega_desired;
     feedback_msg.motor_target.w.f32 = g_robot_state.motor_desired[3] + g_robot_state.omega_desired;
 
-    // TODO: per-motor fault bits
     // TODO: button bits
+    
+	// WARNING: this line is platform dependent
+	feedback_msg.motor_fault = *((struct bits8_t*)(&g_robot_state.motor_fault));
 
-    feedback_msg.fault = g_robot_state.encoder_has_fault;
+    feedback_msg.fault = g_robot_state.motor_fault > 0;
 
     feedback_msg.ball_detected = get_button_bit(0);
     feedback_msg.booster_enabled = get_swicth_bit(0);
@@ -231,7 +233,7 @@ void nrf_channel_search()
                    {
                        nrf24l01_read_rx_payload(payload, NRF_RX_PAYLOAD_SIZE);
                        if (payload[0] != test_ch)
-                       	  continue;
+                          continue;
 
                        found_ch = true;
                        g_robot_config.nrf_channel_rx = payload[0];

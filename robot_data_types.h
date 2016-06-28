@@ -44,9 +44,11 @@ struct robot_config_t
     float gyro_offset;
 
     bool check_motor_fault;
+    bool check_encoder_fault;
     bool use_encoders;
+    bool run_control_loop;
 
-	uint8_t nrf_channel_rx;
+    uint8_t nrf_channel_rx;
     uint8_t nrf_channel_tx;
 };
 
@@ -64,7 +66,7 @@ struct robot_state_t
     float omega_desired;
     float omega_current;
 
-    bool encoder_has_fault;
+    uint8_t motor_fault;
 };
 
 #endif
