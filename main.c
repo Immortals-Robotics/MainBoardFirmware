@@ -51,7 +51,7 @@ void calculate_motor_vels ( void )
 void control_loop ( void )
 {
     if ( g_robot_cmd.halt == true ||
-    	g_robot_config.run_control_loop == false)
+        g_robot_config.run_control_loop == false)
     {
         for (uint8_t i = 0; i < 4; i++)
         {
@@ -145,12 +145,12 @@ void check_motor_fault_process()
     static uint64_t last_check_time_ms = 0;
 
     static uint16_t motor_fault_count[4] = {0, 0, 0, 0};
-	static uint16_t encoder_fault_count[4] = {0, 0, 0, 0};
+    static uint16_t encoder_fault_count[4] = {0, 0, 0, 0};
     static float pre_motor_speed[4] = {0, 0, 0, 0};
 
     //TODO : Choose the if Fault action -> never run the motors or check it again
     if (!g_robot_config.check_motor_fault ||
-		!g_robot_config.check_encoder_fault ||
+        !g_robot_config.check_encoder_fault ||
         g_robot_state.motor_fault)
        return;
 
@@ -158,22 +158,22 @@ void check_motor_fault_process()
     {
         last_check_time_ms = clock_ms();
 
-		g_robot_state.motor_fault = 0;
+        g_robot_state.motor_fault = 0;
 
         for (uint8_t i = 0; i < 4; i++)
         {
             if (motor_fault_count[i] > 200)
-            	set_bit_pos_u8(&g_robot_state.motor_fault, i);
+                set_bit_pos_u8(&g_robot_state.motor_fault, i);
             if (encoder_fault_count[i] > 10)
-            	set_bit_pos_u8(&g_robot_state.motor_fault, 4 + i);
+                set_bit_pos_u8(&g_robot_state.motor_fault, 4 + i);
 
-			motor_fault_count[i] = 0;
+            motor_fault_count[i] = 0;
             encoder_fault_count[i] = 0;
         }
 
-		if (g_robot_state.motor_fault)
+        if (g_robot_state.motor_fault)
         {
-			set_buzzer(2000);
+            set_buzzer(2000);
             g_robot_config.run_control_loop = false;
         }
     }
@@ -189,7 +189,7 @@ void check_motor_fault_process()
                    motor_fault_count[i]++;
             }
 
-			if(fabs(pre_motor_speed[i] - g_robot_state.motor_current[i]) > 50) //Encoder Fault //TODO: opitimize the numbers
+            if(fabs(pre_motor_speed[i] - g_robot_state.motor_current[i]) > 50) //Encoder Fault //TODO: opitimize the numbers
                encoder_fault_count[i]++;
 
             pre_motor_speed[i] = g_robot_state.motor_current[i];
@@ -268,7 +268,7 @@ __noinline void init_default_values()
     g_robot_config.max_w_dec = 1.074f;
     g_robot_config.gyro_offset = 0.0f;
 
-	g_robot_config.check_motor_fault = true;
+    g_robot_config.check_motor_fault = true;
     g_robot_config.check_encoder_fault = true;
     g_robot_config.use_encoders = false;
     g_robot_config.run_control_loop = true;
@@ -339,7 +339,7 @@ void diag_process()
             // wait and beep
             beep(1000, 200);
             delay_ms(2000);
-			beep(800, 200);
+            beep(800, 200);
             g_robot_config.run_control_loop = false;
 
             // compute the offset
@@ -379,7 +379,7 @@ void diag_process()
             beep(5000, 200);
             break;
         }
-		else if (get_button_bit(3) == 0)
+        else if (get_button_bit(3) == 0)
         {
             g_robot_config.check_encoder_fault = false;
             g_robot_config.check_motor_fault = false;
@@ -454,7 +454,7 @@ __noinline void write_on_board_config_to_flash()
     on_board_config.nrf_channel_tx = g_robot_config.nrf_channel_tx;
 
     uint8_t data[MAX_ON_BOARD_SIZE + 1];
-    data[0] = write_robot_on_board_config_fixed(data + 1, &on_board_config);
+    data[0] = (uint8_t)write_robot_on_board_config_fixed(data + 1, &on_board_config);
 
     flash_sector_erase(g_drivers.flash_spi, 1, true);
     flash_write(g_drivers.flash_spi, 1, data, MAX_ON_BOARD_SIZE + 1, true);

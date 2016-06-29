@@ -13,6 +13,17 @@ __noinline bool get_fpga_delay_boot_state(void)
     return ioport_get_value(g_drivers.debug_port, 0) & 0x4;
 }
 
+__noinline bool get_booster_ready(void)
+{
+    return ioport_get_value(g_drivers.debug_port, 0) & 0x2;
+}
+
+__noinline bool get_ball_detected(void)
+{
+    return ioport_get_value(g_drivers.debug_port, 0) & 0x1;
+}
+
+
 __noinline uint8_t get_swicth(void)
 {
     const uint32_t a = ioport_get_value(g_drivers.debug_port, 0);

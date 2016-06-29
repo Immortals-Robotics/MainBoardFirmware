@@ -28,12 +28,14 @@ extern struct robot_config_t g_robot_config;
 extern struct robot_state_t g_robot_state;
 extern struct drivers_t g_drivers;
 
+extern __noinline void write_on_board_config_to_flash(void);
+
 static void construct_feedback_packet(void)
 {
     struct robot_feedback_msg_t feedback_msg;
     feedback_msg.robot_id = g_robot_config.robot_num;
     feedback_msg.battery_voltage.f32 = 14.8f;
-    feedback_msg.capacitor_voltage.f32 = 250.0f;
+    feedback_msg.capacitor_voltage.f32 = get_booster_ready() ? 250.0f : 0.0f;
     feedback_msg.omega.f32 = g_robot_state.omega_current;
     feedback_msg.orientation.f32 = g_robot_state.orientation;
 
@@ -49,20 +51,17 @@ static void construct_feedback_packet(void)
 
     // TODO: button bits
     
-	// WARNING: this line is platform dependent
-	feedback_msg.motor_fault = *((struct bits8_t*)(&g_robot_state.motor_fault));
+    // WARNING: this line is platform dependent
+    feedback_msg.motor_fault = *((struct bits8_t*)(&g_robot_state.motor_fault));
 
     feedback_msg.fault = g_robot_state.motor_fault > 0;
 
-    feedback_msg.ball_detected = get_button_bit(0);
-    feedback_msg.booster_enabled = get_swicth_bit(0);
+    feedback_msg.ball_detected = get_ball_detected();
+    feedback_msg.booster_enabled = get_swicth_bit(3);
 
     // TODO: dribbler conected
 
-    struct robot_wrapper_msg_t wrapper_msg;
-    wrapper_msg.length = (uint8_t)write_robot_feedback_fixed(wrapper_msg.data, &feedback_msg, pending_feedback);
-
-    write_robot_wrapper_fixed(payload, &wrapper_msg);
+    payload[0] = (uint8_t)write_robot_feedback_fixed(payload + 1, &feedback_msg, pending_feedback);
 }
 
 static void send_feedback()
@@ -131,6 +130,8 @@ static void process_received_control_config(const struct robot_control_config_ms
 
     g_robot_config.max_w_acc = config->max_w_acc.f32;
     g_robot_config.max_w_dec = config->max_w_dec.f32;
+
+    write_on_board_config_to_flash();
 }
 
 bool get_no_command_limit_reached(void)
@@ -145,25 +146,23 @@ void nrf_process(void)
     {
         nrf24l01_read_rx_payload(payload, NRF_RX_PAYLOAD_SIZE);
 
-        struct robot_wrapper_msg_t wrapper_msg;
-        if (read_robot_wrapper_fixed(payload, NRF_RX_PAYLOAD_SIZE, &wrapper_msg) == PARSE_RESULT_SUCCESS)
+        const uint8_t length = payload[0];
+        const uint8_t *const data = payload + 1;
+        const uint8_t msg_type = MESSAGE_TYPE(data[0]);
+        if (msg_type == TYPE_COMMAND)
         {
-            const uint8_t msg_type = MESSAGE_TYPE(wrapper_msg.data[0]);
-            if (msg_type == TYPE_COMMAND)
+            struct robot_command_msg_t tmp_command;
+            if (read_robot_command_fixed(data, length, &tmp_command) == PARSE_RESULT_SUCCESS)
             {
-                struct robot_command_msg_t tmp_command;
-                if (read_robot_command_fixed(wrapper_msg.data, wrapper_msg.length, &tmp_command) == PARSE_RESULT_SUCCESS)
-                {
-                    process_received_command(&tmp_command);
-                }
+                process_received_command(&tmp_command);
             }
-            else if (msg_type == TYPE_CONFIG_CONTROL)
+        }
+        else if (msg_type == TYPE_CONFIG_CONTROL)
+        {
+            struct robot_control_config_msg_t tmp_control_config;
+            if (read_robot_control_config_fixed(data, length, &tmp_control_config) == PARSE_RESULT_SUCCESS)
             {
-                struct robot_control_config_msg_t tmp_control_config;
-                if (read_robot_control_config_fixed(wrapper_msg.data, wrapper_msg.length, &tmp_control_config) == PARSE_RESULT_SUCCESS)
-                {
-                    process_received_control_config(&tmp_control_config);
-                }
+                process_received_control_config(&tmp_control_config);
             }
         }
 

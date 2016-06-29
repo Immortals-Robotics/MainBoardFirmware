@@ -11,6 +11,8 @@
 #define OFF 0
 
 __noinline bool get_fpga_delay_boot_state(void);
+__noinline bool get_booster_ready(void);
+__noinline bool get_ball_detected(void);
 
 __noinline uint8_t get_swicth(void);
 __noinline bool get_swicth_bit(const uint8_t bit);
