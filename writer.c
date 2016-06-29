@@ -109,7 +109,10 @@ void write_uint32(uint8_t* const buffer, size_t* const pos, const uint32_t data)
 	*pos += 4;
 }
 
-__noinline void write_float_h(uint8_t* const buffer, size_t* const pos, const union float_32_u_t data)
+#ifdef __C3000__ 
+__noinline 
+#endif 
+void write_float_h(uint8_t* const buffer, size_t* const pos, const union float_32_u_t data)
 {
 	write_uint16(buffer, pos, half_from_float(data.u32));
 }
@@ -163,7 +166,7 @@ void write_v4f(uint8_t* const buffer, size_t* const pos, const struct vector4f_t
 
 size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_command_msg_t* const data)
 {
-	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE - 1);
 
 	size_t size = 0;
 
@@ -194,7 +197,7 @@ size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_comma
 
 size_t write_robot_control_config_fixed(uint8_t* const buffer, const struct robot_control_config_msg_t* const data)
 {
-	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE - 1);
 
 	size_t size = 0;
 
@@ -218,7 +221,7 @@ size_t write_robot_control_config_fixed(uint8_t* const buffer, const struct robo
 
 size_t write_robot_shoot_config_fixed(uint8_t* const buffer, const struct robot_shoot_config_msg_t* const data)
 {
-	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE - 1);
 
 	size_t size = 0;
 
@@ -240,11 +243,11 @@ size_t write_robot_on_board_config_fixed(uint8_t* const buffer, const struct rob
 
 	uint8_t inner_length;
 
-	inner_length = write_robot_control_config_fixed(buffer + size + 1, &data->control_config);
+	inner_length = (uint8_t)write_robot_control_config_fixed(buffer + size + 1, &data->control_config);
 	write_uint8(buffer, &size, inner_length);
 	size += inner_length;
 
-	inner_length = write_robot_shoot_config_fixed(buffer + size + 1, &data->shoot_config);
+	inner_length = (uint8_t)write_robot_shoot_config_fixed(buffer + size + 1, &data->shoot_config);
 	write_uint8(buffer, &size, inner_length);
 	size += inner_length;
 
@@ -258,7 +261,7 @@ size_t write_robot_on_board_config_fixed(uint8_t* const buffer, const struct rob
 
 size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix_msg_t* const data)
 {
-	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE - 1);
 
 	size_t size = 0;
 
@@ -274,7 +277,7 @@ size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix
 
 size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data, enum feedback_type_e type)
 {
-	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE - 1);
 
 	size_t size = 0;
 
@@ -284,7 +287,8 @@ size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feed
 		data->fault |
 		data->ball_detected << 1 |
 		data->booster_enabled << 2 |
-		data->dribbler_connected << 3;
+		data->dribbler_connected << 3 |
+		data->robot_id << 4;
 	write_uint8(buffer, &size, packed_data);
 
 	write_bits8(buffer, &size, &data->motor_fault);
@@ -311,7 +315,7 @@ size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feed
 
 size_t write_robot_feedback_custom_fixed(uint8_t* const buffer, const struct robot_feedback_custom_t* const data)
 {
-	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE - 1);
 
 	size_t size = 0;
 

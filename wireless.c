@@ -31,6 +31,7 @@ extern struct drivers_t g_drivers;
 static void construct_feedback_packet(void)
 {
     struct robot_feedback_msg_t feedback_msg;
+    feedback_msg.robot_id = g_robot_config.robot_num;
     feedback_msg.battery_voltage.f32 = 14.8f;
     feedback_msg.capacitor_voltage.f32 = 250.0f;
     feedback_msg.omega.f32 = g_robot_state.omega_current;
@@ -100,6 +101,7 @@ static void process_received_command(const struct robot_command_msg_t* const com
     }
 
     ioport_set_value(g_drivers.kick_port, (uint8_t)command->shoot_type, (uint32_t)command->shoot_power.f32);
+    ioport_set_value(g_drivers.kick_port, 1 - (uint8_t)command->shoot_type, 0);
     pwmx_set_pulsewidth(g_drivers.motor_d_pwm, (uint16_t)command->dribbler.f32);
 
     if (command->beep > 0)

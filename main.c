@@ -181,9 +181,13 @@ void check_motor_fault_process()
     {
         for (uint8_t i = 0; i < 4; i++)
         {
-            const float error = g_robot_state.motor_desired[i] + g_robot_state.omega_desired - g_robot_state.motor_current[i];
-            if(fabs(error) > MOTOR_FAULT_ERROR_THRESHOLD ) //Motor Fault //TODO: opitimize the numbers
-               motor_fault_count[i]++;
+            if (g_robot_config.run_control_loop == true &&
+                g_robot_cmd.halt == false)
+            {
+                const float error = g_robot_state.motor_desired[i] + g_robot_state.omega_desired - g_robot_state.motor_current[i];
+                if(fabs(error) > MOTOR_FAULT_ERROR_THRESHOLD ) //Motor Fault //TODO: opitimize the numbers
+                   motor_fault_count[i]++;
+            }
 
 			if(fabs(pre_motor_speed[i] - g_robot_state.motor_current[i]) > 50) //Encoder Fault //TODO: opitimize the numbers
                encoder_fault_count[i]++;

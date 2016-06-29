@@ -189,6 +189,8 @@ struct robot_feedback_msg_t
 	struct bits8_t  motor_fault;
 	struct bits8_t button_status;
 
+	unsigned robot_id : 4;
+
 	bool      fault : 1;
 	bool      ball_detected : 1;
 	bool      booster_enabled : 1;
