@@ -42,9 +42,11 @@ void calculate_motor_vels ( void )
 
     for (uint8_t i = 0; i < 4; i++)
     {
-        g_robot_state.motor_current[i] = 4.0f * ioport_get_value(g_drivers.motorvel_port, i);
+        float speed = 4.0f * ioport_get_value(g_drivers.motorvel_port, i);
         if (get_bit_u32(tmp_dir, 4 + i))
-            g_robot_state.motor_current[i] = -g_robot_state.motor_current[i];
+            speed = -speed;
+
+        g_robot_state.motor_current[i] = 0.2f * speed + 0.8f * g_robot_state.motor_current[i];
     }
 }
 

@@ -131,7 +131,7 @@ static void process_received_control_config(const struct robot_control_config_ms
     g_robot_config.max_w_acc = config->max_w_acc.f32;
     g_robot_config.max_w_dec = config->max_w_dec.f32;
 
-    write_on_board_config_to_flash();
+    //write_on_board_config_to_flash();
 }
 
 bool get_no_command_limit_reached(void)
