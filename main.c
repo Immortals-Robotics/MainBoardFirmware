@@ -206,7 +206,7 @@ __INTERRUPT_NATIVE void interrupt_handler(void)
     calculate_motor_vels();
     control_loop();
 
-    check_motor_fault_process();
+    //check_motor_fault_process();
 
     if (get_no_command_limit_reached())
         g_robot_config.run_control_loop = false;
@@ -255,10 +255,10 @@ __noinline void init_default_values()
     g_robot_state.motor_fault = false;
 
     g_robot_config.robot_num = 0;
-    g_robot_config.motor_pid_config.d_gain = 0.0f;
-    g_robot_config.motor_pid_config.i_gain = 0.23f;
-    g_robot_config.motor_pid_config.p_gain = 25.0f;
-    g_robot_config.motor_pid_config.i_max = 328.0f;
+    g_robot_config.motor_pid_config.d_gain = -15.0f;
+    g_robot_config.motor_pid_config.i_gain = 1.50f;
+    g_robot_config.motor_pid_config.p_gain = 15.0f;
+    g_robot_config.motor_pid_config.i_max = 750.0f;
 
     g_robot_config.gyro_pid_config.d_gain = 0.0f;
     g_robot_config.gyro_pid_config.i_gain = 0.23f;
