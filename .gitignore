@@ -36,4 +36,7 @@ Firmware.uvguix.*
 # Debug files
 *.dSYM/
 
+# Keil files
+*.cPreview
+
 

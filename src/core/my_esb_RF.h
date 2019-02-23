@@ -7,10 +7,12 @@ uint8_t led_nr;
 nrf_esb_payload_t rx_payload;
 
 /*lint -save -esym(40, BUTTON_1) -esym(40, BUTTON_2) -esym(40, BUTTON_3) -esym(40, BUTTON_4) -esym(40, LED_1) -esym(40, LED_2) -esym(40, LED_3) -esym(40, LED_4) */
-extern bool received_NRF;
-extern bool HALTED;
-extern uint32_t FRQ_channel;
+bool received_NRF;
+nrf_esb_payload_t nrf_packet_payload;
+
+uint32_t FRQ_channel;
 extern uint8_t IDnumber;
+extern bool HALTED;
 
 void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 {
@@ -33,7 +35,6 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 				//nrf_gpio_pin_set(22);
 				received_NRF=true;
 				
-				
 				if(app_uart_tx_fifo_len() == 0){
 					for(int i=0; i < rx_payload.data[1] && i < rx_payload.length ;i++){
 						
@@ -41,10 +42,13 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 						//nrf_delay_us(50);
 					}
 				}
+				
+				//Storing the packets to process it later
+				nrf_packet_payload = rx_payload;
+				
 				HALTED = (rx_payload.data[2] == 0x06);
 				nrf_esb_flush_rx();
-                //nrf_gpio_pin_clear(22);
-				
+                //nrf_gpio_pin_clear(22);				
             }
             break;
     }

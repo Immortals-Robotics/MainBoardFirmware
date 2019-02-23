@@ -7,6 +7,8 @@
 #define UART_TX_BUF_SIZE 64                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE 64                         /**< UART RX buffer size. */
 
+bool received_FPGA = false;
+uint8_t rx_FPGA_payload[32];
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {
@@ -18,6 +20,17 @@ void uart_error_handle(app_uart_evt_t * p_event)
     {
         //APP_ERROR_HANDLER(p_event->data.error_code);
     }
+	else if (p_event->evt_type == APP_UART_DATA_READY)
+    {
+		//Read the uart RX data:
+		uint8_t cr;
+		for(int i=0; i < 32; ++i){
+			while(app_uart_get(&cr) != NRF_SUCCESS);
+			rx_FPGA_payload[i] = cr;
+		}
+		
+		received_FPGA = true;		
+	}
 }
 
 

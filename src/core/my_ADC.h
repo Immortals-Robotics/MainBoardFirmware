@@ -658,6 +658,157 @@ void saadc_sampling_trigger(void)
 	//APP_ERROR_CHECK(err_code);
 	
 }
+
+#define CHANNEL_COUNT 5
+#define DATA_SAMPLE_BUFFERS 40
+#define SAMPLES_IN_BUFFER DATA_SAMPLE_BUFFERS*CHANNEL_COUNT
+
+int warming_up_count_down = 10;
+
+static nrf_saadc_value_t     m_buffer_pool[2][SAMPLES_IN_BUFFER];
+unsigned char errorBuff = 0x00;
+unsigned char LOW_BATT = 0x01;
+bool NEW_ADC_SAMPLE = false;
+//unsigned char temp,temp2,temp3;
+unsigned char BATT_ADC,
+				MOTOR_1_ADC,
+				MOTOR_2_ADC,
+				MOTOR_3_ADC,
+				MOTOR_4_ADC;
+char tempStr[100];
+int halt_motor[4] = {0,0,0,0};
+#define MIN_MOTOR_ADC_RED_LINE 110
+
+
+void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
+{
+	
+    if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
+    {
+        unsigned int avg_sample = 0;
+        float steinhart;
+        float sampleAVG;
+        int i;
+		
+        ret_code_t err_code;
+		
+        err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
+        //APP_ERROR_CHECK(err_code);
+		avg_sample = 0;
+        for (i = 2; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
+        {
+              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
+        }
+		BATT_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
+		
+		avg_sample = 0;
+		for (i = 4; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
+        {
+              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
+        }
+		MOTOR_1_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
+		if(MOTOR_1_ADC > MIN_MOTOR_ADC_RED_LINE){
+			halt_motor[0] = (halt_motor[0] > 0) ? (halt_motor[0] - 1) : 0;
+		}else{
+			halt_motor[0]++;	
+		}
+		
+		avg_sample = 0;
+		for (i = 1; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
+        {
+              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
+        }
+		MOTOR_2_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
+		if(MOTOR_2_ADC > MIN_MOTOR_ADC_RED_LINE){
+			halt_motor[1] = (halt_motor[1] > 0) ? (halt_motor[1] - 1) : 0;
+		}else{
+			halt_motor[1]++;	
+		}
+		
+		avg_sample = 0;
+		for (i = 0; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
+        {
+              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
+        }
+		MOTOR_3_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
+		if(MOTOR_3_ADC > MIN_MOTOR_ADC_RED_LINE){
+			halt_motor[2] = (halt_motor[2] > 0) ? (halt_motor[2] - 1) : 0;
+		}else{
+			halt_motor[2]++;	
+		}
+		
+		avg_sample = 0;
+		for (i = 3; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
+        {
+              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
+        }
+		MOTOR_4_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
+		if(MOTOR_4_ADC > MIN_MOTOR_ADC_RED_LINE){
+			halt_motor[3] = (halt_motor[3] > 0) ? (halt_motor[3] - 1) : 0;
+		}else{
+			halt_motor[3]++;	
+		}
+		
+		warming_up_count_down --;
+        NEW_ADC_SAMPLE = true;
+    }
+}
+
+
+void saadc_init(void)
+{
+    ret_code_t err_code;
+	
+    nrf_saadc_channel_config_t channel_0_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN0);//MOTOR 3
+    channel_0_config.gain = NRF_SAADC_GAIN1_6;
+    
+	nrf_saadc_channel_config_t channel_1_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN1);//MOTOR 2
+    channel_1_config.gain = NRF_SAADC_GAIN1_6;
+	
+	nrf_saadc_channel_config_t channel_2_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN4);//ADC_BATT
+    channel_2_config.gain = NRF_SAADC_GAIN1_6;
+	channel_2_config.reference = NRF_SAADC_REFERENCE_VDD4;
+	
+	nrf_saadc_channel_config_t channel_3_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN6);//MOTOR 4
+    channel_3_config.gain = NRF_SAADC_GAIN1_6;
+	
+	nrf_saadc_channel_config_t channel_4_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN7);//MOTOR 1
+    channel_4_config.gain = NRF_SAADC_GAIN1_6;
+	
+	
+	
+	err_code = nrf_drv_saadc_init(NULL, saadc_callback);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = nrf_drv_saadc_channel_init(0, &channel_0_config);
+    APP_ERROR_CHECK(err_code);
+	
+	err_code = nrf_drv_saadc_channel_init(1, &channel_1_config);
+    APP_ERROR_CHECK(err_code);
+	
+	err_code = nrf_drv_saadc_channel_init(2, &channel_2_config);
+    APP_ERROR_CHECK(err_code);
+	
+	err_code = nrf_drv_saadc_channel_init(3, &channel_3_config);
+    APP_ERROR_CHECK(err_code);
+	
+	err_code = nrf_drv_saadc_channel_init(4, &channel_4_config);
+    APP_ERROR_CHECK(err_code);
+	
+	
+	
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer_pool[0],SAMPLES_IN_BUFFER);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer_pool[1],SAMPLES_IN_BUFFER);
+    APP_ERROR_CHECK(err_code);
+}
+
 #endif //NRF_MODULE_ENABLED(SAADC)
 
 

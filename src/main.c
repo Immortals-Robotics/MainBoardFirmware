@@ -97,40 +97,22 @@
 #define UART_MCU_RX_BUF_SIZE 64
 #define UART_MCU_TX_BUF_SIZE 64
 
-bool received_NRF;
+extern bool received_FPGA;
+extern bool received_NRF;
+extern nrf_esb_payload_t nrf_packet_payload;
+extern uint32_t FRQ_channel = -1;
 bool HALTED = false;
-int warming_up_count_down = 10;
-uint32_t FRQ_channel = -1;
 uint8_t IDnumber;
 
-#define CHANNEL_COUNT 5
-#define DATA_SAMPLE_BUFFERS 40
-#define SAMPLES_IN_BUFFER DATA_SAMPLE_BUFFERS*CHANNEL_COUNT
 
 volatile uint8_t state = 1;
 
 static const nrf_drv_timer_t m_timer = NRF_DRV_TIMER_INSTANCE(0);
-static nrf_saadc_value_t     m_buffer_pool[2][SAMPLES_IN_BUFFER];
 static nrf_ppi_channel_t     m_ppi_channel;
 static uint32_t              m_adc_evt_counter;
 
-//Omid:
-unsigned char errorBuff = 0x00;
-unsigned char LOW_BATT = 0x01;
-bool NEW_ADC_SAMPLE = false;
-//unsigned char temp,temp2,temp3;
-unsigned char BATT_ADC,
-				MOTOR_1_ADC,
-				MOTOR_2_ADC,
-				MOTOR_3_ADC,
-				MOTOR_4_ADC;
-char tempStr[100];
-int halt_motor[4] = {0,0,0,0};
-#define MIN_MOTOR_ADC_RED_LINE 110
 
-//#define I_RANGE 5;
-//unsigned char Integral_Buffer[4][I_RANGE];
-//int T_PNT = 0;
+
 	
 void send_halt_to_FPGA(){
 	unsigned char data[3]={0x00,0x03,0x06};//HALT COMMAND CODE
@@ -143,134 +125,7 @@ void send_halt_to_FPGA(){
 	}
 }
 
-void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
-{
-	
-    if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
-    {
-        unsigned int avg_sample = 0;
-        float steinhart;
-        float sampleAVG;
-        int i;
-		
-        ret_code_t err_code;
-		
-        err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
-        //APP_ERROR_CHECK(err_code);
-		avg_sample = 0;
-        for (i = 2; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
-        {
-              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
-        }
-		BATT_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
-		
-		avg_sample = 0;
-		for (i = 4; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
-        {
-              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
-        }
-		MOTOR_1_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
-		if(MOTOR_1_ADC > MIN_MOTOR_ADC_RED_LINE){
-			halt_motor[0] = (halt_motor[0] > 0) ? (halt_motor[0] - 1) : 0;
-		}else{
-			halt_motor[0]++;	
-		}
-		
-		avg_sample = 0;
-		for (i = 1; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
-        {
-              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
-        }
-		MOTOR_2_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
-		if(MOTOR_2_ADC > MIN_MOTOR_ADC_RED_LINE){
-			halt_motor[1] = (halt_motor[1] > 0) ? (halt_motor[1] - 1) : 0;
-		}else{
-			halt_motor[1]++;	
-		}
-		
-		avg_sample = 0;
-		for (i = 0; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
-        {
-              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
-        }
-		MOTOR_3_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
-		if(MOTOR_3_ADC > MIN_MOTOR_ADC_RED_LINE){
-			halt_motor[2] = (halt_motor[2] > 0) ? (halt_motor[2] - 1) : 0;
-		}else{
-			halt_motor[2]++;	
-		}
-		
-		avg_sample = 0;
-		for (i = 3; i < SAMPLES_IN_BUFFER; i+=CHANNEL_COUNT)	
-        {
-              avg_sample += (unsigned char) p_event->data.done.p_buffer[i]; // take N samples in a row
-        }
-		MOTOR_4_ADC = avg_sample/DATA_SAMPLE_BUFFERS;
-		if(MOTOR_4_ADC > MIN_MOTOR_ADC_RED_LINE){
-			halt_motor[3] = (halt_motor[3] > 0) ? (halt_motor[3] - 1) : 0;
-		}else{
-			halt_motor[3]++;	
-		}
-		
-		warming_up_count_down --;
-        NEW_ADC_SAMPLE = true;
-    }
-}
 
-
-void saadc_init(void)
-{
-    ret_code_t err_code;
-	
-    nrf_saadc_channel_config_t channel_0_config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN0);//MOTOR 3
-    channel_0_config.gain = NRF_SAADC_GAIN1_6;
-    
-	nrf_saadc_channel_config_t channel_1_config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN1);//MOTOR 2
-    channel_1_config.gain = NRF_SAADC_GAIN1_6;
-	
-	nrf_saadc_channel_config_t channel_2_config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN4);//ADC_BATT
-    channel_2_config.gain = NRF_SAADC_GAIN1_6;
-	channel_2_config.reference = NRF_SAADC_REFERENCE_VDD4;
-	
-	nrf_saadc_channel_config_t channel_3_config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN6);//MOTOR 4
-    channel_3_config.gain = NRF_SAADC_GAIN1_6;
-	
-	nrf_saadc_channel_config_t channel_4_config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN7);//MOTOR 1
-    channel_4_config.gain = NRF_SAADC_GAIN1_6;
-	
-	
-	
-	err_code = nrf_drv_saadc_init(NULL, saadc_callback);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_saadc_channel_init(0, &channel_0_config);
-    APP_ERROR_CHECK(err_code);
-	
-	err_code = nrf_drv_saadc_channel_init(1, &channel_1_config);
-    APP_ERROR_CHECK(err_code);
-	
-	err_code = nrf_drv_saadc_channel_init(2, &channel_2_config);
-    APP_ERROR_CHECK(err_code);
-	
-	err_code = nrf_drv_saadc_channel_init(3, &channel_3_config);
-    APP_ERROR_CHECK(err_code);
-	
-	err_code = nrf_drv_saadc_channel_init(4, &channel_4_config);
-    APP_ERROR_CHECK(err_code);
-	
-	
-	
-    err_code = nrf_drv_saadc_buffer_convert(m_buffer_pool[0],SAMPLES_IN_BUFFER);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_saadc_buffer_convert(m_buffer_pool[1],SAMPLES_IN_BUFFER);
-    APP_ERROR_CHECK(err_code);
-}
 //char tempStr[64];
 void send_ADC_MOTOR_CURRENT(){
 	nrf_esb_stop_rx();
@@ -390,8 +245,8 @@ int main(void)
 		}
 	}
 	
-//	//-----------END-OF-ADC-------------
-	nrf_gpio_pin_set(5);// Fire up all the robot
+	//-----------END-OF-ADC-------------
+	nrf_gpio_pin_set(5);// Fire up the robot
 	nrf_gpio_pin_clear(6);
 	//--------------UART----------------
     const app_uart_comm_params_t comm_params =
@@ -414,46 +269,6 @@ int main(void)
                          APP_IRQ_PRIORITY_LOWEST,
                          err_code);
 	//-------------END_OF_UART-------------
-//	//TESTING:
-//	  nrf_gpio_pin_set(6);//Signal that we found it!!!
-//	  nrf_delay_ms(2000);
-//	  unsigned char tmpDATA[20]={0,0,0,0,0,
-//		  0,0,0,0,0,
-//		  0,0,0,0,0,
-//		  0,0,0,0,0};
-//	tmpDATA[1]=0x0F;
-//	tmpDATA[2]=11;
-//	tmpDATA[3]=0x11;
-//	tmpDATA[7]=0x37;
-//	tmpDATA[8]=0x73;
-//	tmpDATA[9]=0x55;
-//	tmpDATA[10]=0x22;		  
-//	tmpDATA[11]=0x22;
-//	tmpDATA[12]=0x50;
-//	  
-//	while(1){
-//		nrf_gpio_pin_set(22);
-//		if(app_uart_tx_fifo_len() == 0){
-//				for(int i=0; i < 20 ;i++){
-//					
-//					while (app_uart_put(tmpDATA[i]) != NRF_SUCCESS);
-//				}
-//			}
-//		nrf_gpio_pin_clear(22);
-//		nrf_delay_ms(200);
-//			
-//		nrf_gpio_pin_set(22);
-//		if(app_uart_tx_fifo_len() == 0){
-//				for(int i=0; i < 20 ;i++){
-//					
-//					while (app_uart_put(tmpDATA[i]) != NRF_SUCCESS);
-//					nrf_delay_us(50);
-//				}
-//			}
-//		nrf_gpio_pin_clear(22);
-//		nrf_delay_ms(20000);
-//	}
-//	  
 	  
 	//----------------RADIO----------------
 	
