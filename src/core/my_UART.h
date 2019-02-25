@@ -1,5 +1,7 @@
 
 #include "app_uart.h"
+#include "nrf_gpio.h"
+#include "nrf_delay.h"
 
 //#define ENABLE_LOOPBACK_TEST  /**< if defined, then this example will be a loopback test, which means that TX should be connected to RX to get data loopback. */
 
@@ -24,12 +26,30 @@ void uart_error_handle(app_uart_evt_t * p_event)
     {
 		//Read the uart RX data:
 		uint8_t cr;
-		for(int i=0; i < 32; ++i){
-			while(app_uart_get(&cr) != NRF_SUCCESS);
-			rx_FPGA_payload[i] = cr;
+		char tempStr[100];
+//		nrf_gpio_pin_set(22);
+		static int i=0;
+		
+		while(1){
+			uint32_t error_MSG = app_uart_get(&cr);
+			
+			if(error_MSG == NRF_SUCCESS){
+				rx_FPGA_payload[i] = cr;
+				i++;
+			}
+			else
+				break;
+			
+			if(i>=32)
+				break;
 		}
 		
-		received_FPGA = true;		
+		
+		if(i>=32){
+			i = 0;
+			received_FPGA = true;
+		}
+		
 	}
 }
 

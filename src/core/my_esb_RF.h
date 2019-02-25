@@ -10,7 +10,7 @@ nrf_esb_payload_t rx_payload;
 bool received_NRF;
 nrf_esb_payload_t nrf_packet_payload;
 
-uint32_t FRQ_channel;
+uint32_t FRQ_channel = -1;
 extern uint8_t IDnumber;
 extern bool HALTED;
 

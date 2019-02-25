@@ -100,7 +100,7 @@
 extern bool received_FPGA;
 extern bool received_NRF;
 extern nrf_esb_payload_t nrf_packet_payload;
-extern uint32_t FRQ_channel = -1;
+extern uint32_t FRQ_channel;
 bool HALTED = false;
 uint8_t IDnumber;
 
@@ -133,12 +133,14 @@ void send_ADC_MOTOR_CURRENT(){
 	
 	//getting the current ADC data:
 	tx_payload.length = 32;
-	tx_payload.noack = false;
+	tx_payload.noack = true;
 	nrf_delay_us(2000);
+	static uint8_t var_data = 0x01;
 	while(1){
 		
-		tx_payload.noack = false;
-		tx_payload.data[1] = BATT_ADC;
+		tx_payload.length = 32;
+		tx_payload.noack = true;
+		tx_payload.data[1] = var_data++;//BATT_ADC;
 		tx_payload.data[2] = MOTOR_1_ADC;//halt_motor[0];
 		tx_payload.data[3] = MOTOR_2_ADC;//halt_motor[1];
 		tx_payload.data[4] = MOTOR_3_ADC;//halt_motor[2];
@@ -156,6 +158,31 @@ void send_ADC_MOTOR_CURRENT(){
 	}
 	nrf_delay_us(2000);
 	
+	
+	esb_init_as_RX();
+	nrf_delay_us(2000);	
+    nrf_esb_start_rx();
+}
+
+void send_NRF(uint8_t _data[32]){
+	nrf_esb_stop_rx();
+	esb_init_as_TX();
+	
+	static uint8_t round_count = 0x00;
+	tx_payload.length = 32;
+	tx_payload.noack = true;
+	nrf_delay_us(2000);
+	
+	for(int i=0;i < 32;++i){
+		tx_payload.data[i] = _data[i];
+	}
+	
+	tx_payload.data[31] = round_count++;
+	
+	while(nrf_esb_write_payload(&tx_payload) != NRF_SUCCESS);
+	
+	nrf_delay_us(2000);
+	
 	esb_init_as_RX();	
     nrf_esb_start_rx();
 }
@@ -169,7 +196,7 @@ void send_data_TX(unsigned char TXdata[32]){
 	nrf_delay_us(2000);
 	int i;
 	while(1){
-		tx_payload.noack = false;
+		tx_payload.noack = true;
 		for(i=0; i<31; i++)
 			tx_payload.data[i+1] = TXdata[i];
 		
@@ -293,9 +320,10 @@ int main(void)
     nrf_esb_start_rx();
 	nrf_esb_stop_rx();
 	
-//	// TODO comment this part!!!
-//	nrf_esb_set_rf_channel(55);
+//	// comment this part!!!
+//	nrf_esb_set_rf_channel(90);
 //	nrf_esb_get_rf_channel(&FRQ_channel);
+//	nrf_gpio_pin_set(6);//Signal that we found it!!!
 	
 	//TODO test: (uncomment this part for the real firmware)
 	while(!received_NRF){//search for the right frq
@@ -420,6 +448,18 @@ int main(void)
 //			
 //		
 //		nrf_delay_ms(10);
+
+		if ( received_FPGA ){
+			nrf_delay_ms(100);
+			nrf_gpio_pin_clear(22);	
+			nrf_delay_ms(100);
+			nrf_gpio_pin_set(22);
+			nrf_delay_ms(100);
+			nrf_gpio_pin_clear(22);
+			
+			send_NRF(rx_FPGA_payload);
+			received_FPGA = false;
+		}
 		__WFE();
     }
 

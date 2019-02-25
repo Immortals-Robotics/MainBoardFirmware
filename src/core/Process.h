@@ -11,7 +11,6 @@ void handle_NRF_RX_packet(){
 		case 0x06:
 			HALTED = true;
 			break;
-		case 
 		
 	}
 }

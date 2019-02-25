@@ -134,7 +134,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4099</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
@@ -354,7 +354,7 @@
               <MiscControls> --cpreproc_opts=-DBOARD_PCA10040,-DBSP_DEFINES_ONLY,-DCONFIG_GPIO_AS_PINRESET,-DNRF52,-DNRF52832_XXAA,-DNRF52_PAN_74</MiscControls>
               <Define>BOARD_PCA10040 BSP_DEFINES_ONLY NRF52 NRF52832_XXAA NRF52_PAN_74</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\config;..\..\..\..\..\..\components;..\..\..\..\..\..\components\boards;..\..\..\..\..\..\components\drivers_nrf\common;..\..\..\..\..\..\components\drivers_nrf\delay;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\drivers_nrf\nrf_soc_nosd;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\libraries\atomic;..\..\..\..\..\..\components\libraries\balloc;..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\components\libraries\experimental_log;..\..\..\..\..\..\components\libraries\experimental_log\src;..\..\..\..\..\..\components\libraries\experimental_memobj;..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\components\libraries\fifo;..\..\..\..\..\..\components\libraries\strerror;..\..\..\..\..\..\components\libraries\uart;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\toolchain;..\..\..;..\config;..\arm5_no_packs</IncludePath>
+              <IncludePath>src\components;src\components\boards;src\components\proprietary_rf\esb;src\components\drivers_nrf\common;src\components\drivers_nrf\delay;src\components\drivers_nrf\hal;src\components\drivers_nrf\nrf_soc_nosd;src\components\drivers_nrf\uart;src\components\drivers_nrf\saadc;src\components\drivers_nrf\ppi;src\components\drivers_nrf\timer;src\components\drivers_nrf\spi_master;src\components\libraries\atomic;src\components\libraries\balloc;src\components\libraries\bsp;src\components\libraries\experimental_log;src\components\libraries\experimental_log\src;src\components\libraries\experimental_memobj;src\components\libraries\experimental_section_vars;src\components\libraries\fifo;src\components\libraries\strerror;src\components\libraries\uart;src\components\libraries\util;.\src\external\RTT;.\src\config;.\src\core</IncludePath>
             </VariousControls>
           </Aads>
           <LDads>
@@ -408,7 +408,7 @@
             <File>
               <FileName>Process.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Process.h</FilePath>
+              <FilePath>src\core\Process.h</FilePath>
             </File>
           </Files>
         </Group>
