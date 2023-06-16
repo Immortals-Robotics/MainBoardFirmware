@@ -1,6 +1,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = git@github.com:Immortals-Robotics/vcpkg.git
-[submodule "source/common/protos"]
-	path = source/common/protos
+[submodule "protos"]
+	path = protos
 	url = git@github.com:Immortals-Robotics/ImmortalsProtos.git

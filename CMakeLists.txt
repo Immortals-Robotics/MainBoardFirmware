@@ -13,9 +13,9 @@ option(UNIT_TESTS "Build unit tests" ON)
 
 project(firmware)
 
-add_subdirectory(source/common)
+add_subdirectory(source)
 
 if (${UNIT_TESTS})
     enable_testing()
-    add_subdirectory(source/tests)
+    add_subdirectory(tests)
 endif()

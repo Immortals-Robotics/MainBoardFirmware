@@ -1,6 +1,8 @@
-project(${CMAKE_PROJECT_NAME}-common)
+project(${CMAKE_PROJECT_NAME}-bin)
 
 include("${CMAKE_SOURCE_DIR}/cmake/helpers.cmake")
+
+set_project_paths()
 enable_parallel_build()
 
 find_package(asio CONFIG REQUIRED)
@@ -8,7 +10,7 @@ find_package(Protobuf CONFIG REQUIRED)
 find_package(tomlplusplus CONFIG REQUIRED)
 find_package(quill CONFIG REQUIRED)
 
-set(PROTOS_DIR protos)
+set(PROTOS_DIR "${CMAKE_SOURCE_DIR}/protos")
 
 add_subdirectory(${PROTOS_DIR})
 add_protobuf_generate_command(PROTO_FILES PROTO_SRCS PROTO_HDRS)
@@ -23,19 +25,18 @@ set(HEADER_FILES
     network/udp_server.h)
 
 set(SOURCE_FILES
+    main.cpp
     config/config.cpp
     logging/logging.cpp
     network/udp_client.cpp
     network/udp_server.cpp)
 
-add_library(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME} 
     ${SOURCE_FILES} ${HEADER_FILES}
     ${PROTO_SRCS} ${PROTO_HDRS}
     ${PROTO_FILES})
 
-target_include_directories(${PROJECT_NAME} INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
-
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_FILES})
 source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})
@@ -46,8 +47,8 @@ target_link_libraries(${PROJECT_NAME}
     tomlplusplus::tomlplusplus
     quill::quill)
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC TOML_EXCEPTIONS=0)
-target_compile_definitions(${PROJECT_NAME} PUBLIC QUILL_ROOT_LOGGER_ONLY)
+target_compile_definitions(${PROJECT_NAME} PRIVATE TOML_EXCEPTIONS=0)
+target_compile_definitions(${PROJECT_NAME} PRIVATE QUILL_ROOT_LOGGER_ONLY)
 
 option(TRACE_BUILD_TIME "Use -ftime-trace to generate build time trace" OFF)
 if (${TRACE_BUILD_TIME})
