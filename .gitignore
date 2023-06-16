@@ -1,0 +1,12 @@
+.idea/
+build/
+out/
+.DS_Store
+
+.vscode/
+.vs/
+
+vcpkg_installed/
+
+log/
+
