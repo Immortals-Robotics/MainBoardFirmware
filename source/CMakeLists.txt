@@ -48,21 +48,23 @@ set(SOURCE_FILES
     config/config.cpp
     logging/logging.cpp
     network/udp_client.cpp
-    network/udp_server.cpp
+    network/udp_server.cpp)
+
+set(C_SOURCE_FILES
     ${TMC_DIR}/tmc/helpers/CRC.c
     ${TMC_DIR}/tmc/helpers/Functions.c
     ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.c
     ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.c)
 
 add_executable(${PROJECT_NAME} 
-    ${SOURCE_FILES} ${HEADER_FILES}
+    ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES}
     ${PROTO_SRCS} ${PROTO_HDRS}
     ${PROTO_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES} ${PROTO_FILES})
 source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(${PROJECT_NAME} 
@@ -87,4 +89,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_DIR="${CMAKE_SOURCE_DIR}/l
 set_source_files_properties(${PROTO_SRCS} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ${USE_UNITY_BUILDS})
 
+set_source_files_properties(${C_SOURCE_FILES} PROPERTIES 
+    SKIP_PRECOMPILE_HEADERS TRUE
+    SKIP_UNITY_BUILD_INCLUSION TRUE)
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROTO_HDRS} ${HEADER_FILES})
