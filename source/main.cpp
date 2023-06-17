@@ -9,6 +9,9 @@ extern "C" {
 #include "tmc/ic/TMC6200/TMC6200.h"
 }
 
+#include "immortals/micro.pb.h"
+#include <google/protobuf/util/delimited_message_util.h>
+
 void motors_test()
 {
     init_spi();
@@ -41,24 +44,46 @@ void micro_test()
         return;
     }
 
-    char rx_buf[0x100] = {};
+    static constexpr size_t buffer_size = 128;
 
-    char msg[0x100] = {};
-    for (int i = 0; i < 0x100; ++i)
-    {
-        // bit-inverted from i. The values should be: {0xff, 0xfe, 0xfd...}
-        msg[i] = ~i;
-    }
+    char rx_buf[buffer_size] = {};
+    char tx_buf[buffer_size] = {};
 
-    int h = spi_open(pi, 1, 8 * 1000 * 1000, PI_SPI_FLAGS_AUX_SPI(1));
+    int h = spi_open(pi, 1, 4 * 1000 * 1000, 
+        PI_SPI_FLAGS_AUX_SPI(1) | 
+                PI_SPI_FLAGS_MODE(0));
 
     if (h < 0)
         return;
 
     while (true)
     {
-        spi_xfer(pi, h, msg, rx_buf, 0x100);
-        printf("rcv: %s", rx_buf);
+        Immortals::Protos::MicroCommand command{};
+
+        Immortals::Protos::MikonaCommand* const mikona = command.mutable_mikona();
+        mikona->set_charge(true);
+        mikona->set_discharge(false);
+        mikona->set_kick_a(0);
+        mikona->set_kick_b(0);
+
+        Immortals::Protos::LEDCommand *const led = command.mutable_led();
+        led->set_wifi_connected(true);
+        led->set_wifi_acitivity(false);
+        led->set_fault(false);
+
+        command.set_buzzer(false);
+
+        command.SerializeToArray(tx_buf, buffer_size);
+
+        google::protobuf::io::ArrayOutputStream output_stream{tx_buf, buffer_size};
+        google::protobuf::util::SerializeDelimitedToZeroCopyStream(command, &output_stream);
+
+        spi_xfer(pi, h, tx_buf, rx_buf, buffer_size);
+
+        Immortals::Protos::MicroStatus status{};
+        google::protobuf::io::ArrayInputStream input_stream{rx_buf, buffer_size};
+        google::protobuf::util::ParseDelimitedFromZeroCopyStream(&status, &input_stream, nullptr);
+        printf("ir: %d\n", status.balldetected());
     }
 
     spi_close(pi, h);
