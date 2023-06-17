@@ -11,6 +11,7 @@ find_package(tomlplusplus CONFIG REQUIRED)
 find_package(quill CONFIG REQUIRED)
 
 set(PROTOS_DIR "protos")
+set(TMC_DIR "tmc-api")
 
 add_subdirectory(${PROTOS_DIR})
 add_protobuf_generate_command(PROTO_FILES PROTO_SRCS PROTO_HDRS)
@@ -22,14 +23,36 @@ set(HEADER_FILES
     config/config.h
     logging/logging.h
     network/udp_client.h
-    network/udp_server.h)
+    network/udp_server.h
+    ${TMC_DIR}/tmc/helpers/API_Header.h
+    ${TMC_DIR}/tmc/helpers/Bits.h
+    ${TMC_DIR}/tmc/helpers/Config.h
+    ${TMC_DIR}/tmc/helpers/Constants.h
+    ${TMC_DIR}/tmc/helpers/CRC.h
+    ${TMC_DIR}/tmc/helpers/Functions.h
+    ${TMC_DIR}/tmc/helpers/Macros.h
+    ${TMC_DIR}/tmc/helpers/RegisterAccess.h
+    ${TMC_DIR}/tmc/helpers/Types.h
+    ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.h
+    ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Constants.h
+    ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Fields.h
+    ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Register.h
+    ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Variants.h
+    ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.h
+    ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Constants.h
+    ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Fields.h
+    ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Register.h)
 
 set(SOURCE_FILES
     main.cpp
     config/config.cpp
     logging/logging.cpp
     network/udp_client.cpp
-    network/udp_server.cpp)
+    network/udp_server.cpp
+    ${TMC_DIR}/tmc/helpers/CRC.c
+    ${TMC_DIR}/tmc/helpers/Functions.c
+    ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.c
+    ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.c)
 
 add_executable(${PROJECT_NAME} 
     ${SOURCE_FILES} ${HEADER_FILES}
@@ -37,6 +60,7 @@ add_executable(${PROJECT_NAME}
     ${PROTO_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_FILES})
 source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})

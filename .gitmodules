@@ -4,3 +4,6 @@
 [submodule "source/protos"]
 	path = source/protos
 	url = git@github.com:Immortals-Robotics/ImmortalsProtos.git
+[submodule "source/tmc-api"]
+	path = source/tmc-api
+	url = git@github.com:trinamic/TMC-API.git
