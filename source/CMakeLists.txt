@@ -10,7 +10,7 @@ find_package(Protobuf CONFIG REQUIRED)
 find_package(tomlplusplus CONFIG REQUIRED)
 find_package(quill CONFIG REQUIRED)
 
-set(PROTOS_DIR "${CMAKE_SOURCE_DIR}/protos")
+set(PROTOS_DIR "protos")
 
 add_subdirectory(${PROTOS_DIR})
 add_protobuf_generate_command(PROTO_FILES PROTO_SRCS PROTO_HDRS)
