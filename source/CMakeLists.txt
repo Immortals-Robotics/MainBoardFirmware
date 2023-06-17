@@ -23,7 +23,10 @@ set(HEADER_FILES
     config/config.h
     logging/logging.h
     network/udp_client.h
-    network/udp_server.h
+    network/udp_server.h)
+
+set(C_HEADER_FILES
+    spi_hal.h
     ${TMC_DIR}/tmc/helpers/API_Header.h
     ${TMC_DIR}/tmc/helpers/Bits.h
     ${TMC_DIR}/tmc/helpers/Config.h
@@ -51,23 +54,26 @@ set(SOURCE_FILES
     network/udp_server.cpp)
 
 set(C_SOURCE_FILES
+    spi_hal.c
     ${TMC_DIR}/tmc/helpers/CRC.c
     ${TMC_DIR}/tmc/helpers/Functions.c
     ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.c
     ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.c)
 
 add_executable(${PROJECT_NAME} 
-    ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES}
+    ${C_SOURCE_FILES} ${C_HEADER_FILES}
+    ${SOURCE_FILES} ${HEADER_FILES}
     ${PROTO_SRCS} ${PROTO_HDRS}
     ${PROTO_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES} ${PROTO_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES} ${C_HEADER_FILES} ${PROTO_FILES})
 source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
+    pigpiod_if2
     protobuf::libprotobuf
     asio::asio
     tomlplusplus::tomlplusplus
