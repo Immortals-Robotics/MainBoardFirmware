@@ -32,22 +32,22 @@ Logger::Logger()
     quill::Config cfg;
 
     // stdout handler
-    quill::Handler *stdout_handler = quill::stdout_handler(); // for stdout
+    std::shared_ptr<quill::Handler> stdout_handler = quill::stdout_handler(); // for stdout
     stdout_handler->set_pattern("%(ascii_time) [%(thread)] %(fileline:<28) %(level_name) %(message)",
                                 "%Y-%m-%d %H:%M:%S.%Qms");
     // Enable console colors
-    dynamic_cast<quill::ConsoleHandler *>(stdout_handler)->enable_console_colours();
+    dynamic_cast<quill::ConsoleHandler *>(stdout_handler.get())->enable_console_colours();
     stdout_handler->add_filter(std::make_unique<LogFilter>(quill::LogLevel::Debug));
-    cfg.default_handlers.emplace_back(stdout_handler);
+    cfg.default_handlers.emplace_back(stdout_handler.get());
 
     // Find the target path for the log file
     const std::filesystem::path log_file_path = getNewLogFilePath();
     // file handler
-    quill::Handler *file_handler = quill::file_handler(log_file_path, "w"); // for writing to file
+    std::shared_ptr<quill::Handler> file_handler = quill::file_handler(log_file_path, "w"); // for writing to file
     file_handler->set_pattern("%(ascii_time) [%(thread)] %(fileline:<28) %(level_name) %(message)",
                               "%Y-%m-%d %H:%M:%S.%Qms");
     file_handler->add_filter(std::make_unique<LogFilter>(quill::LogLevel::TraceL3));
-    cfg.default_handlers.emplace_back(file_handler);
+    cfg.default_handlers.emplace_back(file_handler.get());
 
     configure(cfg);
 
