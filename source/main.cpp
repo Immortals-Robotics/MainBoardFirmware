@@ -12,11 +12,15 @@ extern "C" {
 #include "immortals/micro.pb.h"
 #include <google/protobuf/util/delimited_message_util.h>
 
-void init_4671(const uint8_t motor_id)
+bool init_4671(const uint8_t motor_id)
 {
     // check the device
     tmc4671_writeInt(motor_id, TMC4671_CHIPINFO_ADDR, 0);
-    int result = tmc4671_readInt(motor_id, TMC4671_CHIPINFO_DATA);
+    const int result = tmc4671_readInt(motor_id, TMC4671_CHIPINFO_DATA);
+    if (result != 0x34363731) // ASCII "4671"
+    {
+        return false;
+    }
 
     // Motor type &  PWM configuration
     tmc4671_setMotorType(motor_id, TMC4671_THREE_PHASE_BLDC);
@@ -75,11 +79,17 @@ void init_4671(const uint8_t motor_id)
     tmc4671_writeInt(motor_id, TMC4671_ADC_I_SELECT, 0x18000100);
 
     tmc4671_switchToMotionMode(motor_id, TMC4671_MOTION_MODE_STOPPED);
+
+    return true;
 }
 
-void init_6200(const uint8_t motor_id)
+bool init_6200(const uint8_t motor_id)
 {
-    int tmc6200_version = TMC6200_FIELD_READ(motor_id, TMC6200_IOIN_OUTPUT, TMC6200_VERSION_MASK, TMC6200_VERSION_SHIFT);
+    const int version = TMC6200_FIELD_READ(motor_id, TMC6200_IOIN_OUTPUT, TMC6200_VERSION_MASK, TMC6200_VERSION_SHIFT);
+    if (version != 0x10)
+    {
+        return false;
+    }
 
     int gstat = tmc6200_readInt(motor_id, TMC6200_GSTAT);
 
@@ -87,6 +97,8 @@ void init_6200(const uint8_t motor_id)
 
     // set default PWM configuration for use with TMC4671
     tmc6200_writeInt(motor_id, TMC6200_GCONF, 0x0);
+
+    return true;
 }
 
 void open_loop_test(const uint8_t motor_id)
