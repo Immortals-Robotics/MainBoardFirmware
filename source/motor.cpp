@@ -72,7 +72,7 @@ bool Motor::initController()
     // TODO: read from the config file
     tmc4671_setTorqueFluxPI(m_id, 550, 11000);
     tmc4671_setVelocityPI(m_id, 200, 15);
-    tmc4671_setPositionPI(m_id, 0, 0);
+    tmc4671_setPositionPI(m_id, 25, 2);
 
 #if 0
     // Init encoder (mode 0)
