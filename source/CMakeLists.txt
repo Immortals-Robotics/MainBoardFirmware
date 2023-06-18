@@ -16,7 +16,7 @@ set(TMC_DIR "tmc-api")
 add_subdirectory(${PROTOS_DIR})
 add_protobuf_generate_command(NANO_PROTO_FILES PROTO_SRCS PROTO_HDRS)
 
-set(HEADER_FILES
+set(COMMON_HEADER_FILES
     pch.h
     services.h
     setting.h
@@ -24,6 +24,9 @@ set(HEADER_FILES
     logging/logging.h
     network/udp_client.h
     network/udp_server.h)
+
+set(HEADER_FILES
+    motor.h)
 
 set(C_HEADER_FILES
     spi_hal.h
@@ -47,6 +50,7 @@ set(C_HEADER_FILES
     ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Register.h)
 
 set(SOURCE_FILES
+    motor.cpp
     main.cpp
     config/config.cpp
     logging/logging.cpp
@@ -62,14 +66,14 @@ set(C_SOURCE_FILES
 
 add_executable(${PROJECT_NAME} 
     ${C_SOURCE_FILES} ${C_HEADER_FILES}
-    ${SOURCE_FILES} ${HEADER_FILES}
+    ${SOURCE_FILES} ${COMMON_HEADER_FILES} ${HEADER_FILES}
     ${PROTO_SRCS} ${PROTO_HDRS}
     ${PROTO_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES} ${C_HEADER_FILES} ${PROTO_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${COMMON_HEADER_FILES} ${HEADER_FILES} ${C_HEADER_FILES} ${PROTO_FILES})
 source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(${PROJECT_NAME}
@@ -98,4 +102,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ${USE_UNITY_BUILDS}
 set_source_files_properties(${C_SOURCE_FILES} PROPERTIES 
     SKIP_PRECOMPILE_HEADERS TRUE
     SKIP_UNITY_BUILD_INCLUSION TRUE)
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROTO_HDRS} ${HEADER_FILES})
+target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROTO_HDRS} ${COMMON_HEADER_FILES})
