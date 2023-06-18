@@ -7,14 +7,34 @@
 int pi_h;
 int spi_h;
 
-const int cs = 8;
+const uint8_t cs = 8;
 
-const int mux_a0 = 27;
-const int mux_a1 = 22;
-const int mux_a2 = 5;
-const int mux_a3 = 6;
+const uint8_t mux_a0 = 27;
+const uint8_t mux_a1 = 22;
+const uint8_t mux_a2 = 5;
+const uint8_t mux_a3 = 6;
 
-const int m_en = 13;
+const uint8_t m_en = 13;
+
+const uint8_t unused_ce_id = 15;
+
+static const uint8_t ctrl_ce_id[5] = 
+{
+    0, // Dribbler
+    2, // Motor 1
+    8, // Motor 2
+    6, // Motor 3
+    4  // Motor 4
+};
+
+static const uint8_t drv_ce_id[5] =
+{
+    1, // Dribbler
+    3, // Motor 1
+    9, // Motor 2
+    7, // Motor 3
+    5  // Motor 4
+};
 
 bool init_spi()
 {
@@ -63,14 +83,20 @@ void shutdown_spi()
     pigpio_stop(pi_h); /* Disconnect from local Pi. */
 }
 
+void select_ce(const uint8_t ce_id)
+{
+    gpio_write(pi_h, mux_a0, (ce_id & 1) >> 0);
+    gpio_write(pi_h, mux_a1, (ce_id & 2) >> 1);
+    gpio_write(pi_h, mux_a2, (ce_id & 4) >> 2);
+    gpio_write(pi_h, mux_a3, (ce_id & 8) >> 3);
+}
+
 uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 {
-    gpio_write(pi_h, mux_a0, 0);
-    gpio_write(pi_h, mux_a1, 1);
-    gpio_write(pi_h, mux_a2, 1);
-    gpio_write(pi_h, mux_a3, 0);
+    const uint8_t ce_id = ctrl_ce_id[motor];
+    select_ce(ce_id);
 
-    char rx_buf[64] = {};
+    char rx_buf[64] = {0};
 
     gpio_write(pi_h, cs, 0);
 
@@ -86,10 +112,8 @@ uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
 uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 {
-    gpio_write(pi_h, mux_a0, 1);
-    gpio_write(pi_h, mux_a1, 1);
-    gpio_write(pi_h, mux_a2, 1);
-    gpio_write(pi_h, mux_a3, 0);
+    const uint8_t ce_id = drv_ce_id[motor];
+    select_ce(ce_id);
 
     char rx_buf[64] = {};
 
