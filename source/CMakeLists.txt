@@ -26,6 +26,7 @@ set(COMMON_HEADER_FILES
     network/udp_server.h)
 
 set(HEADER_FILES
+    micro.h
     motor.h)
 
 set(C_HEADER_FILES
@@ -50,6 +51,7 @@ set(C_HEADER_FILES
     ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Register.h)
 
 set(SOURCE_FILES
+    micro.cpp
     motor.cpp
     main.cpp
     config/config.cpp

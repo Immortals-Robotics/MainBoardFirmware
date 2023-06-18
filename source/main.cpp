@@ -1,10 +1,10 @@
 #include <cstdio>
-
 #include <pigpiod_if2.h>
 
 #include "spi_hal.h"
 
 #include "motor.h"
+#include "micro.h"
 
 #include "immortals/micro.pb.h"
 #include <google/protobuf/util/delimited_message_util.h>
@@ -40,10 +40,7 @@ void motors_test(const uint8_t motor_id)
 
 void micro_test()
 {
-    static constexpr size_t buffer_size = 128;
-
-    char rx_buf[buffer_size] = {};
-    char tx_buf[buffer_size] = {};
+    Micro micro{};
 
     while (true)
     {
@@ -51,27 +48,10 @@ void micro_test()
 
         Immortals::Protos::MikonaCommand* const mikona = command.mutable_mikona();
         mikona->set_charge(true);
-        mikona->set_discharge(false);
-        mikona->set_kick_a(0);
-        mikona->set_kick_b(0);
 
-        Immortals::Protos::LEDCommand *const led = command.mutable_led();
-        led->set_wifi_connected(true);
-        led->set_wifi_acitivity(false);
-        led->set_fault(false);
+        micro.sendCommand(command);
 
-        command.set_buzzer(false);
-
-        command.SerializeToArray(tx_buf, buffer_size);
-
-        google::protobuf::io::ArrayOutputStream output_stream{tx_buf, buffer_size};
-        google::protobuf::util::SerializeDelimitedToZeroCopyStream(command, &output_stream);
-
-        micro_xfer(tx_buf, rx_buf, buffer_size);
-
-        Immortals::Protos::MicroStatus status{};
-        google::protobuf::io::ArrayInputStream input_stream{rx_buf, buffer_size};
-        google::protobuf::util::ParseDelimitedFromZeroCopyStream(&status, &input_stream, nullptr);
+        const Immortals::Protos::MicroStatus& status = micro.getStatus();
         printf("ir: %d\n", status.balldetected());
     }
 }
