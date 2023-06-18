@@ -6,10 +6,9 @@ extern "C" {
 #endif
 
 bool init_spi();
-
 void shutdown_spi();
 
-void test_4671();
+int micro_xfer(char *tx_buf, char *rx_buf, unsigned count);
 
 void enable_driver(bool enable);
 

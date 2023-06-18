@@ -33,36 +33,17 @@ void velocity_test(const uint8_t motor_id)
 
 void motors_test(const uint8_t motor_id)
 {
-    init_spi();
-
     enable_driver(true);
 
     velocity_test(motor_id);
-
-    shutdown_spi();
 }
 
 void micro_test()
 {
-    const int pi = pigpio_start(0, 0); /* Connect to local Pi. */
-
-    if (pi < 0)
-    {
-        printf("Can't connect to pigpio daemon\n");
-        return;
-    }
-
     static constexpr size_t buffer_size = 128;
 
     char rx_buf[buffer_size] = {};
     char tx_buf[buffer_size] = {};
-
-    int h = spi_open(pi, 1, 4 * 1000 * 1000, 
-        PI_SPI_FLAGS_AUX_SPI(1) | 
-                PI_SPI_FLAGS_MODE(0));
-
-    if (h < 0)
-        return;
 
     while (true)
     {
@@ -86,23 +67,23 @@ void micro_test()
         google::protobuf::io::ArrayOutputStream output_stream{tx_buf, buffer_size};
         google::protobuf::util::SerializeDelimitedToZeroCopyStream(command, &output_stream);
 
-        spi_xfer(pi, h, tx_buf, rx_buf, buffer_size);
+        micro_xfer(tx_buf, rx_buf, buffer_size);
 
         Immortals::Protos::MicroStatus status{};
         google::protobuf::io::ArrayInputStream input_stream{rx_buf, buffer_size};
         google::protobuf::util::ParseDelimitedFromZeroCopyStream(&status, &input_stream, nullptr);
         printf("ir: %d\n", status.balldetected());
     }
-
-    spi_close(pi, h);
-
-    pigpio_stop(pi); /* Disconnect from local Pi. */
 }
 
 int main(int argc, char* argv[])
 {
+    init_spi();
+
     motors_test(3);
-    //micro_test();
+    micro_test();
+
+    shutdown_spi();
 
     return 0;
 }

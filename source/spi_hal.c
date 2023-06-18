@@ -5,7 +5,8 @@
 #include <pigpiod_if2.h>
 
 int pi_h;
-int spi_h;
+int spi0_h;
+int spi1_h;
 
 const uint8_t cs = 8;
 
@@ -38,7 +39,8 @@ static const uint8_t drv_ce_id[5] =
 
 bool init_spi()
 {
-    pi_h = pigpio_start(0, 0); /* Connect to local Pi. */
+    // Connect to local pigpio daemon
+    pi_h = pigpio_start(0, 0);
 
     if (pi_h < 0)
     {
@@ -55,17 +57,24 @@ bool init_spi()
 
     set_mode(pi_h, m_en, PI_OUTPUT);
 
-    const unsigned spi_flags =
-        PI_SPI_FLAGS_MODE(3) // mode 3
-        | PI_SPI_FLAGS_RESVD(1)   // ce0 not reserved
-        ;
-
-    spi_h = spi_open(pi_h, 0, 1000000, spi_flags);
-
-    if (spi_h < 0)
     {
-        printf("Can't create SPI handle\n");
-        return false;
+        const unsigned spi_flags = PI_SPI_FLAGS_MODE(3) | // mode 3
+                                   PI_SPI_FLAGS_RESVD(1); // ce0 not reserved
+
+        spi0_h = spi_open(pi_h, 0, 1 * 1000 * 1000, spi_flags);
+
+        if (spi0_h < 0)
+        {
+            printf("Can't create SPI0 handle\n");
+            return false;
+        }
+    }
+
+    {
+        const unsigned spi_flags = PI_SPI_FLAGS_MODE(0) | // mode 0
+                                   PI_SPI_FLAGS_AUX_SPI(1); // spi1
+
+        spi1_h = spi_open(pi_h, 1, 4 * 1000 * 1000, spi_flags);
     }
 
     return true;
@@ -78,7 +87,7 @@ void shutdown_spi()
     gpio_write(pi_h, mux_a2, 1);
     gpio_write(pi_h, mux_a3, 1);
 
-    spi_close(pi_h, spi_h);
+    spi_close(pi_h, spi0_h);
 
     pigpio_stop(pi_h); /* Disconnect from local Pi. */
 }
@@ -100,7 +109,7 @@ uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     gpio_write(pi_h, cs, 0);
 
-    spi_xfer(pi_h, spi_h, &data, rx_buf, 1);
+    spi_xfer(pi_h, spi0_h, &data, rx_buf, 1);
 
     if (lastTransfer)
     {
@@ -119,7 +128,7 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     gpio_write(pi_h, cs, 0);
 
-    spi_xfer(pi_h, spi_h, &data, rx_buf, 1);
+    spi_xfer(pi_h, spi0_h, &data, rx_buf, 1);
 
     if (lastTransfer)
     {
@@ -127,6 +136,11 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
     }
 
     return rx_buf[0];
+}
+
+int micro_xfer(char*tx_buf, char*rx_buf, const unsigned count)
+{
+    return spi_xfer(pi_h, spi1_h, tx_buf, rx_buf, count);
 }
 
 void enable_driver(bool enable)
