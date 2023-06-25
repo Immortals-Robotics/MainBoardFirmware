@@ -43,10 +43,15 @@ public:
     Setting &operator=(const Setting &) = delete;
 
     static constexpr size_t kMaxUdpPacketSize = 1472;
+
+     NetworkAddress commands_address = {"224.5.23.2", 10010};
 };
 
 inline void Setting::load(const toml::node_view<const toml::node> t_node)
 {
+    const auto network = t_node["network"];
+
+    commands_address.load(network["commands"]);
 }
 
 } // namespace Immortals

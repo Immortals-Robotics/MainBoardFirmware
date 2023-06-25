@@ -4,6 +4,8 @@
 
 #include "spi_hal.h"
 
+namespace Immortals
+{
 void Micro::requestStatus()
 {
     Immortals::Protos::MicroCommand command{};
@@ -18,6 +20,8 @@ void Micro::sendCommand(const Immortals::Protos::MicroCommand &t_command)
 
     micro_xfer(m_tx_buf, m_rx_buf, kBufferSize);
 
+    m_status.Clear();
     google::protobuf::io::ArrayInputStream input_stream{m_rx_buf, kBufferSize};
     google::protobuf::util::ParseDelimitedFromZeroCopyStream(&m_status, &input_stream, nullptr);
 }
+} // namespace Immortals

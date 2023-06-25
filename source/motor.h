@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+namespace Immortals
+{
 class Motor
 {
 public:
@@ -31,3 +33,4 @@ private:
 
     int m_id;
 };
+} // namespace Immortals

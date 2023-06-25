@@ -2,6 +2,8 @@
 
 #include "immortals/micro.pb.h"
 
+namespace Immortals
+{
 class Micro
 {
 public:
@@ -25,3 +27,4 @@ private:
     char m_rx_buf[kBufferSize] = {};
     char m_tx_buf[kBufferSize] = {};
 };
+} // namespace Immortals

@@ -5,18 +5,19 @@
 
 #include "motor.h"
 #include "micro.h"
+#include "command.h"
 
 #include "immortals/micro.pb.h"
 #include <google/protobuf/util/delimited_message_util.h>
 
 void velocity_test(const uint8_t motor_id)
 {
-    Motor motor{motor_id};
+    Immortals::Motor motor{motor_id};
 
     motor.init();
 
     // Switch to velocity mode
-    motor.setMotionMode(Motor::MotionMode::Velocity);
+    motor.setMotionMode(Immortals::Motor::MotionMode::Velocity);
 
     // Rotate right
     motor.setTargetVelocity(8000);
@@ -28,7 +29,7 @@ void velocity_test(const uint8_t motor_id)
 
     // Stop
     motor.setTargetVelocity(0);
-    motor.setMotionMode(Motor::MotionMode::Stopped);
+    motor.setMotionMode(Immortals::Motor::MotionMode::Stopped);
 }
 
 void motors_test(const uint8_t motor_id)
@@ -40,19 +41,36 @@ void motors_test(const uint8_t motor_id)
 
 void micro_test()
 {
-    Micro micro{};
+    Immortals::Micro micro{};
 
     while (true)
     {
         Immortals::Protos::MicroCommand command{};
 
-        Immortals::Protos::MikonaCommand* const mikona = command.mutable_mikona();
-        mikona->set_charge(true);
+        command.mutable_led()->set_wifi_connected(micro.getStatus().button());
 
         micro.sendCommand(command);
 
         const Immortals::Protos::MicroStatus& status = micro.getStatus();
-        printf("ir: %d\n", status.balldetected());
+
+        time_sleep(0.01);
+    }
+}
+
+void commands_test()
+{
+    Immortals::Command command{};
+    command.setId(0);
+    command.connect();
+
+    while (true)
+    {
+        if (command.receive())
+        {
+            const Immortals::Protos::RobotCommand& robot_command = command.getCommand();
+
+            printf("Received command: %d\n", robot_command.mikona_enabled());
+        }
     }
 }
 
@@ -62,6 +80,7 @@ int main(int argc, char* argv[])
 
     motors_test(3);
     micro_test();
+    commands_test();
 
     shutdown_spi();
 

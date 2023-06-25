@@ -6,6 +6,8 @@ extern "C"
 #include "tmc/ic/TMC6200/TMC6200.h"
 }
 
+namespace Immortals
+{
 Motor::Motor(const uint8_t t_id)
     : m_id(t_id)
 {
@@ -166,3 +168,4 @@ int Motor::getActualVelocity() const
 {
     return tmc4671_getActualVelocity(m_id);
 }
+} // namespace Immortals

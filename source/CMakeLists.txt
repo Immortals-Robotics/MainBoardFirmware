@@ -14,7 +14,7 @@ set(PROTOS_DIR "protos")
 set(TMC_DIR "tmc-api")
 
 add_subdirectory(${PROTOS_DIR})
-add_protobuf_generate_command(NANO_PROTO_FILES PROTO_SRCS PROTO_HDRS)
+add_protobuf_generate_command(PROTO_FILES PROTO_SRCS PROTO_HDRS)
 
 set(COMMON_HEADER_FILES
     pch.h
@@ -26,6 +26,7 @@ set(COMMON_HEADER_FILES
     network/udp_server.h)
 
 set(HEADER_FILES
+    command.h
     micro.h
     motor.h)
 
@@ -51,6 +52,7 @@ set(C_HEADER_FILES
     ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Register.h)
 
 set(SOURCE_FILES
+    command.cpp
     micro.cpp
     motor.cpp
     main.cpp
