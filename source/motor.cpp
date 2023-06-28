@@ -8,8 +8,8 @@ extern "C"
 
 namespace Immortals
 {
-Motor::Motor(const uint8_t t_id)
-    : m_id(t_id)
+Motor::Motor(const Id t_id)
+    : m_id((uint8_t)t_id)
 {
 }
 
