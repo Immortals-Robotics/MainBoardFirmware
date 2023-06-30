@@ -49,6 +49,8 @@ private:
     bool initController();
     bool initDriver();
 
+    void enableDriver(bool enable);
+
     int m_id = (uint8_t)Id::Unknown;
 };
 } // namespace Immortals

@@ -3,6 +3,7 @@
 extern "C"
 {
 #include "tmc/ic/TMC4671/TMC4671.h"
+#include "tmc/ic/TMC4671/TMC4671_Variants.h"
 #include "tmc/ic/TMC6200/TMC6200.h"
 }
 
@@ -15,13 +16,15 @@ Motor::Motor(const Id t_id)
 
 bool Motor::init()
 {
-    if (!initController())
+    if (!initDriver())
     {
+        printf("Failed to initialize motor driver\n");
         return false;
     }
 
-    if (!initDriver())
+    if (!initController())
     {
+        printf("Failed to initialize motor controller\n");
         return false;
     }
 
@@ -87,6 +90,24 @@ bool Motor::initController()
     tmc4671_writeInt(m_id, TMC4671_ABN_DECODER_COUNT, 0x00000000);
 #endif
 
+    enableDriver(false);
+
+    // TODO: loop over and find the median value
+    const uint16_t i0_raw = tmc4671_readFieldWithDependency(m_id,
+        TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
+        ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW,
+        TMC4671_ADC_I0_RAW_MASK, TMC4671_ADC_I0_RAW_SHIFT);
+
+    const uint16_t i1_raw = tmc4671_readFieldWithDependency(m_id,
+        TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
+        ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW,
+        TMC4671_ADC_I1_RAW_MASK, TMC4671_ADC_I1_RAW_SHIFT);
+
+    enableDriver(true);
+
+    tmc4671_setAdcI0Offset(m_id, i0_raw);
+    tmc4671_setAdcI1Offset(m_id, i1_raw);
+
     // Selectors
     // TODO: read from the config file
     tmc4671_writeInt(m_id, TMC4671_PHI_E_SELECTION, TMC4671_PHI_E_HALL);
@@ -110,10 +131,17 @@ bool Motor::initDriver()
 
     TMC6200_FIELD_UPDATE(m_id, TMC6200_DRV_CONF, TMC6200_DRVSTRENGTH_MASK, TMC6200_DRVSTRENGTH_SHIFT, 1);
 
+    // Set current amplification to 10x
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_AMPLIFICATION_MASK, TMC6200_AMPLIFICATION_SHIFT, 1);
     // set default PWM configuration for use with TMC4671
-    tmc6200_writeInt(m_id, TMC6200_GCONF, 0x0);
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_SINGLELINE_MASK, TMC6200_SINGLELINE_SHIFT, 0);
 
     return true;
+}
+
+void Motor::enableDriver(bool enable)
+{
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_DISABLE_MASK, TMC6200_DISABLE_SHIFT, enable ? 0 : 1);
 }
 
 void Motor::setMotionMode(const MotionMode t_mode)
