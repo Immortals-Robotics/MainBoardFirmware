@@ -12,33 +12,47 @@
 #include "immortals/micro.pb.h"
 #include <google/protobuf/util/delimited_message_util.h>
 
-void velocity_test(const Immortals::Motor::Id motor_id)
+void motors_test()
 {
-    Immortals::Motor motor{motor_id};
+    std::unordered_map<Immortals::Motor::Id, Immortals::Motor> motor_map = 
+    {
+        //{Immortals::Motor::Id::MD, Immortals::Motor{Immortals::Motor::Id::MD}},
+        {Immortals::Motor::Id::M1, Immortals::Motor{Immortals::Motor::Id::M1}},
+        {Immortals::Motor::Id::M2, Immortals::Motor{Immortals::Motor::Id::M2}},
+        {Immortals::Motor::Id::M3, Immortals::Motor{Immortals::Motor::Id::M3}},
+        {Immortals::Motor::Id::M4, Immortals::Motor{Immortals::Motor::Id::M4}},
+    };
 
-    motor.init();
+    enable_drivers(true);
 
-    // Switch to velocity mode
-    motor.setMotionMode(Immortals::Motor::MotionMode::Velocity);
+    for (auto& motor : motor_map)
+    {
+        motor.second.init();
+        motor.second.setMotionMode(Immortals::Motor::MotionMode::Velocity);
+    }
 
     // Rotate right
-    motor.setTargetVelocity(8000);
-    time_sleep(3);
+    for (auto& motor : motor_map)
+    {
+        motor.second.setTargetVelocity(1500);
+    }
+
+    time_sleep(1);
 
     // Rotate left
-    motor.setTargetVelocity(-8000);
-    time_sleep(3);
+    for (auto& motor : motor_map)
+    {
+        motor.second.setTargetVelocity(-1500);
+    }
+
+    time_sleep(1);
 
     // Stop
-    motor.setTargetVelocity(0);
-    motor.setMotionMode(Immortals::Motor::MotionMode::Stopped);
-}
-
-void motors_test(const Immortals::Motor::Id motor_id)
-{
-    enable_driver(true);
-
-    velocity_test(motor_id);
+    for (auto& motor : motor_map)
+    {
+        motor.second.setTargetVelocity(0);
+        motor.second.setMotionMode(Immortals::Motor::MotionMode::Stopped);
+    }
 }
 
 void micro_test()
@@ -189,7 +203,8 @@ int main(int argc, char* argv[])
 {
     init_spi();
 
-    motors_test(Immortals::Motor::Id::M3);
+    motors_test();
+
     micro_test();
     commands_test();
 

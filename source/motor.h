@@ -49,6 +49,8 @@ private:
     bool initController();
     bool initDriver();
 
+    void calibrateAdc();
+
     void enableDriver(bool enable);
 
     int m_id = (uint8_t)Id::Unknown;

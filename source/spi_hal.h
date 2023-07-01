@@ -10,7 +10,7 @@ void shutdown_spi();
 
 int micro_xfer(char *tx_buf, char *rx_buf, unsigned count);
 
-void enable_driver(bool enable);
+void enable_drivers(bool enable);
 
 #ifdef __cplusplus
 }
