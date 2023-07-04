@@ -38,7 +38,7 @@ Logger::Logger()
     // Enable console colors
     dynamic_cast<quill::ConsoleHandler *>(stdout_handler.get())->enable_console_colours();
     stdout_handler->add_filter(std::make_unique<LogFilter>(quill::LogLevel::Debug));
-    cfg.default_handlers.emplace_back(stdout_handler.get());
+    cfg.default_handlers.emplace_back(stdout_handler);
 
     // Find the target path for the log file
     const std::filesystem::path log_file_path = getNewLogFilePath();
@@ -47,7 +47,7 @@ Logger::Logger()
     file_handler->set_pattern("%(ascii_time) [%(thread)] %(fileline:<28) %(level_name) %(message)",
                               "%Y-%m-%d %H:%M:%S.%Qms");
     file_handler->add_filter(std::make_unique<LogFilter>(quill::LogLevel::TraceL3));
-    cfg.default_handlers.emplace_back(file_handler.get());
+    cfg.default_handlers.emplace_back(file_handler);
 
     configure(cfg);
 

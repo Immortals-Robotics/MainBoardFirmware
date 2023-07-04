@@ -12,8 +12,10 @@ extern "C"
 
 namespace Immortals
 {
-Motor::Motor(const Id t_id)
+Motor::Motor(const Id t_id, const uint8_t t_pole_count, const float t_radius)
     : m_id((uint8_t)t_id)
+    , m_radius(t_radius)
+    , m_pole_count(t_pole_count)
 {
 }
 
@@ -52,7 +54,7 @@ bool Motor::initController()
 
     // Motor type &  PWM configuration
     tmc4671_setMotorType(m_id, TMC4671_THREE_PHASE_BLDC);
-    tmc4671_setPolePairs(m_id, 8); // 8 for main motors, 1 for the dribbler
+    tmc4671_setPolePairs(m_id, m_pole_count); // 8 for main motors, 1 for the dribbler
     tmc4671_writeInt(m_id, TMC4671_PWM_POLARITIES, 0x00000000);
     tmc4671_writeInt(m_id, TMC4671_PWM_MAXCNT, 0x00000F9F);
     tmc4671_writeInt(m_id, TMC4671_PWM_BBM_H_BBM_L, 0x00001919);
@@ -208,17 +210,17 @@ Motor::MotionMode Motor::getMotionMode() const
     }
 }
 
-void Motor::setTargetVelocity(const int t_velocity)
+void Motor::setTargetVelocityRaw(const int t_velocity)
 {
     tmc4671_setTargetVelocity(m_id, t_velocity);
 }
 
-int Motor::getTargetVelocity() const
+int Motor::getTargetVelocityRaw() const
 {
     return tmc4671_getTargetVelocity(m_id);
 }
 
-int Motor::getActualVelocity() const
+int Motor::getActualVelocityRaw() const
 {
     return tmc4671_getActualVelocity(m_id);
 }
