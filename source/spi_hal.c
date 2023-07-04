@@ -143,7 +143,7 @@ int micro_xfer(char*tx_buf, char*rx_buf, const unsigned count)
     return spi_xfer(pi_h, spi1_h, tx_buf, rx_buf, count);
 }
 
-void enable_driver(bool enable)
+void enable_drivers(bool enable)
 {
     gpio_write(pi_h, m_en, enable);
 }

@@ -1,29 +1,41 @@
 #include "motor.h"
 
+#include <algorithm>
+#include <pigpiod_if2.h>
+
 extern "C"
 {
 #include "tmc/ic/TMC4671/TMC4671.h"
+#include "tmc/ic/TMC4671/TMC4671_Variants.h"
 #include "tmc/ic/TMC6200/TMC6200.h"
 }
 
 namespace Immortals
 {
-Motor::Motor(const uint8_t t_id)
-    : m_id(t_id)
+Motor::Motor(const Id t_id)
+    : m_id((uint8_t)t_id)
 {
 }
 
 bool Motor::init()
 {
+    enableDriver(false);
+
     if (!initController())
     {
+        printf("Failed to initialize motor controller\n");
         return false;
     }
 
     if (!initDriver())
     {
+        printf("Failed to initialize motor driver\n");
         return false;
     }
+
+    calibrateAdc();
+
+    enableDriver(true);
 
     return true;
 }
@@ -47,13 +59,13 @@ bool Motor::initController()
     tmc4671_writeInt(m_id, TMC4671_PWM_SV_CHOP, 0x00000007);
 
     // ADC configuration
-    tmc4671_writeInt(m_id, TMC4671_ADC_I_SELECT, 0x18000100);
+    tmc4671_writeInt(m_id, TMC4671_ADC_I_SELECT, 0x24000100);
     tmc4671_writeInt(m_id, TMC4671_dsADC_MCFG_B_MCFG_A, 0x00100010);
     tmc4671_writeInt(m_id, TMC4671_dsADC_MCLK_A, 0x20000000);
     tmc4671_writeInt(m_id, TMC4671_dsADC_MCLK_B, 0x20000000);
     tmc4671_writeInt(m_id, TMC4671_dsADC_MDEC_B_MDEC_A, 0x014E014E);
-    tmc4671_writeInt(m_id, TMC4671_ADC_I0_SCALE_OFFSET, 0xFF007EF5);
-    tmc4671_writeInt(m_id, TMC4671_ADC_I1_SCALE_OFFSET, 0xFF007F85);
+    tmc4671_writeInt(m_id, TMC4671_ADC_I0_SCALE_OFFSET, 0xFF0083DA);
+    tmc4671_writeInt(m_id, TMC4671_ADC_I1_SCALE_OFFSET, 0xFF0082F9);
 
     // Digital hall settings
     tmc4671_writeInt(m_id, TMC4671_HALL_MODE, 0x00001000);
@@ -72,7 +84,7 @@ bool Motor::initController()
 
     // PI settings
     // TODO: read from the config file
-    tmc4671_setTorqueFluxPI(m_id, 550, 11000);
+    tmc4671_setTorqueFluxPI(m_id, 256, 256);
     tmc4671_setVelocityPI(m_id, 200, 15);
     tmc4671_setPositionPI(m_id, 25, 2);
 
@@ -87,14 +99,13 @@ bool Motor::initController()
     tmc4671_writeInt(m_id, TMC4671_ABN_DECODER_COUNT, 0x00000000);
 #endif
 
+    tmc4671_switchToMotionMode(m_id, TMC4671_MOTION_MODE_STOPPED);
+
     // Selectors
     // TODO: read from the config file
     tmc4671_writeInt(m_id, TMC4671_PHI_E_SELECTION, TMC4671_PHI_E_HALL);
     tmc4671_writeInt(m_id, TMC4671_VELOCITY_SELECTION, TMC4671_VELOCITY_PHI_E_ABN);
     tmc4671_writeInt(m_id, TMC4671_POSITION_SELECTION, TMC4671_POSITION_PHI_E_ABN);
-    tmc4671_writeInt(m_id, TMC4671_ADC_I_SELECT, 0x18000100);
-
-    tmc4671_switchToMotionMode(m_id, TMC4671_MOTION_MODE_STOPPED);
 
     return true;
 }
@@ -111,10 +122,53 @@ bool Motor::initDriver()
 
     TMC6200_FIELD_UPDATE(m_id, TMC6200_DRV_CONF, TMC6200_DRVSTRENGTH_MASK, TMC6200_DRVSTRENGTH_SHIFT, 1);
 
+    // Set current amplification to 10x
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_AMPLIFICATION_MASK, TMC6200_AMPLIFICATION_SHIFT, 1);
+    // Set current amplification to 10x
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_AMPLIFICATION_MASK, TMC6200_AMPLIFICATION_SHIFT, 1);
     // set default PWM configuration for use with TMC4671
-    tmc6200_writeInt(m_id, TMC6200_GCONF, 0x0);
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_SINGLELINE_MASK, TMC6200_SINGLELINE_SHIFT, 0);
 
     return true;
+}
+
+// should be called during init when the motor is not moving
+// and the driver is disabled
+void Motor::calibrateAdc()
+{
+    // loop over and find the median value
+    static constexpr int loop_count = 10;
+    uint16_t i0_raw_list[loop_count] = {};
+    uint16_t i1_raw_list[loop_count] = {};
+    
+    for (int i = 0; i < loop_count; ++i)
+    {
+        i0_raw_list[i] = tmc4671_readFieldWithDependency(m_id,
+            TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
+            ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW,
+            TMC4671_ADC_I0_RAW_MASK, TMC4671_ADC_I0_RAW_SHIFT);
+
+        i1_raw_list[i]= tmc4671_readFieldWithDependency(m_id,
+            TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
+            ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW,
+            TMC4671_ADC_I1_RAW_MASK, TMC4671_ADC_I1_RAW_SHIFT);
+
+        time_sleep(0.01);
+    }
+
+    std::sort(std::begin(i0_raw_list), std::end(i0_raw_list));
+    std::sort(std::begin(i1_raw_list), std::end(i1_raw_list));
+
+    const uint16_t i0_raw = i0_raw_list[loop_count / 2];
+    const uint16_t i1_raw = i1_raw_list[loop_count / 2];
+
+    tmc4671_setAdcI0Offset(m_id, i0_raw);
+    tmc4671_setAdcI1Offset(m_id, i1_raw);
+}
+
+void Motor::enableDriver(bool enable)
+{
+    TMC6200_FIELD_UPDATE(m_id, TMC6200_GCONF, TMC6200_DISABLE_MASK, TMC6200_DISABLE_SHIFT, enable ? 0 : 1);
 }
 
 void Motor::setMotionMode(const MotionMode t_mode)

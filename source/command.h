@@ -8,7 +8,7 @@ class Command
     Command() = default;
     ~Command() = default;
 
-    void setId(uint8_t id)
+    void setRobotId(uint8_t id)
     {
         m_id = id;
     }
