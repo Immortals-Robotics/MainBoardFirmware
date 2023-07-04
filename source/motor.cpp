@@ -25,13 +25,13 @@ bool Motor::init()
 
     if (!initController())
     {
-        printf("Failed to initialize motor controller\n");
+        LOG_ERROR("Failed to initialize motor controller {}\n", m_id);
         return false;
     }
 
     if (!initDriver())
     {
-        printf("Failed to initialize motor driver\n");
+        LOG_ERROR("Failed to initialize motor driver {}\n", m_id);
         return false;
     }
 

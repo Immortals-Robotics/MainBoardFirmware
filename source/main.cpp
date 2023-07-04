@@ -63,7 +63,11 @@ int main(int argc, char* argv[])
 {
     Immortals::Services::initialize();
 
-    init_spi();
+    if (!init_spi())
+    {
+        LOG_CRITICAL("Failed to initialize SPI\n");
+        return 1;
+    }
 
     Immortals::Micro micro{};
 
@@ -110,14 +114,14 @@ int main(int argc, char* argv[])
 
             Immortals::Protos::MicroCommand micro_command{};
 
-            printf("Received command: %d\n", robot_command.mikona_enabled());
+            LOG_DEBUG("Received command\n");
 
             
             if (robot_command.has_move_command())
             {
                 if (robot_command.move_command().has_wheel_velocity())
                 {
-                    printf("Received wheel velocity");
+                    LOG_DEBUG("Received wheel velocity");
 
                     // TODO: take pole count into account
 
@@ -137,7 +141,7 @@ int main(int argc, char* argv[])
                 }
                 else if (robot_command.move_command().has_local_velocity())
                 {
-                    printf("Received local velocity");
+                    LOG_DEBUG("Received local velocity");
 
                     const Immortals::Protos::MoveLocalVelocity& local_velocity = robot_command.move_command().local_velocity();
 
@@ -148,11 +152,11 @@ int main(int argc, char* argv[])
                 }
                 else if (robot_command.move_command().has_global_velocity())
                 {
-                    printf("Received global velocity");
+                    LOG_DEBUG("Received global velocity");
                 }
                 else
                 {
-                    printf("Received unknown move command");
+                    LOG_ERROR("Received unknown move command");
                 }
             }
         
