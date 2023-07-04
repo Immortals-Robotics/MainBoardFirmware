@@ -98,8 +98,6 @@ int main(int argc, char* argv[])
         motor.second.setMotionMode(Immortals::Motor::MotionMode::Velocity);
     }
 
-    motors_test();
-
     micro.requestStatus();
 
     Immortals::Command command{};
@@ -116,6 +114,10 @@ int main(int argc, char* argv[])
 
             LOG_DEBUG("Received command\n");
 
+            static bool wifi_led = false;
+            wifi_led = !wifi_led;
+
+            micro_command.mutable_led()->set_wifi_acitivity(wifi_led);
             
             if (robot_command.has_move_command())
             {
