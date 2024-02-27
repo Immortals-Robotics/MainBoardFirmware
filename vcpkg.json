@@ -1,0 +1,11 @@
+{
+    "name": "firmware",
+    "version-string": "2023.0.0",
+    "dependencies": [
+      "asio",
+      "protobuf",
+      "tomlplusplus",
+      "gtest",
+      "quill"
+    ]
+  }

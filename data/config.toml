@@ -1,0 +1,5 @@
+[network]
+
+[network.commands]
+ip   = "224.5.23.2"
+port = 10010
