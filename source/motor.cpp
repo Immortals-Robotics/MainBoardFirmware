@@ -19,13 +19,13 @@ bool Motor::init()
 
     if (!initController())
     {
-        LOG_ERROR("Failed to initialize motor controller {}\n", m_id);
+        logError("Failed to initialize motor controller {}", m_id);
         return false;
     }
 
     if (!initDriver())
     {
-        LOG_ERROR("Failed to initialize motor driver {}\n", m_id);
+        logError("Failed to initialize motor driver {}", m_id);
         return false;
     }
 

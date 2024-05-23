@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     if (!init_spi())
     {
-        LOG_CRITICAL("Failed to initialize SPI\n");
+        Immortals::logCritical("Failed to initialize SPI");
         return 1;
     }
 
@@ -102,14 +102,14 @@ int main(int argc, char *argv[])
 
             Protos::Immortals::MicroCommand micro_command{};
 
-            LOG_DEBUG("Received command\n");
+            Immortals::logDebug("Received command");
 
             static bool wifi_led = false;
             wifi_led             = !wifi_led;
 
             micro_command.mutable_led()->set_wifi_activity(wifi_led);
 
-            LOG_DEBUG("Received local velocity");
+            Immortals::logDebug("Received local velocity");
 
             motor_map[Immortals::Motor::Id::FrontLeft].setTargetVelocityMs(
                 compute_wheel_velocity(robot_command, wheel_config.at(Immortals::Motor::Id::FrontLeft)));

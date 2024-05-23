@@ -3,6 +3,6 @@
     "asio",
     "protobuf",
     "tomlplusplus",
-    "quill"
+    "spdlog"
   ]
 }

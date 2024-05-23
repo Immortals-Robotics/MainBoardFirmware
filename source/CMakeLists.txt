@@ -2,7 +2,7 @@ project(${CMAKE_PROJECT_NAME}-bin)
 
 find_package(asio CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
-find_package(quill CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(tomlplusplus REQUIRED IMPORTED_TARGET tomlplusplus)
@@ -18,6 +18,7 @@ set(HEADER_FILES
         setting.h
         config/config.h
         logging/logging.h
+        logging/macros.h
         network/udp_client.h
         network/udp_server.h
         command.h
@@ -77,9 +78,7 @@ target_link_libraries(${PROJECT_NAME}
         protobuf::libprotobuf
         asio::asio
         PkgConfig::tomlplusplus
-        quill::quill)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE QUILL_ROOT_LOGGER_ONLY)
+        spdlog::spdlog)
 
 option(TRACE_BUILD_TIME "Use -ftime-trace to generate build time trace" OFF)
 if (${TRACE_BUILD_TIME})

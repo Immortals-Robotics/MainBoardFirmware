@@ -12,6 +12,7 @@
 #include <numbers>
 #include <optional>
 #include <random>
+#include <source_location>
 #include <span>
 #include <string>
 #include <thread>
@@ -26,7 +27,12 @@
 #include <google/protobuf/message_lite.h>
 #include <google/protobuf/util/delimited_message_util.h>
 #include <pigpiod_if2.h>
-#include <quill/Quill.h>
+#include <spdlog/async.h>
+#include <spdlog/details/null_mutex.h>
+#include <spdlog/sinks/base_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #include <toml++/toml.h>
 
 #include "config/config.h"
