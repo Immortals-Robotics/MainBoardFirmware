@@ -4,8 +4,8 @@ namespace Immortals
 {
 class Command
 {
-    public:
-    Command() = default;
+public:
+     Command() = default;
     ~Command() = default;
 
     void setRobotId(uint8_t id)
@@ -18,11 +18,10 @@ class Command
 
     bool receive();
 
-    const Immortals::Protos::RobotCommand &getCommand() const
+    const Protos::Immortals::Command &getCommand() const
     {
         return m_pb_command;
     }
-    
 
 private:
     uint8_t m_id;
@@ -31,6 +30,6 @@ private:
     std::unique_ptr<Immortals::UdpClient> m_udp;
 
     // last received command
-    Immortals::Protos::RobotCommand m_pb_command;
+    Protos::Immortals::Command m_pb_command;
 };
 } // namespace Immortals

@@ -8,12 +8,12 @@ namespace Immortals
 {
 void Micro::requestStatus()
 {
-    Immortals::Protos::MicroCommand command{};
+    Protos::Immortals::MicroCommand command{};
 
     sendCommand(command);
 }
 
-void Micro::sendCommand(const Immortals::Protos::MicroCommand &t_command)
+void Micro::sendCommand(const Protos::Immortals::MicroCommand &t_command)
 {
     google::protobuf::io::ArrayOutputStream output_stream{m_tx_buf, kBufferSize};
     google::protobuf::util::SerializeDelimitedToZeroCopyStream(t_command, &output_stream);

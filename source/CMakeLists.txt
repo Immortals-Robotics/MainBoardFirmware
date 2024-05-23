@@ -1,10 +1,5 @@
 project(${CMAKE_PROJECT_NAME}-bin)
 
-include("${CMAKE_SOURCE_DIR}/cmake/helpers.cmake")
-
-set_project_paths()
-enable_parallel_build()
-
 find_package(asio CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(quill CONFIG REQUIRED)
@@ -16,7 +11,6 @@ set(PROTOS_DIR "protos")
 set(TMC_DIR "tmc-api")
 
 add_subdirectory(${PROTOS_DIR})
-add_protobuf_generate_command(PROTO_FILES PROTO_SRCS PROTO_HDRS)
 
 set(COMMON_HEADER_FILES
         pch.h
@@ -83,6 +77,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_F
 source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(${PROJECT_NAME}
+        ${CMAKE_PROJECT_NAME}-protos
         pigpiod_if2
         protobuf::libprotobuf
         asio::asio
@@ -107,4 +102,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ${USE_UNITY_BUILDS}
 set_source_files_properties(${C_SOURCE_FILES} PROPERTIES
         SKIP_PRECOMPILE_HEADERS TRUE
         SKIP_UNITY_BUILD_INCLUSION TRUE)
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROTO_HDRS} ${COMMON_HEADER_FILES})
+
+get_target_property(PROTOS_PCHS ${CMAKE_PROJECT_NAME}-protos INTERFACE_PRECOMPILE_HEADERS)
+
+target_precompile_headers(${PROJECT_NAME}
+        PUBLIC ${PROTOS_PCHS}
+        PUBLIC ${COMMON_HEADER_FILES})
