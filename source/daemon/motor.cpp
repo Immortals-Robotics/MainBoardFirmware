@@ -7,7 +7,7 @@ extern "C"
 #include "tmc/ic/TMC6200/TMC6200.h"
 }
 
-namespace Immortals
+namespace Immortals::Daemon
 {
 Motor::Motor(const Id t_id, const uint8_t t_pole_count, const float t_radius)
     : m_id((uint8_t) t_id), m_radius(t_radius), m_pole_count(t_pole_count)
@@ -19,13 +19,13 @@ bool Motor::init()
 
     if (!initController())
     {
-        logError("Failed to initialize motor controller {}", m_id);
+        Common::logError("Failed to initialize motor controller {}", m_id);
         return false;
     }
 
     if (!initDriver())
     {
-        logError("Failed to initialize motor driver {}", m_id);
+        Common::logError("Failed to initialize motor driver {}", m_id);
         return false;
     }
 
@@ -114,7 +114,7 @@ bool Motor::initDriver()
         return false;
     }
 
-    int gstat = tmc6200_readInt(m_id, TMC6200_GSTAT);
+    [[maybe_unused]] int gstat = tmc6200_readInt(m_id, TMC6200_GSTAT);
 
     TMC6200_FIELD_UPDATE(m_id, TMC6200_DRV_CONF, TMC6200_DRVSTRENGTH_MASK, TMC6200_DRVSTRENGTH_SHIFT, 1);
 
@@ -179,6 +179,8 @@ void Motor::setMotionMode(const MotionMode t_mode)
     case MotionMode::Position:
         mode = TMC4671_MOTION_MODE_POSITION;
         break;
+    case MotionMode::Unknown:
+        Common::logWarning("Unknown motion mode");
     }
 
     tmc4671_switchToMotionMode(m_id, mode);
@@ -204,6 +206,7 @@ Motor::MotionMode Motor::getMotionMode() const
 
 void Motor::setTargetVelocityRaw(const int t_velocity)
 {
+    //logTrace("target velocity: {}", t_velocity);
     tmc4671_setTargetVelocity(m_id, t_velocity);
 }
 

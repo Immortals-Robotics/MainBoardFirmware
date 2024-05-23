@@ -9,7 +9,7 @@
     {
       "name": "base",
       "hidden": true,
-      "toolchainFile": "~/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "toolchainFile": "/home/lordhippo/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}"
     },

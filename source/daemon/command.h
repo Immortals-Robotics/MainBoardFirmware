@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Immortals
+namespace Immortals::Daemon
 {
 class Command
 {
@@ -27,7 +27,7 @@ private:
     uint8_t m_id;
 
     // UDP_connection
-    std::unique_ptr<Immortals::UdpClient> m_udp;
+    std::unique_ptr<Common::UdpClient> m_udp;
 
     // last received command
     Protos::Immortals::Command m_pb_command;

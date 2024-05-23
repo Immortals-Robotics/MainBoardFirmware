@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Immortals
+namespace Immortals::Daemon
 {
 class Micro
 {

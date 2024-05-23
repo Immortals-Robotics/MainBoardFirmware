@@ -2,7 +2,7 @@
 
 #include "spi_hal.h"
 
-namespace Immortals
+namespace Immortals::Daemon
 {
 void Micro::requestStatus()
 {

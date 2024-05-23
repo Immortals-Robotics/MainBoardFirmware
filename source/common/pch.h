@@ -1,43 +1,41 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <chrono>
-#include <cmath>
-#include <cstdint>
-#include <cstdio>
+#include <deque>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <memory>
+#include <mutex>
 #include <numbers>
 #include <optional>
+#include <ostream>
 #include <random>
 #include <source_location>
 #include <span>
-#include <string>
-#include <thread>
-
-#include <array>
-#include <deque>
-#include <set>
+#include <string.h>
+#include <string_view>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
-#include <asio.hpp>
-#include <google/protobuf/message_lite.h>
-#include <google/protobuf/util/delimited_message_util.h>
-#include <pigpiod_if2.h>
+#include <fmt/chrono.h>
+#include <fmt/format.h>
+#include <fmt/std.h>
+#include <nng/nng.h>
+#include <nng/protocol/pubsub0/pub.h>
+#include <nng/protocol/pubsub0/sub.h>
 #include <spdlog/async.h>
 #include <spdlog/details/null_mutex.h>
 #include <spdlog/sinks/base_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include <toml++/toml.h>
+#include <toml++/toml.hpp>
 
-#include "config/config.h"
-#include "logging/logging.h"
-#include "network/udp_client.h"
-#include "network/udp_server.h"
+#include <asio.hpp>
+
+#include <google/protobuf/message_lite.h>
+
 #include "services.h"
-#include "setting.h"

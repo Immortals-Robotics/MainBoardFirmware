@@ -105,7 +105,7 @@ uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, &data, rx_buf, 1);
+    spiXfer(spi0_h, (char *) &data, rx_buf, 1);
 
     if (lastTransfer)
     {
@@ -120,11 +120,11 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
     const uint8_t ce_id = drv_ce_id[motor];
     select_ce(ce_id);
 
-    char rx_buf[64] = {};
+    char rx_buf[64] = {0};
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, &data, rx_buf, 1);
+    spiXfer(spi0_h, (char *) &data, rx_buf, 1);
 
     if (lastTransfer)
     {

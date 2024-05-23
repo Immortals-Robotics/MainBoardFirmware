@@ -1,12 +1,12 @@
 #include "command.h"
 
-namespace Immortals
+namespace Immortals::Daemon
 {
 bool Command::connect()
 {
-    logInfo("Receiving commands at {}:{}", setting().commands_address.ip, setting().commands_address.port);
+    Common::logInfo("Receiving commands at {}", Common::config().commands_address);
 
-    m_udp = std::make_unique<UdpClient>(setting().commands_address);
+    m_udp = std::make_unique<Common::UdpClient>(Common::config().commands_address);
 
     return isConnected();
 }
@@ -36,4 +36,4 @@ bool Command::receive()
 
     return false;
 }
-} // namespace Immortals
+} // namespace Immortals::Daemon
