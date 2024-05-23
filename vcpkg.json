@@ -1,6 +1,7 @@
 {
   "dependencies": [
     "asio",
+    "nng",
     "protobuf",
     "tomlplusplus",
     "spdlog"
