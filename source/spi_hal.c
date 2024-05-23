@@ -1,10 +1,9 @@
-#include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
-#include <pigpiod_if2.h>
+#include <pigpio.h>
 
-int pi_h;
 int spi0_h;
 int spi1_h;
 
@@ -19,8 +18,7 @@ const uint8_t m_en = 13;
 
 const uint8_t unused_ce_id = 15;
 
-static const uint8_t ctrl_ce_id[5] = 
-{
+static const uint8_t ctrl_ce_id[5] = {
     0, // Dribbler
     2, // Motor 1
     8, // Motor 2
@@ -28,8 +26,7 @@ static const uint8_t ctrl_ce_id[5] =
     4  // Motor 4
 };
 
-static const uint8_t drv_ce_id[5] =
-{
+static const uint8_t drv_ce_id[5] = {
     1, // Dribbler
     3, // Motor 1
     9, // Motor 2
@@ -39,29 +36,27 @@ static const uint8_t drv_ce_id[5] =
 
 bool init_spi()
 {
-    // Connect to local pigpio daemon
-    pi_h = pigpio_start(0, 0);
-
-    if (pi_h < 0)
+    const int result = gpioInitialise();
+    if (result < 0)
     {
-        printf("Can't connect to pigpio daemon\n");
+        printf("Failed to initialize pigpio: %d.\n", result);
         return false;
     }
 
-    set_mode(pi_h, cs, PI_OUTPUT);
+    gpioSetMode(cs, PI_OUTPUT);
 
-    set_mode(pi_h, mux_a0, PI_OUTPUT);
-    set_mode(pi_h, mux_a1, PI_OUTPUT);
-    set_mode(pi_h, mux_a2, PI_OUTPUT);
-    set_mode(pi_h, mux_a3, PI_OUTPUT);
+    gpioSetMode(mux_a0, PI_OUTPUT);
+    gpioSetMode(mux_a1, PI_OUTPUT);
+    gpioSetMode(mux_a2, PI_OUTPUT);
+    gpioSetMode(mux_a3, PI_OUTPUT);
 
-    set_mode(pi_h, m_en, PI_OUTPUT);
+    gpioSetMode(m_en, PI_OUTPUT);
 
     {
         const unsigned spi_flags = PI_SPI_FLAGS_MODE(3) | // mode 3
                                    PI_SPI_FLAGS_RESVD(1); // ce0 not reserved
 
-        spi0_h = spi_open(pi_h, 0, 1 * 1000 * 1000, spi_flags);
+        spi0_h = spiOpen(0, 1 * 1000 * 1000, spi_flags);
 
         if (spi0_h < 0)
         {
@@ -71,10 +66,10 @@ bool init_spi()
     }
 
     {
-        const unsigned spi_flags = PI_SPI_FLAGS_MODE(0) | // mode 0
+        const unsigned spi_flags = PI_SPI_FLAGS_MODE(0) |   // mode 0
                                    PI_SPI_FLAGS_AUX_SPI(1); // spi1
 
-        spi1_h = spi_open(pi_h, 1, 4 * 1000 * 1000, spi_flags);
+        spi1_h = spiOpen(1, 4 * 1000 * 1000, spi_flags);
     }
 
     return true;
@@ -82,22 +77,23 @@ bool init_spi()
 
 void shutdown_spi()
 {
-    gpio_write(pi_h, mux_a0, 1);
-    gpio_write(pi_h, mux_a1, 1);
-    gpio_write(pi_h, mux_a2, 1);
-    gpio_write(pi_h, mux_a3, 1);
+    gpioWrite(mux_a0, 1);
+    gpioWrite(mux_a1, 1);
+    gpioWrite(mux_a2, 1);
+    gpioWrite(mux_a3, 1);
 
-    spi_close(pi_h, spi0_h);
+    spiClose(spi0_h);
+    spiClose(spi1_h);
 
-    pigpio_stop(pi_h); /* Disconnect from local Pi. */
+    gpioTerminate();
 }
 
 void select_ce(const uint8_t ce_id)
 {
-    gpio_write(pi_h, mux_a0, (ce_id & 1) >> 0);
-    gpio_write(pi_h, mux_a1, (ce_id & 2) >> 1);
-    gpio_write(pi_h, mux_a2, (ce_id & 4) >> 2);
-    gpio_write(pi_h, mux_a3, (ce_id & 8) >> 3);
+    gpioWrite(mux_a0, (ce_id & 1) >> 0);
+    gpioWrite(mux_a1, (ce_id & 2) >> 1);
+    gpioWrite(mux_a2, (ce_id & 4) >> 2);
+    gpioWrite(mux_a3, (ce_id & 8) >> 3);
 }
 
 uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
@@ -107,13 +103,13 @@ uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     char rx_buf[64] = {0};
 
-    gpio_write(pi_h, cs, 0);
+    gpioWrite(cs, 0);
 
-    spi_xfer(pi_h, spi0_h, &data, rx_buf, 1);
+    spiXfer(spi0_h, &data, rx_buf, 1);
 
     if (lastTransfer)
     {
-        gpio_write(pi_h, cs, 1);
+        gpioWrite(cs, 1);
     }
 
     return rx_buf[0];
@@ -126,24 +122,24 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     char rx_buf[64] = {};
 
-    gpio_write(pi_h, cs, 0);
+    gpioWrite(cs, 0);
 
-    spi_xfer(pi_h, spi0_h, &data, rx_buf, 1);
+    spiXfer(spi0_h, &data, rx_buf, 1);
 
     if (lastTransfer)
     {
-        gpio_write(pi_h, cs, 1);
+        gpioWrite(cs, 1);
     }
 
     return rx_buf[0];
 }
 
-int micro_xfer(char*tx_buf, char*rx_buf, const unsigned count)
+int micro_xfer(char *tx_buf, char *rx_buf, const unsigned count)
 {
-    return spi_xfer(pi_h, spi1_h, tx_buf, rx_buf, count);
+    return spiXfer(spi1_h, tx_buf, rx_buf, count);
 }
 
 void enable_drivers(bool enable)
 {
-    gpio_write(pi_h, m_en, enable);
+    gpioWrite(m_en, enable);
 }

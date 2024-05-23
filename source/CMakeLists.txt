@@ -74,7 +74,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_F
 
 target_link_libraries(${PROJECT_NAME}
         ${CMAKE_PROJECT_NAME}-protos
-        pigpiod_if2
+        pigpio
         protobuf::libprotobuf
         asio::asio
         PkgConfig::tomlplusplus
