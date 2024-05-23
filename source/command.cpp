@@ -4,8 +4,7 @@ namespace Immortals
 {
 bool Command::connect()
 {
-    std::cout << "Receiving commands at " << setting().commands_address.ip
-              << " , on port : " << setting().commands_address.port << std::endl;
+    logInfo("Receiving commands at {}:{}", setting().commands_address.ip, setting().commands_address.port);
 
     m_udp = std::make_unique<UdpClient>(setting().commands_address);
 
