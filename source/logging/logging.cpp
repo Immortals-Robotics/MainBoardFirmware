@@ -21,7 +21,7 @@ public:
                                 quill::MacroMetadata const &t_metadata,
                                 quill::fmt_buffer_t const  &t_formatted_record) noexcept override
     {
-        return t_metadata.level() >= m_log_level;
+        return t_metadata.log_level() >= m_log_level;
     }
 };
 
@@ -43,7 +43,7 @@ Logger::Logger()
     // Find the target path for the log file
     const std::filesystem::path log_file_path = getNewLogFilePath();
     // file handler
-    std::shared_ptr<quill::Handler> file_handler = quill::file_handler(log_file_path, "w"); // for writing to file
+    std::shared_ptr<quill::Handler> file_handler = quill::file_handler(log_file_path); // for writing to file
     file_handler->set_pattern("%(ascii_time) [%(thread)] %(fileline:<28) %(level_name) %(message)",
                               "%Y-%m-%d %H:%M:%S.%Qms");
     file_handler->add_filter(std::make_unique<LogFilter>(quill::LogLevel::TraceL3));
@@ -92,7 +92,7 @@ std::filesystem::path Logger::getNewLogFilePath() const
 
     std::stringstream ss;
     ss << LOG_DIR << "/ai_log_" << std::setw(4) << std::setfill('0') << log_file_idx
-        << std::put_time(&tm, "_%Y_%m_%d__%H_%M_%S") << ".imm_ai_log";
+       << std::put_time(&tm, "_%Y_%m_%d__%H_%M_%S") << ".imm_ai_log";
 
     std::string new_log_file_path = ss.str();
     std::cout << "Creating new log file:  " << new_log_file_path << std::endl;

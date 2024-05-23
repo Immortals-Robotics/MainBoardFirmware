@@ -21,7 +21,6 @@
 
 #include <asio.hpp>
 #include <toml++/toml.h>
-#include <gtest/gtest.h>
 #include <quill/Quill.h>
 
 #include "services.h"
