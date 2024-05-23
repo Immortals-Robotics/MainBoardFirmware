@@ -1,7 +1,5 @@
 #include "command.h"
 
-#include "immortals/command.pb.h"
-
 namespace Immortals
 {
 bool Command::connect()

@@ -1,8 +1,5 @@
 #include "motor.h"
 
-#include <algorithm>
-#include <pigpiod_if2.h>
-
 extern "C"
 {
 #include "tmc/ic/TMC4671/TMC4671.h"
@@ -13,11 +10,8 @@ extern "C"
 namespace Immortals
 {
 Motor::Motor(const Id t_id, const uint8_t t_pole_count, const float t_radius)
-    : m_id((uint8_t)t_id)
-    , m_radius(t_radius)
-    , m_pole_count(t_pole_count)
-{
-}
+    : m_id((uint8_t) t_id), m_radius(t_radius), m_pole_count(t_pole_count)
+{}
 
 bool Motor::init()
 {
@@ -139,21 +133,19 @@ bool Motor::initDriver()
 void Motor::calibrateAdc()
 {
     // loop over and find the median value
-    static constexpr int loop_count = 10;
-    uint16_t i0_raw_list[loop_count] = {};
-    uint16_t i1_raw_list[loop_count] = {};
-    
+    static constexpr int loop_count              = 10;
+    uint16_t             i0_raw_list[loop_count] = {};
+    uint16_t             i1_raw_list[loop_count] = {};
+
     for (int i = 0; i < loop_count; ++i)
     {
-        i0_raw_list[i] = tmc4671_readFieldWithDependency(m_id,
-            TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
-            ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW,
-            TMC4671_ADC_I0_RAW_MASK, TMC4671_ADC_I0_RAW_SHIFT);
+        i0_raw_list[i] = tmc4671_readFieldWithDependency(m_id, TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
+                                                         ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW, TMC4671_ADC_I0_RAW_MASK,
+                                                         TMC4671_ADC_I0_RAW_SHIFT);
 
-        i1_raw_list[i]= tmc4671_readFieldWithDependency(m_id,
-            TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
-            ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW,
-            TMC4671_ADC_I1_RAW_MASK, TMC4671_ADC_I1_RAW_SHIFT);
+        i1_raw_list[i] = tmc4671_readFieldWithDependency(m_id, TMC4671_ADC_RAW_DATA, TMC4671_ADC_RAW_ADDR,
+                                                         ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW, TMC4671_ADC_I1_RAW_MASK,
+                                                         TMC4671_ADC_I1_RAW_SHIFT);
 
         time_sleep(0.01);
     }

@@ -12,16 +12,14 @@ set(TMC_DIR "tmc-api")
 
 add_subdirectory(${PROTOS_DIR})
 
-set(COMMON_HEADER_FILES
+set(HEADER_FILES
         pch.h
         services.h
         setting.h
         config/config.h
         logging/logging.h
         network/udp_client.h
-        network/udp_server.h)
-
-set(HEADER_FILES
+        network/udp_server.h
         command.h
         micro.h
         motor.h)
@@ -66,15 +64,12 @@ set(C_SOURCE_FILES
 
 add_executable(${PROJECT_NAME}
         ${C_SOURCE_FILES} ${C_HEADER_FILES}
-        ${SOURCE_FILES} ${COMMON_HEADER_FILES} ${HEADER_FILES}
-        ${PROTO_SRCS} ${PROTO_HDRS}
-        ${PROTO_FILES})
+        ${SOURCE_FILES} ${HEADER_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${PROTOS_DIR}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${COMMON_HEADER_FILES} ${HEADER_FILES} ${C_HEADER_FILES} ${PROTO_FILES})
-source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} PREFIX "generated" FILES ${PROTO_SRCS} ${PROTO_HDRS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES} ${C_SOURCE_FILES} ${HEADER_FILES} ${C_HEADER_FILES})
 
 target_link_libraries(${PROJECT_NAME}
         ${CMAKE_PROJECT_NAME}-protos
@@ -107,4 +102,4 @@ get_target_property(PROTOS_PCHS ${CMAKE_PROJECT_NAME}-protos INTERFACE_PRECOMPIL
 
 target_precompile_headers(${PROJECT_NAME}
         PUBLIC ${PROTOS_PCHS}
-        PUBLIC ${COMMON_HEADER_FILES})
+        PUBLIC pch.h)

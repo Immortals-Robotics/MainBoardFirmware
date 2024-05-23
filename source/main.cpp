@@ -3,10 +3,6 @@
 #include "motor.h"
 #include "spi_hal.h"
 
-#include <google/protobuf/util/delimited_message_util.h>
-#include <immortals/command.pb.h>
-#include "immortals/micro.pb.h"
-
 std::unordered_map<Immortals::Motor::Id, Immortals::Motor> motor_map;
 
 void motors_test()

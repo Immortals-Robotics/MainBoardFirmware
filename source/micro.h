@@ -1,7 +1,5 @@
 #pragma once
 
-#include "immortals/micro.pb.h"
-
 namespace Immortals
 {
 class Micro

@@ -1,7 +1,5 @@
 #include "micro.h"
 
-#include <google/protobuf/util/delimited_message_util.h>
-
 #include "spi_hal.h"
 
 namespace Immortals
