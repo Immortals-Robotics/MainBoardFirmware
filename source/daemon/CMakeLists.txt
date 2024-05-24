@@ -1,5 +1,7 @@
 project(${CMAKE_PROJECT_NAME}-daemon)
 
+option(USE_MOCK_GPIO "Use a mock version of pigpio. Useful when developing on platforms other than rpi." OFF)
+
 set(TMC_DIR "../tmc-api")
 
 set(HEADER_FILES
@@ -42,15 +44,26 @@ set(C_SOURCE_FILES
         ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.c
         ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.c)
 
+if (${USE_MOCK_GPIO})
+    set(C_HEADER_FILES ${C_HEADER_FILES} mock_pigpio/pigpio.h)
+    set(C_SOURCE_FILES ${C_SOURCE_FILES} mock_pigpio/pigpio.c)
+endif ()
+
 add_executable(${PROJECT_NAME}
         ${C_SOURCE_FILES} ${C_HEADER_FILES}
         ${SOURCE_FILES} ${HEADER_FILES})
 
+if (${USE_MOCK_GPIO})
+    target_include_directories(${PROJECT_NAME} PRIVATE mock_pigpio)
+endif ()
+
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
-target_link_libraries(${PROJECT_NAME}
-        ${CMAKE_PROJECT_NAME}-common
-        pigpio)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_PROJECT_NAME}-common)
+
+if (NOT ${USE_MOCK_GPIO})
+    target_link_libraries(${PROJECT_NAME} pigpio)
+endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ${USE_UNITY_BUILDS})
 

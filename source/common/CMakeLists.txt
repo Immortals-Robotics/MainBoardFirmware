@@ -54,6 +54,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         spdlog::spdlog
         nng::nng)
 
+if (WIN32)
+        target_compile_definitions(${PROJECT_NAME} PUBLIC _WIN32_WINNT=_WIN32_WINNT_WIN10)
+endif ()
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC DATA_DIR="${CMAKE_SOURCE_DIR}/data")
 target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_DIR="${CMAKE_SOURCE_DIR}/log")
 
