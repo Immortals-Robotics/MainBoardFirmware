@@ -33,4 +33,4 @@ Logger::~Logger()
 {
     flush();
 }
-} // namespace Immortals
+} // namespace Immortals::Common

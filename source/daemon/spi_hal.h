@@ -2,15 +2,16 @@
 #define SPI_HAL_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-bool init_spi();
-void shutdown_spi();
+    bool init_spi();
+    void shutdown_spi();
 
-int micro_xfer(char *tx_buf, char *rx_buf, unsigned count);
+    int micro_xfer(char *tx_buf, char *rx_buf, unsigned count);
 
-void enable_drivers(bool enable);
+    void enable_drivers(bool enable);
 
 #ifdef __cplusplus
 }

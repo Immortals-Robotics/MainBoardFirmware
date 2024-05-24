@@ -33,4 +33,4 @@ LOG_MACRO(logWarning, warn);
 LOG_MACRO(logError, err);
 LOG_MACRO(logCritical, critical);
 
-} // namespace Immortals
+} // namespace Immortals::Common

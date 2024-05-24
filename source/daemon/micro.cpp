@@ -22,4 +22,4 @@ void Micro::sendCommand(const Protos::Immortals::MicroCommand &t_command)
     google::protobuf::io::ArrayInputStream input_stream{m_rx_buf, kBufferSize};
     google::protobuf::util::ParseDelimitedFromZeroCopyStream(&m_status, &input_stream, nullptr);
 }
-} // namespace Immortals
+} // namespace Immortals::Daemon

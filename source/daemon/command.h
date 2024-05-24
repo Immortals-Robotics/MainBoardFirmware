@@ -5,7 +5,7 @@ namespace Immortals::Daemon
 class Command
 {
 public:
-     Command() = default;
+    Command()  = default;
     ~Command() = default;
 
     void setRobotId(uint8_t id)
@@ -32,4 +32,4 @@ private:
     // last received command
     Protos::Immortals::Command m_pb_command;
 };
-} // namespace Immortals
+} // namespace Immortals::Daemon

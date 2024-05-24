@@ -5,7 +5,7 @@ namespace Immortals::Daemon
 class Micro
 {
 public:
-     Micro() = default;
+    Micro()  = default;
     ~Micro() = default;
 
     void requestStatus();
@@ -25,4 +25,4 @@ private:
     char m_rx_buf[kBufferSize] = {};
     char m_tx_buf[kBufferSize] = {};
 };
-} // namespace Immortals
+} // namespace Immortals::Daemon
