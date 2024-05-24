@@ -35,7 +35,11 @@ For more information, please refer to <http://unlicense.org/>
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef _MSC_VER
 typedef unsigned long int pthread_t;
+#else
+#include <pthread.h>
+#endif
 
 #define PIGPIO_VERSION 79
 
@@ -4341,6 +4345,10 @@ extern "C"
     ...
     D*/
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomment"
+#endif
     /*F*/
     int fileOpen(char *file, unsigned mode);
     /*D
@@ -4447,6 +4455,10 @@ extern "C"
     ...
     D*/
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     /*F*/
     int fileClose(unsigned handle);
     /*D
@@ -4539,6 +4551,11 @@ extern "C"
     ...
     D*/
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcomment"
+#endif
+
     /*F*/
     int fileList(char *fpat, char *buf, unsigned count);
     /*D
@@ -4590,6 +4607,10 @@ extern "C"
     }
     ...
     D*/
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
     /*F*/
     int gpioCfgBufferSize(unsigned cfgMillis);

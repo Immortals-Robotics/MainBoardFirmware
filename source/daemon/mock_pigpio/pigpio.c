@@ -31,7 +31,13 @@ For more information, please refer to <http://unlicense.org/>
 
 #include "pigpio.h"
 
+#if defined(_MSC_VER)
 #pragma warning(push, 0)
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wcomment"
+#endif
 
 /*F*/
 int gpioInitialise(void)
@@ -4571,7 +4577,7 @@ D*/
 /*F*/
 rawWaveInfo_t rawWaveInfo(int wave_id)
 {
-    rawWaveInfo_t info = {};
+    rawWaveInfo_t info = {0};
     return info;
 }
 /*D
@@ -5548,4 +5554,8 @@ A 16-bit word value.
 
 PARAMS*/
 
+#if defined(_MSC_VER)
 #pragma warning(pop)
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
