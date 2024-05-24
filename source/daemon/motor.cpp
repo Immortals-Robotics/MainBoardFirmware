@@ -147,7 +147,7 @@ void Motor::calibrateAdc()
                                                          ADC_RAW_ADDR_ADC_I1_RAW_ADC_I0_RAW, TMC4671_ADC_I1_RAW_MASK,
                                                          TMC4671_ADC_I1_RAW_SHIFT);
 
-        time_sleep(0.01);
+        std::this_thread::sleep_for(10ms);
     }
 
     std::sort(std::begin(i0_raw_list), std::end(i0_raw_list));
@@ -206,7 +206,7 @@ Motor::MotionMode Motor::getMotionMode() const
 
 void Motor::setTargetVelocityRaw(const int t_velocity)
 {
-    //logTrace("target velocity: {}", t_velocity);
+    // logTrace("target velocity: {}", t_velocity);
     tmc4671_setTargetVelocity(m_id, t_velocity);
 }
 
@@ -219,4 +219,4 @@ int Motor::getActualVelocityRaw() const
 {
     return tmc4671_getActualVelocity(m_id);
 }
-} // namespace Immortals
+} // namespace Immortals::Daemon

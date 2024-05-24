@@ -15,7 +15,7 @@ void motors_test()
         motor.second.setTargetVelocityRpm(100);
     }
 
-    time_sleep(1);
+    std::this_thread::sleep_for(1s);
 
     // Rotate left
     for (auto &motor : motor_map)
@@ -23,7 +23,7 @@ void motors_test()
         motor.second.setTargetVelocityRpm(-100);
     }
 
-    time_sleep(1);
+    std::this_thread::sleep_for(1s);
 
     // Stop
     for (auto &motor : motor_map)

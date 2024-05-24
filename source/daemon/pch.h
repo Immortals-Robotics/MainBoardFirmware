@@ -17,6 +17,8 @@
 #include <string>
 #include <thread>
 
+using namespace std::chrono_literals;
+
 #include <array>
 #include <deque>
 #include <set>
@@ -24,4 +26,3 @@
 #include <vector>
 
 #include <google/protobuf/util/delimited_message_util.h>
-#include <pigpio.h>
