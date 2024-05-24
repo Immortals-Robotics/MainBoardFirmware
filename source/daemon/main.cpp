@@ -53,7 +53,10 @@ float compute_wheel_velocity(const Protos::Immortals::Command &command, const Wh
 
 int main()
 {
-    Immortals::Common::Services::initialize();
+    Immortals::Common::Services::initialize({
+        .t_config_path = std::filesystem::path{DATA_DIR} / "config.toml",
+        .t_db_path     = std::filesystem::path{LOG_DIR} / "db",
+    });
 
     if (!init_spi())
     {

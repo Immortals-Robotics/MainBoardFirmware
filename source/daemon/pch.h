@@ -26,3 +26,8 @@ using namespace std::chrono_literals;
 #include <vector>
 
 #include <google/protobuf/util/delimited_message_util.h>
+
+#include <protos/immortals/command.pb.h>
+#include <protos/immortals/micro.pb.h>
+
+#include <common/common.h>

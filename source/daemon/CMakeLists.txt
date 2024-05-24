@@ -1,5 +1,7 @@
 project(${CMAKE_PROJECT_NAME}-daemon)
 
+find_package(immortals-common CONFIG REQUIRED)
+
 option(USE_MOCK_GPIO "Use a mock version of pigpio. Useful when developing on platforms other than rpi." OFF)
 
 set(TMC_DIR "../tmc-api")
@@ -59,7 +61,8 @@ endif ()
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_PROJECT_NAME}-common)
+target_link_libraries(${PROJECT_NAME}
+        immortals::common)
 
 if (NOT ${USE_MOCK_GPIO})
     target_link_libraries(${PROJECT_NAME} pigpio)
@@ -71,10 +74,6 @@ set_source_files_properties(${C_SOURCE_FILES} PROPERTIES
         SKIP_PRECOMPILE_HEADERS TRUE
         SKIP_UNITY_BUILD_INCLUSION TRUE)
 
-get_target_property(COMMON_PCHS ${CMAKE_PROJECT_NAME}-common INTERFACE_PRECOMPILE_HEADERS)
-
-target_precompile_headers(${PROJECT_NAME}
-        PUBLIC ${COMMON_PCHS}
-        PUBLIC pch.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE pch.h)
 
 install(TARGETS ${PROJECT_NAME})

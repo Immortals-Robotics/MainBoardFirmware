@@ -16,8 +16,14 @@ option(ENABLE_SANITIZERS "Enable address and undefined behavior sanitizers" OFF)
 project(firmware)
 
 # Enable ASAN
-add_compile_options($<$<BOOL:${ENABLE_SANITIZERS}>:-fsanitize=address>)
-add_link_options($<$<BOOL:${ENABLE_SANITIZERS}>:-fsanitize=address>)
+add_compile_options($<$<OR:$<BOOL:${ENABLE_SANITIZERS}>,$<CONFIG:Debug>>:-fsanitize=address>)
+add_link_options($<$<OR:$<BOOL:${ENABLE_SANITIZERS}>,$<CONFIG:Debug>>:-fsanitize=address>)
+
+# undefined behavior sanitizer is not available on MSVC
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options("$<$<OR:$<BOOL:${ENABLE_SANITIZERS}>,$<CONFIG:Debug>>:-fno-omit-frame-pointer;-fsanitize=undefined>")
+    add_link_options("$<$<OR:$<BOOL:${ENABLE_SANITIZERS}>,$<CONFIG:Debug>>:-fno-omit-frame-pointer;-fsanitize=undefined>")
+endif ()
 
 # Set warning levels
 if (MSVC)
@@ -39,8 +45,9 @@ if (${TRACE_BUILD_TIME})
     add_compile_options(-ftime-trace)
 endif ()
 
-add_subdirectory(source/protos)
-add_subdirectory(source/common)
+add_compile_definitions(DATA_DIR="${CMAKE_SOURCE_DIR}/data")
+add_compile_definitions(LOG_DIR="${CMAKE_SOURCE_DIR}/log")
+
 add_subdirectory(source/daemon)
 
 set(CPACK_GENERATOR ZIP)

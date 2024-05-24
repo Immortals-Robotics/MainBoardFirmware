@@ -1,10 +1,5 @@
 {
   "dependencies": [
-    "vcpkg-pkgconfig-get-modules",
-    "asio",
-    "nng",
-    "protobuf",
-    "tomlplusplus",
-    "spdlog"
+    "immortals-common"
   ]
 }

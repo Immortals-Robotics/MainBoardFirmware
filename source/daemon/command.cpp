@@ -4,9 +4,9 @@ namespace Immortals::Daemon
 {
 bool Command::connect()
 {
-    Common::logInfo("Receiving commands at {}", Common::config().commands_address);
+    Common::logInfo("Receiving commands at {}", Common::config().network.commands_address);
 
-    m_udp = std::make_unique<Common::UdpClient>(Common::config().commands_address);
+    m_udp = std::make_unique<Common::UdpClient>(Common::config().network.commands_address);
 
     return isConnected();
 }
