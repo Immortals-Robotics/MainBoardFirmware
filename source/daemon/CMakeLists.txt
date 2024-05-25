@@ -1,10 +1,9 @@
 project(${CMAKE_PROJECT_NAME}-daemon)
 
 find_package(immortals-common CONFIG REQUIRED)
+find_package(tmc-api CONFIG REQUIRED)
 
 option(USE_MOCK_GPIO "Use a mock version of pigpio. Useful when developing on platforms other than rpi." OFF)
-
-set(TMC_DIR "../tmc-api")
 
 set(HEADER_FILES
         pch.h
@@ -13,25 +12,7 @@ set(HEADER_FILES
         motor.h)
 
 set(C_HEADER_FILES
-        spi_hal.h
-        ${TMC_DIR}/tmc/helpers/API_Header.h
-        ${TMC_DIR}/tmc/helpers/Bits.h
-        ${TMC_DIR}/tmc/helpers/Config.h
-        ${TMC_DIR}/tmc/helpers/Constants.h
-        ${TMC_DIR}/tmc/helpers/CRC.h
-        ${TMC_DIR}/tmc/helpers/Functions.h
-        ${TMC_DIR}/tmc/helpers/Macros.h
-        ${TMC_DIR}/tmc/helpers/RegisterAccess.h
-        ${TMC_DIR}/tmc/helpers/Types.h
-        ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.h
-        ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Constants.h
-        ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Fields.h
-        ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Register.h
-        ${TMC_DIR}/tmc/ic/TMC4671/TMC4671_Variants.h
-        ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.h
-        ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Constants.h
-        ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Fields.h
-        ${TMC_DIR}/tmc/ic/TMC6200/TMC6200_Register.h)
+        spi_hal.h)
 
 set(SOURCE_FILES
         command.cpp
@@ -40,11 +21,7 @@ set(SOURCE_FILES
         main.cpp)
 
 set(C_SOURCE_FILES
-        spi_hal.c
-        ${TMC_DIR}/tmc/helpers/CRC.c
-        ${TMC_DIR}/tmc/helpers/Functions.c
-        ${TMC_DIR}/tmc/ic/TMC4671/TMC4671.c
-        ${TMC_DIR}/tmc/ic/TMC6200/TMC6200.c)
+        spi_hal.c)
 
 if (${USE_MOCK_GPIO})
     set(C_HEADER_FILES ${C_HEADER_FILES} mock_pigpio/pigpio.h)
@@ -59,10 +36,9 @@ if (${USE_MOCK_GPIO})
     target_include_directories(${PROJECT_NAME} PRIVATE mock_pigpio)
 endif ()
 
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${TMC_DIR}")
-
 target_link_libraries(${PROJECT_NAME}
-        immortals::common)
+        immortals::common
+        analogdevicesinc::tmc-api)
 
 if (NOT ${USE_MOCK_GPIO})
     target_link_libraries(${PROJECT_NAME} pigpio)

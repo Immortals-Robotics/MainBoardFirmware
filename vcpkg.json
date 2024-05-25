@@ -5,6 +5,13 @@
       "features": [
         "udp"
       ]
+    },
+    {
+      "name": "tmc-api",
+      "features": [
+        "tmc-4671",
+        "tmc-6200"
+      ]
     }
   ]
 }

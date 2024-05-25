@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
+# TODO: do this only on rpi
 set(ENV{VCPKG_FORCE_SYSTEM_BINARIES} ON)
 
 set(USE_FOLDERS ON)

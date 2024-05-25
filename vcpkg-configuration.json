@@ -8,13 +8,14 @@
     {
       "kind": "git",
       "repository": "https://github.com/Immortals-Robotics/vcpkg-registry",
-      "baseline": "33ef5363aa14e8c68409680efb468dddf6b855e7",
+      "baseline": "9d62483325ad9f7e388877fca713ef6544d35fac",
       "packages": [
         "homog2d",
         "imgui",
         "immortals-protos",
         "immortals-common",
         "rlimgui",
+        "tmc-api",
         "vartypes"
       ]
     }
