@@ -1,5 +1,10 @@
 {
   "dependencies": [
-    "immortals-common"
+    {
+      "name": "immortals-common",
+      "features": [
+        "udp"
+      ]
+    }
   ]
 }
