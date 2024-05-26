@@ -2,6 +2,7 @@ project(${CMAKE_PROJECT_NAME}-daemon)
 
 find_package(immortals-common CONFIG REQUIRED)
 find_package(tmc-api CONFIG REQUIRED)
+find_package(icm-42688 CONFIG REQUIRED)
 
 option(USE_MOCK_GPIO "Use a mock version of pigpio. Useful when developing on platforms other than rpi." OFF)
 
@@ -9,7 +10,12 @@ set(HEADER_FILES
         pch.h
         command.h
         micro.h
-        motor.h)
+        motor.h
+        icm-42688/device.h
+        icm-42688/device_inl.h
+        icm-42688/fifo.h
+        icm-42688/hal.h
+        icm-42688/registers.h)
 
 set(C_HEADER_FILES
         spi_hal.h)
@@ -18,7 +24,9 @@ set(SOURCE_FILES
         command.cpp
         micro.cpp
         motor.cpp
-        main.cpp)
+        main.cpp
+        icm-42688/device.cpp
+        icm-42688/fifo.cpp)
 
 set(C_SOURCE_FILES
         spi_hal.c)
@@ -31,6 +39,8 @@ endif ()
 add_executable(${PROJECT_NAME}
         ${C_SOURCE_FILES} ${C_HEADER_FILES}
         ${SOURCE_FILES} ${HEADER_FILES})
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE ICM42688_FEATURE_SPI=1)
 
 if (${USE_MOCK_GPIO})
     target_include_directories(${PROJECT_NAME} PRIVATE mock_pigpio)

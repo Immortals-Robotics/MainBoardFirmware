@@ -4,8 +4,9 @@
 
 #include <pigpio.h>
 
-int spi0_h;
-int spi1_h;
+int spi_motor_h;
+int spi_micro_h;
+int spi_imu_h;
 
 const uint8_t cs = 8;
 
@@ -55,11 +56,11 @@ bool init_spi(void)
         const unsigned spi_flags = PI_SPI_FLAGS_MODE(3) | // mode 3
                                    PI_SPI_FLAGS_RESVD(1); // ce0 not reserved
 
-        spi0_h = spiOpen(0, 1 * 1000 * 1000, spi_flags);
+        spi_motor_h = spiOpen(0, 1 * 1000 * 1000, spi_flags);
 
-        if (spi0_h < 0)
+        if (spi_motor_h < 0)
         {
-            printf("Can't create SPI0 handle\n");
+            printf("Can't create motor SPI handle\n");
             return false;
         }
     }
@@ -67,7 +68,26 @@ bool init_spi(void)
         const unsigned spi_flags = PI_SPI_FLAGS_MODE(0) |   // mode 0
                                    PI_SPI_FLAGS_AUX_SPI(1); // spi1
 
-        spi1_h = spiOpen(1, 4 * 1000 * 1000, spi_flags);
+        spi_micro_h = spiOpen(1, 4 * 1000 * 1000, spi_flags);
+
+        if (spi_micro_h < 0)
+        {
+            printf("Can't create micro SPI handle\n");
+            return false;
+        }
+    }
+
+    {
+        const unsigned spi_flags = PI_SPI_FLAGS_MODE(0) |   // mode 0
+                                   PI_SPI_FLAGS_AUX_SPI(1); // spi1
+
+        spi_imu_h = spiOpen(0, 4 * 1000 * 1000, spi_flags);
+
+        if (spi_imu_h < 0)
+        {
+            printf("Can't create imu SPI handle\n");
+            return false;
+        }
     }
 
     return true;
@@ -80,8 +100,9 @@ void shutdown_spi(void)
     gpioWrite(mux_a2, 1);
     gpioWrite(mux_a3, 1);
 
-    spiClose(spi0_h);
-    spiClose(spi1_h);
+    spiClose(spi_motor_h);
+    spiClose(spi_micro_h);
+    spiClose(spi_imu_h);
 
     gpioTerminate();
 }
@@ -102,7 +123,7 @@ void tmc4671_readWriteArray(uint8_t motor, uint8_t *data, size_t length)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, (char *) data, (char *) data, length);
+    spiXfer(spi_motor_h, (char *) data, (char *) data, length);
 
     gpioWrite(cs, 1);
 }
@@ -114,7 +135,7 @@ void tmc6200_readWriteArray(uint8_t motor, uint8_t *data, size_t length)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, (char *) data, (char *) data, length);
+    spiXfer(spi_motor_h, (char *) data, (char *) data, length);
 
     gpioWrite(cs, 1);
 }
@@ -128,7 +149,7 @@ uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, (char *) &data, rx_buf, 1);
+    spiXfer(spi_motor_h, (char *) &data, rx_buf, 1);
 
     if (lastTransfer)
     {
@@ -147,7 +168,7 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, (char *) &data, rx_buf, 1);
+    spiXfer(spi_motor_h, (char *) &data, rx_buf, 1);
 
     if (lastTransfer)
     {
@@ -160,10 +181,16 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
 int micro_xfer(char *tx_buf, char *rx_buf, const unsigned count)
 {
-    return spiXfer(spi1_h, tx_buf, rx_buf, count);
+    return spiXfer(spi_micro_h, tx_buf, rx_buf, count);
 }
 
 void enable_drivers(bool enable)
 {
     gpioWrite(m_en, enable);
+}
+
+void icm42688SpiTransfer(uint8_t t_idx, const uint8_t *t_tx_buf, uint8_t *t_rx_buf, size_t t_count)
+{
+    (void) t_idx;
+    spiXfer(spi_imu_h, (char *) t_tx_buf, (char *) t_rx_buf, t_count);
 }

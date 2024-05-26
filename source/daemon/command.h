@@ -8,9 +8,9 @@ public:
      Command() = default;
     ~Command() = default;
 
-    void setRobotId(uint8_t id)
+    void setRobotId(const uint8_t t_id)
     {
-        m_id = id;
+        m_id = t_id;
     }
 
     bool connect();

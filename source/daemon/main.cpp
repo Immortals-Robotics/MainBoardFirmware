@@ -3,33 +3,35 @@
 #include "motor.h"
 #include "spi_hal.h"
 
-std::unordered_map<Immortals::Daemon::Motor::Id, Immortals::Daemon::Motor> motor_map;
+#include "icm-42688/device.h"
 
-void motors_test()
+std::unordered_map<Immortals::Daemon::Motor::Id, Immortals::Daemon::Motor> g_motor_map;
+
+void motorsTest()
 {
     enable_drivers(true);
 
     // Rotate right
-    for (auto &motor : motor_map)
+    for (auto &[id, motor] : g_motor_map)
     {
-        motor.second.setTargetVelocityRpm(100);
+        motor.setTargetVelocityRpm(100);
     }
 
     std::this_thread::sleep_for(1s);
 
     // Rotate left
-    for (auto &motor : motor_map)
+    for (auto &[id, motor] : g_motor_map)
     {
-        motor.second.setTargetVelocityRpm(-100);
+        motor.setTargetVelocityRpm(-100);
     }
 
     std::this_thread::sleep_for(1s);
 
     // Stop
-    for (auto &motor : motor_map)
+    for (auto &[id, motor] : g_motor_map)
     {
-        motor.second.setTargetVelocityRpm(0);
-        motor.second.setMotionMode(Immortals::Daemon::Motor::MotionMode::Stopped);
+        motor.setTargetVelocityRpm(0);
+        motor.setMotionMode(Immortals::Daemon::Motor::MotionMode::Stopped);
     }
 }
 
@@ -41,14 +43,14 @@ struct WheelConfig
     float angle;
 };
 
-float compute_wheel_velocity(const Protos::Immortals::Command &command, const WheelConfig &wheel)
+float computeWheelVelocity(const Protos::Immortals::Command &t_command, const WheelConfig &t_wheel)
 {
     // TODO: rotate motion
-    const float vx = -command.motion().x();
-    const float vy = command.motion().y();
-    const float w  = command.target_angle().deg() - command.current_angle().deg();
+    const float vx = -t_command.motion().x();
+    const float vy = t_command.motion().y();
+    const float w  = t_command.target_angle().deg() - t_command.current_angle().deg();
 
-    return vx * std::cos(wheel.angle) + vy * std::sin(wheel.angle) + w * wheel.distance;
+    return vx * std::cos(t_wheel.angle) + vy * std::sin(t_wheel.angle) + w * t_wheel.distance;
 }
 
 int main()
@@ -63,35 +65,41 @@ int main()
         return 1;
     }
 
+    ICM42688::Device imu{0, ICM42688::Device::Connection::Spi};
+    if (imu.begin() < 0)
+    {
+        Immortals::Common::logCritical("IMU initialization failed");
+    }
+
     Immortals::Daemon::Micro micro{};
 
-    static constexpr float   wheel_radius   = 0.05f;
-    static constexpr float   wheel_distance = 0.1f;
-    static constexpr uint8_t pole_count     = 8;
+    static constexpr float   kWheelRadius   = 0.05f;
+    static constexpr float   kWheelDistance = 0.1f;
+    static constexpr uint8_t kPoleCount     = 8;
 
     const std::unordered_map<Immortals::Daemon::Motor::Id, WheelConfig> wheel_config = {
-        {Immortals::Daemon::Motor::Id::M1, {wheel_distance, 2.4958208f}},  //  180 - 37
-        {Immortals::Daemon::Motor::Id::M2, {wheel_distance, 0.6457718f}},  //  37
-        {Immortals::Daemon::Motor::Id::M3, {wheel_distance, -0.7853982f}}, // -45
-        {Immortals::Daemon::Motor::Id::M4, {wheel_distance, -2.3561945f}}, // -135
+        {Immortals::Daemon::Motor::Id::M1, {kWheelDistance, 2.4958208f}},  //  180 - 37
+        {Immortals::Daemon::Motor::Id::M2, {kWheelDistance, 0.6457718f}},  //  37
+        {Immortals::Daemon::Motor::Id::M3, {kWheelDistance, -0.7853982f}}, // -45
+        {Immortals::Daemon::Motor::Id::M4, {kWheelDistance, -2.3561945f}}, // -135
     };
 
-    motor_map = {
+    g_motor_map = {
         {Immortals::Daemon::Motor::Id::MD, Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::MD, 1, 0.01f}},
         {Immortals::Daemon::Motor::Id::M1,
-         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M1, pole_count, wheel_radius}},
+         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M1, kPoleCount, kWheelRadius}},
         {Immortals::Daemon::Motor::Id::M2,
-         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M2, pole_count, wheel_radius}},
+         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M2, kPoleCount, kWheelRadius}},
         {Immortals::Daemon::Motor::Id::M3,
-         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M3, pole_count, wheel_radius}},
+         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M3, kPoleCount, kWheelRadius}},
         {Immortals::Daemon::Motor::Id::M4,
-         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M4, pole_count, wheel_radius}},
+         Immortals::Daemon::Motor{Immortals::Daemon::Motor::Id::M4, kPoleCount, kWheelRadius}},
     };
 
-    for (auto &motor : motor_map)
+    for (auto &[id, motor] : g_motor_map)
     {
-        motor.second.init();
-        motor.second.setMotionMode(Immortals::Daemon::Motor::MotionMode::Velocity);
+        motor.init();
+        motor.setMotionMode(Immortals::Daemon::Motor::MotionMode::Velocity);
     }
 
     micro.requestStatus();
@@ -101,6 +109,8 @@ int main()
     Immortals::Common::logInfo("ID: {}", id);
     command.setRobotId(id);
     command.connect();
+
+    bool wifi_led = false;
 
     while (true)
     {
@@ -112,21 +122,20 @@ int main()
 
             Immortals::Common::logDebug("Received command");
 
-            static bool wifi_led = false;
-            wifi_led             = !wifi_led;
+            wifi_led = !wifi_led;
 
             micro_command.mutable_led()->set_wifi_activity(wifi_led);
 
             Immortals::Common::logDebug("Received local velocity");
 
-            motor_map[Immortals::Daemon::Motor::Id::FrontLeft].setTargetVelocityMs(
-                compute_wheel_velocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::FrontLeft)));
-            motor_map[Immortals::Daemon::Motor::Id::FrontRight].setTargetVelocityMs(
-                compute_wheel_velocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::FrontRight)));
-            motor_map[Immortals::Daemon::Motor::Id::BackRight].setTargetVelocityMs(
-                compute_wheel_velocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::BackRight)));
-            motor_map[Immortals::Daemon::Motor::Id::BackLeft].setTargetVelocityMs(
-                compute_wheel_velocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::BackLeft)));
+            g_motor_map[Immortals::Daemon::Motor::Id::FrontLeft].setTargetVelocityMs(
+                computeWheelVelocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::FrontLeft)));
+            g_motor_map[Immortals::Daemon::Motor::Id::FrontRight].setTargetVelocityMs(
+                computeWheelVelocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::FrontRight)));
+            g_motor_map[Immortals::Daemon::Motor::Id::BackRight].setTargetVelocityMs(
+                computeWheelVelocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::BackRight)));
+            g_motor_map[Immortals::Daemon::Motor::Id::BackLeft].setTargetVelocityMs(
+                computeWheelVelocity(robot_command, wheel_config.at(Immortals::Daemon::Motor::Id::BackLeft)));
 
             micro_command.mutable_mikona()->set_charge(true);
 
@@ -134,7 +143,7 @@ int main()
             micro_command.mutable_mikona()->set_kick_a(robot_command.shoot());
             micro_command.mutable_mikona()->set_kick_b(robot_command.chip());
 
-            motor_map[Immortals::Daemon::Motor::Id::Dribbler].setTargetVelocityRpm(robot_command.dribbler());
+            g_motor_map[Immortals::Daemon::Motor::Id::Dribbler].setTargetVelocityRpm(robot_command.dribbler());
         }
     }
 
