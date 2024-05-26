@@ -106,7 +106,7 @@ int main()
     {
         if (command.receive())
         {
-            const Protos::Immortals::Command robot_command{};
+            const Protos::Immortals::Command robot_command = command.getCommand();
 
             Protos::Immortals::MicroCommand micro_command{};
 

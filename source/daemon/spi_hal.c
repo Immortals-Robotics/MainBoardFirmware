@@ -34,7 +34,7 @@ static const uint8_t drv_ce_id[5] = {
     5  // Motor 4
 };
 
-bool init_spi()
+bool init_spi(void)
 {
     const int result = gpioInitialise();
     if (result < 0)
@@ -73,7 +73,7 @@ bool init_spi()
     return true;
 }
 
-void shutdown_spi()
+void shutdown_spi(void)
 {
     gpioWrite(mux_a0, 1);
     gpioWrite(mux_a1, 1);
@@ -102,7 +102,7 @@ void tmc4671_readWriteArray(uint8_t motor, uint8_t *data, size_t length)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, (char *) &data, (char *) &data, length);
+    spiXfer(spi0_h, (char *) data, (char *) data, length);
 
     gpioWrite(cs, 1);
 }
@@ -114,7 +114,7 @@ void tmc6200_readWriteArray(uint8_t motor, uint8_t *data, size_t length)
 
     gpioWrite(cs, 0);
 
-    spiXfer(spi0_h, (char *) &data, (char *) &data, length);
+    spiXfer(spi0_h, (char *) data, (char *) data, length);
 
     gpioWrite(cs, 1);
 }

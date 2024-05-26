@@ -6,9 +6,9 @@ extern "C"
 {
 #endif
 
-    bool init_spi();
+    bool init_spi(void);
 
-    void shutdown_spi();
+    void shutdown_spi(void);
 
     int micro_xfer(char *tx_buf, char *rx_buf, unsigned count);
 
