@@ -51,7 +51,6 @@ bool init_spi()
     gpioSetMode(mux_a3, PI_OUTPUT);
 
     gpioSetMode(m_en, PI_OUTPUT);
-
     {
         const unsigned spi_flags = PI_SPI_FLAGS_MODE(3) | // mode 3
                                    PI_SPI_FLAGS_RESVD(1); // ce0 not reserved
@@ -64,7 +63,6 @@ bool init_spi()
             return false;
         }
     }
-
     {
         const unsigned spi_flags = PI_SPI_FLAGS_MODE(0) |   // mode 0
                                    PI_SPI_FLAGS_AUX_SPI(1); // spi1
@@ -96,6 +94,31 @@ void select_ce(const uint8_t ce_id)
     gpioWrite(mux_a3, (ce_id & 8) >> 3);
 }
 
+#if FEATURE_SPI_ARRAY_TRANSFER
+void tmc4671_readWriteArray(uint8_t motor, uint8_t *data, size_t length)
+{
+    const uint8_t ce_id = ctrl_ce_id[motor];
+    select_ce(ce_id);
+
+    gpioWrite(cs, 0);
+
+    spiXfer(spi0_h, (char *) &data, (char *) &data, length);
+
+    gpioWrite(cs, 1);
+}
+
+void tmc6200_readWriteArray(uint8_t motor, uint8_t *data, size_t length)
+{
+    const uint8_t ce_id = drv_ce_id[motor];
+    select_ce(ce_id);
+
+    gpioWrite(cs, 0);
+
+    spiXfer(spi0_h, (char *) &data, (char *) &data, length);
+
+    gpioWrite(cs, 1);
+}
+#else
 uint8_t tmc4671_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 {
     const uint8_t ce_id = ctrl_ce_id[motor];
@@ -133,6 +156,7 @@ uint8_t tmc6200_readwriteByte(uint8_t motor, uint8_t data, uint8_t lastTransfer)
 
     return rx_buf[0];
 }
+#endif
 
 int micro_xfer(char *tx_buf, char *rx_buf, const unsigned count)
 {
