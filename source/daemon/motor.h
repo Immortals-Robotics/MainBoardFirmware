@@ -7,7 +7,7 @@ class Motor
 public:
     enum class Id : uint8_t
     {
-        Unknown = (uint8_t) (~0),
+        Unknown = std::numeric_limits<uint8_t>::max(),
 
         M1 = 1,
         M2 = 2,
@@ -30,8 +30,8 @@ public:
         Stopped,
     };
 
-    Motor() = default;
-    Motor(Id t_id, uint8_t t_pole_count, float t_radius = 1.0f);
+     Motor() = default;
+     Motor(Id t_id, uint8_t t_pole_count, float t_radius = 1.0f);
     ~Motor() = default;
 
     bool init();
@@ -82,7 +82,12 @@ private:
 
     void enableDriver(bool enable);
 
-    int m_id = (uint8_t) Id::Unknown;
+    uint8_t idInt() const
+    {
+        return static_cast<uint8_t>(m_id);
+    }
+
+    Id m_id = Id::Unknown;
 
     // wheel radius in meters
     float m_radius;
@@ -90,3 +95,34 @@ private:
     uint8_t m_pole_count = 0;
 };
 } // namespace Immortals::Daemon
+
+#if FEATURE_LOGGING
+template <>
+struct fmt::formatter<Immortals::Daemon::Motor::Id> : fmt::formatter<std::string>
+{
+    static constexpr std::string_view idName(const Immortals::Daemon::Motor::Id t_id)
+    {
+        switch (t_id)
+        {
+        default:
+        case Immortals::Daemon::Motor::Id::Unknown:
+            return "Unknown";
+        case Immortals::Daemon::Motor::Id::FrontLeft:
+            return "FrontLeft";
+        case Immortals::Daemon::Motor::Id::FrontRight:
+            return "FrontRight";
+        case Immortals::Daemon::Motor::Id::BackRight:
+            return "BackRight";
+        case Immortals::Daemon::Motor::Id::BackLeft:
+            return "BackLeft";
+        case Immortals::Daemon::Motor::Id::Dribbler:
+            return "Dribbler";
+        }
+    }
+
+    auto format(Immortals::Daemon::Motor::Id t_id, format_context &t_ctx) const
+    {
+        return fmt::format_to(t_ctx.out(), "{}", idName(t_id));
+    }
+};
+#endif
